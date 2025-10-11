@@ -17,8 +17,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-white text-gray-900 antialiased flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1">{children}
+        </main>
         <Footer />
+          
       </body>
     </html>
   );
