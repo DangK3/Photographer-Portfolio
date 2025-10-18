@@ -1,21 +1,16 @@
 @import "tailwindcss";
-
 :root {
+  /* Chuyển từ hex sang các giá trị RGB (không có 'rgb()' ) */
   --background: #f4f4f4;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --glow-color: rgba(0, 0, 0, 0.2);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
+    :root {
+    --background: #1c1c1c;
     --foreground: #ededed;
+    --glow-color: rgba(255, 255, 255, 0.4);
   }
 }
 
@@ -24,7 +19,7 @@ html, body {
   margin: 0;
   padding: 0;
   background: var(--background);
-  color: var(--foreground);
+  color: var(--foreground); 
   font-family: Arial, Helvetica, sans-serif;
   scroll-behavior: smooth;
 }
@@ -77,3 +72,67 @@ section:nth-child(5) {
 footer {
   will-change: opacity, transform;
 }
+
+/* KEYFRAMES CHO HIỆU ỨNG */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1) translate(0, 0);
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1.1) translate(-1%, 1%);
+    filter: brightness(0.95);
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* CLASS TIỆN ÍCH */
+.ken-burns-effect {
+  /* Hiệu ứng chạy trong 25 giây, lặp lại vô hạn và luân phiên */
+  animation: ken-burns 25s ease-in-out infinite alternate;
+}
+
+.animate-fade-in-up {
+  /* Hiệu ứng xuất hiện trong 1.2 giây, có độ trễ 0.3 giây */
+  animation: fade-in-up 1.2s ease-out 0.3s forwards;
+  opacity: 0; /* Trạng thái ban đầu trước khi animation bắt đầu */
+}
+
+.text-shadow-md {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* BỎ HOẶC CHỈNH SỬA CSS CŨ */
+/* Bạn nên xóa hoặc comment out phần CSS này để tránh xung đột với component mới */
+/*
+section:nth-child(1) {
+  background-color: #f0f0f0;
+  color: #333;
+}
+*/
+.menu-link-glow {
+  /* Chuyển đổi mượt mà */
+  transition: text-shadow 0.3s ease-out;
+  will-change: text-shadow;
+  
+  /* Đặt shadow mặc định là 0 để tránh giật khi hover */
+  text-shadow: 0 0 0 var(--glow-color);
+}
+
+.menu-link-glow:hover {
+  /* Tạo 3 lớp shadow mờ bằng biến --glow-color.
+    Lớp 1 mờ 10px, lớp 2 mờ 20px, lớp 3 mờ 30px để tạo vầng sáng lan tỏa.
+  */
+  text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color), 0 0 30px var(--glow-color);
+}
+

@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import ScrollToTopButton from '@/components/ScrollToTopButton';
+import LayoutWrapper from '@/components/LayoutWrapper';
+
 
 export const metadata: Metadata = {
-  title: "Photographer Portfolio",
+  title: "Oni Studio",
   description: "Showcase of professional photography projects.",
 };
+
 
 export default function RootLayout({
   children,
@@ -14,13 +16,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-white text-gray-900 antialiased flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">{children}
-        </main>
-        <Footer />
-          
+    <html lang="vi">
+      <body className="bg-background text-gray-900 antialiased flex flex-col min-h-screen">
+       {/* 3. Bọc 'children' bằng 'LayoutWrapper' */}
+        <LayoutWrapper>{children}</LayoutWrapper>
+        <ScrollToTopButton />
       </body>
     </html>
   );

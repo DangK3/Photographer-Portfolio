@@ -1,10 +1,9 @@
+import HeroSection from "@/components/HeroSection"; 
+
 export default function HomePage() {
   return (
     <main>
-      <section>
-        <h1>Section 1 — Welcome</h1>
-      </section>
-
+      <HeroSection /> {/* Sử dụng HeroSection thay cho section 1 cũ */}
       <section>
         <h1>Section 2 — Portfolio</h1>
       </section>
