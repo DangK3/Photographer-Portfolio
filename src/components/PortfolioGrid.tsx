@@ -3,6 +3,9 @@
 
 import Image, { StaticImageData } from 'next/image';
 import { useState } from 'react'; 
+import Lightbox from 'yet-another-react-lightbox';
+import Captions from 'yet-another-react-lightbox/plugins/captions';
+import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
 // 1. Import ảnh trực tiếp
 import img01 from '@/assets/portfolio/Portfolio_01.png'; // Giả sử bạn đặt ảnh ở đây
 import img02 from '@/assets/portfolio/Portfolio_02.png';
@@ -93,12 +96,11 @@ const portfolioItems: PortfolioItem[] = [
 ];
 interface GridItemProps {
   item: PortfolioItem;
-  isActive: boolean;
-  onItemClick: (id: number) => void;
+  onClick: () => void;
 }
 // 2. Component Con (Grid Item)
 // Tạo component con để giữ code sạch sẽ
-function GridItem({ item, isActive, onItemClick }: GridItemProps) {
+function GridItem({ item, onClick }: GridItemProps) {
   return (
     <div
       className={`
@@ -106,10 +108,7 @@ function GridItem({ item, isActive, onItemClick }: GridItemProps) {
         h-80 md:h-auto ${item.colSpan} ${item.rowSpan}
       `}
       // h-80: Đặt chiều cao cố định trên mobile (khi chỉ có 1 cột)
-      onClick={(e) => {
-        e.stopPropagation(); // Ngăn sự kiện "chạm" lan ra ngoài
-        onItemClick(item.id);
-      }}
+      onClick={onClick}
     >
       <Image
         src={item.src}
@@ -124,50 +123,29 @@ function GridItem({ item, isActive, onItemClick }: GridItemProps) {
       {/* <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> */}
       <div
         className={`
-                  absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent 
-                  transition-opacity duration-300
-                  ${
-                    isActive
-                      ? 'opacity-100'
-                      : 'opacity-0 group-hover:opacity-100'
-                  }
-                `}
+          absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent 
+          transition-opacity duration-300
+          opacity-100 md:opacity-0 md:group-hover:opacity-100
+        `}
       />
       {/* Đường viền mỏng bên trong khi hover */}
       {/* <div className="absolute inset-3 md:inset-4 rounded-2xl rounded-md */}
       {/* border border-white/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> */}
       <div
         className={`
-          absolute inset-3 md:inset-4 border border-white/50 
+          absolute inset-3 md:inset-4 border border-white/30 
           transition-opacity duration-300 rounded-md
-          ${
-            isActive
-              ? 'opacity-100'
-              : 'opacity-0 group-hover:opacity-100'
-          }
-        `}
+          opacity-100 md:opacity-0 md:group-hover:opacity-100
+        `} // 5. THAY ĐỔI: Logic hiển thị (luôn hiện trên mobile, chỉ hiện khi hover trên desktop)
       />
-      {/* Nội dung text khi hover (đáp ứng đúng yêu cầu của bạn) */}
-      {/* <div
-        className="
-          absolute bottom-4 left-4 md:bottom-6 md:left-6 
-          text-white 
-          opacity-0 translate-y-3 
-          group-hover:opacity-100 group-hover:translate-y-0 
-          transition-all duration-300 z-10
-        "
-      > */}
       <div
         className={`
           absolute bottom-4 left-4 md:bottom-6 md:left-6 
           text-white 
           transition-all duration-300 z-10
-          ${
-            isActive
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0'
-          }
-        `} // 5. SỬA LOGIC HIỂN THỊ
+          opacity-100 translate-y-0 
+          md:opacity-0 md:translate-y-3 md:group-hover:opacity-100 md:group-hover:translate-y-0
+        `} // 6. THAY ĐỔI: Logic hiển thị (luôn hiện trên mobile, chỉ hiện khi hover trên desktop)
       >
         <span className="text-xs md:text-sm uppercase tracking-widest opacity-80">
           {item.category}
@@ -219,16 +197,16 @@ function GridItem({ item, isActive, onItemClick }: GridItemProps) {
 // }
 export default function PortfolioGrid() {
   // 6. Thêm State để lưu ID của item đang active
-  const [activeId, setActiveId] = useState<number | null>(null);
-
-  const handleItemClick = (id: number) => {
-    // Nếu click vào item đang active, hãy đóng nó lại
-    // Nếu click vào item mới, hãy mở nó ra
-    setActiveId(activeId === id ? null : id);
-  };
+  const [index, setIndex] = useState(-1);
+  const slides = portfolioItems.map((item) => ({
+    src: item.src.src,
+    title: item.title,
+    description: item.category,
+  }));
 
   return (
-    // 7. Thêm onClick vào wrapper để xử lý "chạm ra ngoài"
+    <>
+      {/* 7. Thêm onClick vào wrapper để xử lý "chạm ra ngoài" */}
     <div
       className="
         grid grid-cols-2 
@@ -236,16 +214,35 @@ export default function PortfolioGrid() {
         md:auto-rows-[350px] 
         gap-2 md:gap-4
       "
-      onClick={() => setActiveId(null)} // Click ra ngoài grid sẽ đóng (reset)
     >
-      {portfolioItems.map((item) => (
+      {portfolioItems.map((item, i) => (
         <GridItem
           key={item.id}
           item={item}
-          isActive={item.id === activeId} // 8. Truyền trạng thái active
-          onItemClick={handleItemClick} // 9. Truyền hàm xử lý click
+         onClick={() => setIndex(i)}// 9. Truyền hàm xử lý click
         />
       ))}
     </div>
+    <Lightbox
+        // Mở khi index >= 0
+        open={index > -1}
+        // Đóng bằng cách set index về -1
+        close={() => setIndex(-1)}
+        // Hiển thị slide tương ứng với index
+        index={index}
+        // Nguồn dữ liệu
+        slides={slides}
+        // Kích hoạt các plugin
+        plugins={[Captions, Thumbnails]}
+        // Tùy chỉnh (nếu muốn)
+        captions={{
+          showToggle: true,
+          descriptionTextAlign: 'center',
+        }}
+        thumbnails={{
+          position: 'bottom',
+        }}
+      />
+    </>
   );
 }
