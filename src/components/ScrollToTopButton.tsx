@@ -36,7 +36,7 @@ export default function ScrollToTopButton() {
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed bottom-6 right-6 z-50 p-3
+      className={`fixed bottom-6 right-6 z-30 p-3
                  bg-black/70 text-white rounded-full
                  shadow-lg cursor-pointer
                  transition-all duration-300 ease-in-out

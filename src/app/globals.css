@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "yet-another-react-lightbox/styles.css";
+@import "yet-another-react-lightbox/plugins/captions.css";
+@import "yet-another-react-lightbox/plugins/thumbnails.css";
 :root {
   /* Chuyển từ hex sang các giá trị RGB (không có 'rgb()' ) */
   --background: #f4f4f4;
@@ -31,7 +34,7 @@ main {
 }
 
 /* SECTIONS - Đã loại bỏ min-height, thêm padding để trông đẹp hơn */
-section {
+/* section {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -66,7 +69,7 @@ section:nth-child(4) {
 section:nth-child(5) {
   background-color: #b0b0b0;
   color: #333;
-}
+} */
 
 /* FOOTER */
 footer {
