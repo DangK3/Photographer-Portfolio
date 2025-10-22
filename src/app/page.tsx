@@ -1,7 +1,7 @@
 import HeroSection from "@/components/HeroSection"; 
 import Container from '@/components/Container'; // 1. Import Container
 import PortfolioGrid from '@/components/PortfolioGrid'; // 2. Import component mới
-
+import ProjectShowcase from '@/components/ProjectShowcase';
 
 export default function HomePage() {
   return (
@@ -28,7 +28,7 @@ export default function HomePage() {
           <PortfolioGrid />
         </Container>
       </section>
-
+      <ProjectShowcase />
       <section>
         <h1>Section 4 — About</h1>
       </section>

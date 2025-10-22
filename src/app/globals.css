@@ -7,6 +7,8 @@
   --background: #f4f4f4;
   --foreground: #171717;
   --glow-color: rgba(0, 0, 0, 0.2);
+  --gradient-color-1: #f9fafb; /* gray-50 */
+  --gradient-color-2: #f3f4f6; /* gray-100 */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,6 +16,9 @@
     --background: #1c1c1c;
     --foreground: #ededed;
     --glow-color: rgba(255, 255, 255, 0.4);
+    --gradient-color-1: #111827; /* gray-900 */
+    --gradient-color-2: #1c1c1c; /* bg */
+    --gradient-color-3: #1f2937; /* gray-800 */
   }
 }
 
@@ -139,3 +144,30 @@ section:nth-child(1) {
   text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color), 0 0 30px var(--glow-color);
 }
 
+/* === CSS CHO NỀN CHUYỂN ĐỘNG (SECTION 3) === */
+
+/* 2. Keyframes (Giữ nguyên) */
+@keyframes moveGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 3. Class animation (Chỉ cần 1 class duy nhất) */
+.animated-gradient {
+  /* Dùng 2 biến màu đã định nghĩa ở trên */
+  background-image: linear-gradient(
+    -45deg,
+    var(--gradient-color-1),
+    var(--gradient-color-2),
+    var(--gradient-color-3)
+  );
+  background-size: 200% 200%;
+  animation: moveGradient 5s ease-in-out infinite;
+}
