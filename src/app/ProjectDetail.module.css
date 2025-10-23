@@ -1,0 +1,138 @@
+/* src/app/ProjectDetail.module.css */
+
+.projectDetailContainer {
+    max-width: 1200px; 
+    margin: 0 auto;
+    padding: 0 20px;
+    padding-bottom: 60px; /* Khoảng cách với footer */
+}
+
+.projectTitle {
+    text-align: center;
+    font-size: 2.8em; /* Kích thước chữ lớn */
+    margin-top: 60px;
+    margin-bottom: 40px;
+    font-weight: 300; /* Font mỏng cho tinh tế */
+    letter-spacing: 1px;
+    color: var(--foreground);
+}
+
+/* Kỹ thuật để ảnh full-width, tràn ra khỏi container cha */
+.imageContainer {
+    position: relative;
+    width: 100vw; /* Chiếm 100% chiều rộng viewport */
+    height: 75vh; /* Chiều cao 75% viewport */
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    margin-bottom: 50px;
+    overflow: hidden;
+    background-color: #333; /* Màu nền cho ảnh khi đang tải */
+}
+
+.projectImage {
+    object-fit: cover;
+}
+
+/* Wrapper để giữ nội dung text (description, credits) ở giữa */
+.contentWrapper {
+    max-width: 800px; 
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.projectInfo {
+    margin-bottom: 60px;
+}
+
+.description {
+    font-size: 1.15em;
+    line-height: 1.8;
+    margin-bottom: 30px;
+    color: var(--foreground); /* Màu chữ chính */
+    opacity: 0.9;
+}
+
+.credits p {
+    margin: 5px 0;
+    font-size: 0.95em;
+    color: var(--foreground);
+    opacity: 0.7;
+}
+
+.credits strong {
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* Thanh điều hướng Prev/Next */
+.projectNavigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 80px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    border-top: 1px solid rgba(128, 128, 128, 0.2); /* Đường kẻ mờ */
+    padding-top: 30px;
+}
+
+.navLink {
+    text-decoration: none;
+    color: var(--foreground);
+    font-weight: 500;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+.navLink:hover:not(.disabled) {
+    color: #007bff; /* Thay bằng màu highlight của bạn */
+    background-color: rgba(128, 128, 128, 0.1);
+}
+
+.navLink.disabled {
+    color: var(--foreground);
+    opacity: 0.3;
+    pointer-events: none; /* Vô hiệu hóa click */
+}
+
+/* CSS cho hiệu ứng Fade-in */
+.fade_in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.fade_in_visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.projectImage {
+    object-fit: cover; /* Giữ nguyên dòng này, nó sẽ được áp dụng khi dùng fill */
+}
+/* Responsive */
+@media (max-width: 768px) {
+    .projectTitle {
+        font-size: 2.2em;
+        margin-top: 40px;
+        margin-bottom: 30px;
+    }
+    .imageContainer {
+        height: 50vh;
+        margin-bottom: 30px;
+    }
+    .contentWrapper {
+        padding: 0 15px;
+    }
+    .description {
+        font-size: 1.05em;
+    }
+    .projectNavigation {
+        margin-top: 50px;
+        font-size: 0.9em;
+    }
+}

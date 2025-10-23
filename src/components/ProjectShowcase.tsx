@@ -6,9 +6,9 @@ import Container from './Container';
 import { useEffect, useRef, useState } from 'react'; // 2. BẮT BUỘC: Import hooks
 
 // Import 3 ảnh của bạn (giữ nguyên)
-import projectImg1 from '@/assets/portfolio/Portfolio_06.png';
-import projectImg2 from '@/assets/portfolio/Portfolio_05.png';
-import projectImg3 from '@/assets/portfolio/Portfolio_04.png';
+import projectImg1 from '../assets/section_02/Portfolio_06.png';
+import projectImg2 from '../assets/section_02/Portfolio_05.png';
+import projectImg3 from '../assets/section_02/Portfolio_04.png';
 
 // Dữ liệu (giữ nguyên)
 const featuredProjects = [

@@ -7,12 +7,12 @@ import Lightbox from 'yet-another-react-lightbox';
 import Captions from 'yet-another-react-lightbox/plugins/captions';
 import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
 // 1. Import ảnh trực tiếp
-import img01 from '@/assets/portfolio/Portfolio_01.png'; // Giả sử bạn đặt ảnh ở đây
-import img02 from '@/assets/portfolio/Portfolio_02.png';
-import img03 from '@/assets/portfolio/Portfolio_03.png';
-import img04 from '@/assets/portfolio/Portfolio_04.png';
-import img05 from '@/assets/portfolio/Portfolio_05.png';
-import img06 from '@/assets/portfolio/Portfolio_06.png';
+import img01 from '../assets/section_02/Portfolio_01.png'; // Giả sử bạn đặt ảnh ở đây
+import img02 from '../assets/section_02//Portfolio_02.png';
+import img03 from '../assets/section_02//Portfolio_03.png';
+import img04 from '../assets/section_02//Portfolio_04.png';
+import img05 from '../assets/section_02//Portfolio_05.png';
+import img06 from '../assets/section_02//Portfolio_06.png';
 /* 1. DỮ LIỆU MẪU (MOCK DATA)
   - Bạn sẽ thay thế đường dẫn 'src' bằng ảnh thật của mình.
   - colSpan/rowSpan: Dùng class Tailwind để điều khiển bố cục.
