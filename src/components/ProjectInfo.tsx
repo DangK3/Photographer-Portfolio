@@ -1,6 +1,7 @@
 // components/ProjectInfo.tsx
 import React from 'react'; // Import React khi dùng JSX trong TypeScript
-import styles from '../app/ProjectDetail.module.css';
+import styles from '../app/styles/ProjectDetail.module.css';
+
 
 // Định nghĩa interface cho props của ProjectInfo
 interface ProjectInfoProps {

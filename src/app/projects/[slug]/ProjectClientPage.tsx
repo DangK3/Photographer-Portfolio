@@ -7,7 +7,7 @@ import { Project } from '../../../data/project'; // Import kiểu dữ liệu
 import ProjectDetailImage from '@/components/ProjectDetailImage';
 import ProjectInfo from '@/components/ProjectInfo';
 import ProjectNavigation from '@/components/ProjectNavigation';
-import styles from '../../ProjectDetail.module.css'; // Import CSS
+import styles from '../../styles/ProjectDetail.module.css'; // Import CSS
 
 // Props nhận từ Server Component (page.tsx)
 interface ProjectClientPageProps {

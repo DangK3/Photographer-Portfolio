@@ -1,7 +1,7 @@
 // src/components/ProjectNavigation.tsx
 import React from 'react';
 import Link from 'next/link';
-import styles from '../app/ProjectDetail.module.css';
+import styles from '../app/styles/ProjectDetail.module.css'; // Giả sử file CSS ở src/styles/
 
 interface ProjectNavigationProps {
   prevProjectSlug: string | null; // Có thể là string hoặc null

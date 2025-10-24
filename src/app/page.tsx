@@ -1,7 +1,7 @@
 import HeroSection from "@/components/HeroSection"; 
 import ProjectShowcase from '@/components/ProjectShowcase';
 import PortfolioSection from '@/components/PortfolioSection';
-
+import BtsSection from '@/components/BtsSection';
 export default function HomePage() {
   return (
     <main>
@@ -11,10 +11,10 @@ export default function HomePage() {
       <PortfolioSection />
       {/* Section 03 */}
       <ProjectShowcase />
-      <section>
-        <h1>Section 4 — About</h1>
-      </section>
-
+      {/* Section 04 */}
+      <BtsSection />
+      
+      
       <section>
         <h1>Section 5 — Contact</h1>
       </section>

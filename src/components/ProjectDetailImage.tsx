@@ -1,9 +1,9 @@
 // src/components/ProjectDetailImage.tsx
-import Image from 'next/image';
-import styles from '../app/ProjectDetail.module.css'; // Giả sử file CSS ở src/styles/
+import Image, { StaticImageData } from 'next/image';
+import styles from '../app/styles/ProjectDetail.module.css';
 
 interface ProjectDetailImageProps {
-  imageUrl: string;
+  imageUrl: string | StaticImageData;
   altText: string;
 }
 
