@@ -4,7 +4,7 @@
 
 import Image from 'next/image';
 import Container from './Container';
-import Background from '../assets/section_01/hero-background.jpg';
+import Background from '../assets/section_01/hero-background.webp';
 import { TypeAnimation } from 'react-type-animation'; // 2. Import thư viện
 
 export default function HeroSection() {

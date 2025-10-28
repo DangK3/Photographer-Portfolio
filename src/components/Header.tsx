@@ -59,10 +59,10 @@ export default function Header() {
               Cá nhân
             </a>
             <a href="#" className="menu-link-glow">
-              Giới thiệu
+              Dịch vụ
             </a>
             <a href="#" className="menu-link-glow">
-              Dự án
+              Giới thiệu
             </a>
           </nav>
 

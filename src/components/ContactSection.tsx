@@ -51,7 +51,7 @@ export default function ContactSection() {
       ></div>
 
       {/* 4. NỘI DUNG (đặt z-index cao hơn) */}
-      <Container className="relative z-20">
+      <Container className="relative z-20 mt-16 mb-12 lg:mt-24 lg:mb-14">
         <div className="relative md:border-l-1 border-black dark:border-white">
        {/* 1. THAY ĐỔI: TIÊU ĐỀ DỌC (Chỉ hiện từ 'md' trở lên) */}
           <div className="hidden md:flex absolute top-0 -left-16 md:-left-24 w-16 md:w-24 h-full items-center justify-center pointer-events-none">
