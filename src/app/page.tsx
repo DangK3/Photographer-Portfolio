@@ -2,6 +2,7 @@ import HeroSection from "@/components/HeroSection";
 import ProjectShowcase from '@/components/ProjectShowcase';
 import PortfolioSection from '@/components/PortfolioSection';
 import BtsSection from '@/components/BtsSection';
+import ContactSection from '@/components/ContactSection';
 export default function HomePage() {
   return (
     <main>
@@ -13,11 +14,8 @@ export default function HomePage() {
       <ProjectShowcase />
       {/* Section 04 */}
       <BtsSection />
-      
-      
-      <section>
-        <h1>Section 5 — Contact</h1>
-      </section>
+      {/* Section 05 */}
+      <ContactSection />
     </main>
   );
 }

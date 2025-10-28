@@ -32,7 +32,6 @@ export default function Footer() {
         ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
       `}
     >
-      © 2025 My Portfolio. All rights reserved.
-    </footer>
+  Đ. Lý Thường Kiệt, Phường Phú Thọ, Quận 11, Thành phố Hồ Chí Minh, Việt Nam </footer>
   );
 }

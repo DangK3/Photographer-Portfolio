@@ -172,3 +172,19 @@ section:nth-child(1) {
   animation: moveGradient 5s ease-in-out infinite;
 }
 
+/* ... (toàn bộ css cũ của bạn) ... */
+
+/* === CSS CHO BRAND SCROLLER (MỚI) === */
+@keyframes infinite-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-infinite-scroll {
+  /* Tốc độ 40s. Bạn có thể điều chỉnh 40s thành số khác để nhanh/chậm hơn */
+  animation: infinite-scroll 40s linear infinite;
+}
