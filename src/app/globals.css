@@ -188,3 +188,36 @@ section:nth-child(1) {
   /* Tốc độ 40s. Bạn có thể điều chỉnh 40s thành số khác để nhanh/chậm hơn */
   animation: infinite-scroll 40s linear infinite;
 }
+
+/* === THANH CUỘN TINH TẾ === */
+
+/* Áp dụng cho Firefox */
+html {
+  /* 1. Màu của Thumb (vị trí) - Dùng màu glow-color của bạn */
+  scrollbar-color: var(--glow-color) var(--background);
+  /* 2. Chiều rộng thanh cuộn */
+  scrollbar-width: thin;
+}
+
+/* Áp dụng cho Chrome, Safari, Edge */
+
+/* 1. Chiều rộng thanh cuộn */
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* 2. Màu của Track (đường chạy) - Đồng màu với nền */
+body::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+/* 3. Màu của Thumb (vị trí) - Dùng màu của bạn */
+body::-webkit-scrollbar-thumb {
+  background-color: var(--foreground);
+  border-radius: 4px;
+}
+
+/* 4. Tăng độ đậm khi hover lên thanh cuộn */
+body::-webkit-scrollbar-thumb:hover {
+  background-color: #ededed; /* Tùy chỉnh màu đậm hơn nếu muốn */
+}
