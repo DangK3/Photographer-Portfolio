@@ -35,7 +35,6 @@ export default function ProjectClientPage({
     triggerOnce: true,
     threshold: 0.5,
   });
-  console.log('Debugging imageUrl:', project.imageUrl); // Thêm dòng này
   return (
     <article className={styles.projectDetailContainer}>
       

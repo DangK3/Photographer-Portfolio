@@ -58,7 +58,7 @@ export default function ContactSection() {
             <h2
               className="transform -rotate-90 whitespace-nowrap text-4xl md:text-5xl 
                          font-light tracking-widest uppercase 
-                         text-black/20 dark:text-white/20"
+                         text-black/80 dark:text-white/80"
             >
               Liên Hệ
             </h2>
@@ -77,7 +77,7 @@ export default function ContactSection() {
             {/* CỘT 1: FORM */}
             <div>
               <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
-                Nếu bạn thích điền form:
+                Để lại lời nhắn cho chúng tôi bằng cách điền vào biểu mẫu bên dưới:
               </p>
               {/* ... (phần form giữ nguyên) ... */}
               <form
@@ -151,7 +151,7 @@ export default function ContactSection() {
                            border border-black/30 dark:border-white/30
                            text-lg md:text-xl font-mono 
                            hover:border-black dark:hover:border-white
-                           transition-all duration-300"
+                           transition-all duration-300 cursor-pointer"
               >
                 {copyText}
               </button>

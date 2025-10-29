@@ -1,5 +1,6 @@
 // src/components/BrandScroller.tsx
 import React from 'react';
+import Container from './Container';
 
 // 1. CẬP NHẬT MÀU SẮC ICON
 const brands = [
@@ -102,13 +103,14 @@ const BrandList = ({ 'aria-hidden': ariaHidden = false }) => (
 
 export default function BrandScroller() {
   return (
-    <div
-      className="w-full py-8 inline-flex flex-nowrap overflow-hidden 
-                 /* <-- 3. XÓA bg-[--background] */
-                 mask-[linear-gradient(to_right,transparent_0,black_128px,black_calc(100%-200px),transparent_100%)]"
-    >
-      <BrandList />
-      <BrandList aria-hidden={true} />
-    </div>
+    <Container>
+      <div
+        className="w-full py-8 inline-flex flex-nowrap overflow-hidden 
+                  mask-[linear-gradient(to_right,transparent_0,black_128px,black_calc(100%-200px),transparent_100%)]"
+      >
+        <BrandList />
+        <BrandList aria-hidden={true} />
+      </div>
+    </Container>
   );
 }

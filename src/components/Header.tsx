@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'; // Import hook
 import Container from "./Container";
 import localFont from 'next/font/local'; 
+import Link from 'next/link';
 
 // 2. Cấu hình và tải font tùy chỉnh
 const logoFont = localFont({
@@ -29,7 +30,9 @@ export default function Header() {
       document.body.style.overflow = 'auto';
     };
   }, [isMenuOpen]); // Hook này sẽ chạy lại mỗi khi state 'isMenuOpen' thay đổi
-
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
+  };
   return (
     // Thêm 'relative' để menu di động có thể định vị 'absolute' so với header
    <header
@@ -42,28 +45,29 @@ export default function Header() {
           <h1
             className={`text-xl font-semibold tracking-widest cursor-pointer ${logoFont.className}`}
           >
-            <a href="#" className="menu-link-glow">
+           {/* 3. THAY ĐỔI: Logo trỏ về trang chủ */}
+            <Link href="/" className="menu-link-glow">
               Oni Studio
-            </a>
+            </Link>
           </h1>
 
-          {/* 1. Navigation cho Desktop (ẩn trên di động) */}
+          {/* 4. THAY ĐỔI: Navigation cho Desktop (dùng <Link>) */}
           <nav className="hidden md:flex space-x-6 text-md">
-            <a href="#" className="menu-link-glow">
+            <Link href="/thuong-mai" className="menu-link-glow">
               Thương mại
-            </a>
-            <a href="#" className="menu-link-glow">
+            </Link>
+            <Link href="/thoi-trang" className="menu-link-glow">
               Thời trang
-            </a>
-            <a href="#" className="menu-link-glow">
+            </Link>
+            <Link href="/ca-nhan" className="menu-link-glow">
               Cá nhân
-            </a>
-            <a href="#" className="menu-link-glow">
-              Dịch vụ
-            </a>
-            <a href="#" className="menu-link-glow">
+            </Link>
+            <Link href="/dich-vu" className="menu-link-glow">
+              Dịch Vụ
+            </Link>
+            <Link href="/gioi-thieu" className="menu-link-glow">
               Giới thiệu
-            </a>
+            </Link>
           </nav>
 
           {/* 2. Nút Hamburger cho Di động (chỉ hiện trên di động) */}
@@ -115,22 +119,22 @@ export default function Header() {
           isMenuOpen ? 'block opacity-100' : 'hidden opacity-0'
         }`}
       >
-        <nav className="flex flex-col ps-10 space-y-8 p-5 text-4xl font-bold text-white mt-5">
-          <a href="#" className="menu-link-glow">
+       <nav className="flex flex-col ps-10 space-y-8 p-5 text-4xl font-bold text-white mt-5">
+          <Link href="/thuong-mai" className="menu-link-glow" onClick={handleLinkClick}>
             Thương mại
-          </a>
-          <a href="#" className="menu-link-glow">
+          </Link>
+          <Link href="/thoi-trang" className="menu-link-glow" onClick={handleLinkClick}>
             Thời trang
-          </a>
-          <a href="#" className="menu-link-glow">
+          </Link>
+          <Link href="/ca-nhan" className="menu-link-glow" onClick={handleLinkClick}>
             Cá nhân
-          </a>
-          <a href="#" className="menu-link-glow">
+          </Link>
+          <Link href="/dich-vu" className="menu-link-glow" onClick={handleLinkClick}>
+            Dịch Vụ
+          </Link>
+          <Link href="/gioi-thieu" className="menu-link-glow" onClick={handleLinkClick}>
             Giới thiệu
-          </a>
-          <a href="#" className="menu-link-glow">
-            Dự án
-          </a>
+          </Link>
         </nav>
       </div>
     </header>
