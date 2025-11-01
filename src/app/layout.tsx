@@ -5,8 +5,14 @@ import LayoutWrapper from '@/components/LayoutWrapper';
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "Oni Studio",
   description: "Showcase of professional photography projects.",
+  openGraph: {
+    title: 'Oni Studio',
+    description: 'Mô tả mặc định...',
+    images: ['/default-og-image.jpg'], // Một ảnh đại diện mặc định
+  },
 };
 
 
