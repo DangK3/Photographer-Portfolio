@@ -2,24 +2,32 @@
 @import "yet-another-react-lightbox/styles.css";
 @import "yet-another-react-lightbox/plugins/captions.css";
 @import "yet-another-react-lightbox/plugins/thumbnails.css";
+/* src/app/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 :root {
   /* Chuyển từ hex sang các giá trị RGB (không có 'rgb()' ) */
   --background: #f4f4f4;
   --foreground: #171717;
-  --glow-color: rgba(0, 0, 0, 0.2);
+  --glow-color: #aa9f9f;
   --gradient-color-1: #f9fafb; /* gray-50 */
   --gradient-color-2: #f3f4f6; /* gray-100 */
+  --gradient-color-3: #f9fafb; /* gray-50 */
+  --to-linear: #dadada;
+  --from-linear: #ebebeb;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
+html.dark { 
     --background: #1c1c1c;
     --foreground: #ededed;
-    --glow-color: rgba(255, 255, 255, 0.4);
+    --glow-color: #6d6d6d;
     --gradient-color-1: #111827; /* gray-900 */
     --gradient-color-2: #1c1c1c; /* bg */
     --gradient-color-3: #1f2937; /* gray-800 */
-  }
+    --to-linear: #030a20;
+    --from-linear: #030a20;
 }
 
 html, body {
@@ -27,7 +35,6 @@ html, body {
   margin: 0;
   padding: 0;
   background: var(--background);
-  color: var(--foreground); 
   font-family: Arial, Helvetica, sans-serif;
   scroll-behavior: smooth;
 }
@@ -37,44 +44,6 @@ main {
   width: 100%;
   /* overflow-x: hidden; */
 }
-
-/* SECTIONS - Đã loại bỏ min-height, thêm padding để trông đẹp hơn */
-/* section {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  font-weight: 600;
-  transition: background-color 0.5s ease, color 0.5s ease;
-  padding: 4rem 0;
-  scroll-snap-type: y mandatory;
-}
-
-section:nth-child(1) {
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-section:nth-child(2) {
-  background-color: #e0e0e0;
-  color: #333;
-}
-
-section:nth-child(3) {
-  background-color: #d0d0d0;
-  color: #333;
-}
-
-section:nth-child(4) {
-  background-color: #c0c0c0;
-  color: #333;
-}
-
-section:nth-child(5) {
-  background-color: #b0b0b0;
-  color: #333;
-} */
 
 /* FOOTER */
 footer {
@@ -120,27 +89,14 @@ footer {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
-/* BỎ HOẶC CHỈNH SỬA CSS CŨ */
-/* Bạn nên xóa hoặc comment out phần CSS này để tránh xung đột với component mới */
-/*
-section:nth-child(1) {
-  background-color: #f0f0f0;
-  color: #333;
-}
-*/
+
 .menu-link-glow {
-  /* Chuyển đổi mượt mà */
   transition: text-shadow 0.3s ease-out;
   will-change: text-shadow;
-  
-  /* Đặt shadow mặc định là 0 để tránh giật khi hover */
   text-shadow: 0 0 0 var(--glow-color);
 }
 
 .menu-link-glow:hover {
-  /* Tạo 3 lớp shadow mờ bằng biến --glow-color.
-    Lớp 1 mờ 10px, lớp 2 mờ 20px, lớp 3 mờ 30px để tạo vầng sáng lan tỏa.
-  */
   text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color), 0 0 30px var(--glow-color);
 }
 
@@ -172,7 +128,6 @@ section:nth-child(1) {
   animation: moveGradient 5s ease-in-out infinite;
 }
 
-/* ... (toàn bộ css cũ của bạn) ... */
 
 /* === CSS CHO BRAND SCROLLER (MỚI) === */
 @keyframes infinite-scroll {

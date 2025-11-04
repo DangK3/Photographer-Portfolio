@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ScrollToTopButton from '@/components/ScrollToTopButton';
 import LayoutWrapper from '@/components/LayoutWrapper';
-
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -22,11 +22,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi">
-      <body className="bg-background text-gray-900 antialiased flex flex-col min-h-screen">
-       {/* 3. Bọc 'children' bằng 'LayoutWrapper' */}
-        <LayoutWrapper>{children}</LayoutWrapper>
-        <ScrollToTopButton />
+   <html lang="vi" suppressHydrationWarning>
+     <body className="bg-[var(--background)] 
+                      text-[var(--foreground)] border-b 
+                       antialiased flex flex-col min-h-screen
+                       transition-colors duration-300">
+        <Providers>
+          <LayoutWrapper>{children}</LayoutWrapper>
+          <ScrollToTopButton />
+        </Providers>
       </body>
     </html>
   );

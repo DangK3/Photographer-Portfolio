@@ -1,29 +1,28 @@
-// src/app/projects/[slug]/page.tsx
+// src/app/projects/[slug]/page.tsx (SỬA LỖI TRIỆT ĐỂ)
 
-import { Metadata } from 'next';
+import { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
-import projects from '../../../data/project'; // Import data
-import ProjectClientPage from './ProjectClientPage'; // Import Client Component
-import { cache } from 'react'; // Dùng cache để tối ưu
+import projects from '../../../data/project';
+import ProjectClientPage from './ProjectClientPage';
+import { cache } from 'react';
 
-// Interface cho props (params từ URL)
-interface ProjectPageParams {
+// 1. DÙNG TYPE 'Props' CHUẨN
+type Props = {
   params: { slug: string };
-}
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-// Hàm này thay thế getStaticPaths: Báo cho Next.js biết cần build tĩnh những slug nào
 export async function generateStaticParams() {
   return projects.map((project) => ({
     slug: project.slug,
   }));
 }
 
-// Hàm lấy dữ liệu dự án (được cache lại)
 const getProjectData = cache(async (slug: string) => {
   const projectIndex = projects.findIndex((p) => p.slug === slug);
   
   if (projectIndex === -1) {
-    return null; // Không tìm thấy
+    return null;
   }
 
   const project = projects[projectIndex];
@@ -37,32 +36,62 @@ const getProjectData = cache(async (slug: string) => {
   };
 });
 
-// Hàm tạo Metadata (thay thế <Head>)
-export async function generateMetadata({ params }: ProjectPageParams): Promise<Metadata> {
-  const awaitedParams = await params; // await params ở đây
-  const data = await getProjectData(awaitedParams.slug); // Sử dụng awaitedParams.slug
+// 2. SỬA HÀM METADATA
+export async function generateMetadata(
+  { params, searchParams }: Props, // Dùng Props
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  
+  // ⛔ BẠN PHẢI XÓA DÒNG "await params" Ở ĐÂY ⛔
+  // const awaitedParams = await params; // <--- XÓA DÒNG NÀY
+  const data = await getProjectData(params.slug); // Dùng trực tiếp params.slug
 
   if (!data) {
     return { title: 'Project Not Found' };
   }
+
+  // Sửa lỗi StaticImageData
+  let ogUrl: string;
+  let ogWidth: number = 1200;
+  let ogHeight: number = 630;
+
+  if (typeof data.project.imageUrl === 'string') {
+    ogUrl = data.project.imageUrl;
+  } else {
+    ogUrl = data.project.imageUrl.src;
+    ogWidth = data.project.imageUrl.width;
+    ogHeight = data.project.imageUrl.height;
+  }
   
   return {
-    title: `${data.project.title} - Oni Studio`, // Tên studio của bạn
+    title: `${data.project.title} - Oni Studio`,
     description: data.project.description.substring(0, 150),
+    openGraph: {
+      title: `${data.project.title} - Oni Studio`,
+      description: data.project.description.substring(0, 150),
+      images: [
+        {
+          url: ogUrl,
+          width: ogWidth,
+          height: ogHeight,
+          alt: data.project.title,
+        },
+      ],
+    },
   };
 }
 
-// Component Trang (Server Component)
-export default async function ProjectDetailPage({ params }: ProjectPageParams) {
-  const awaitedParams = await params; // await params ở đây
-  const data = await getProjectData(awaitedParams.slug); // Sử dụng awaitedParams.slug
+// 4. SỬA COMPONENT TRANG
+export default async function ProjectDetailPage({ params, searchParams }: Props) { // Dùng Props
+  
+  // ⛔ BẠN PHẢI XÓA DÒNG "await params" Ở ĐÂY ⛔
+  // const awaitedParams = await params; // <--- XÓA DÒNG NÀY
+  const data = await getProjectData(params.slug); // Dùng trực tiếp params.slug
 
-  // Xử lý nếu không tìm thấy dự án
   if (!data) {
-    notFound(); // Trả về trang 404
+    notFound();
   }
 
-  // Truyền dữ liệu xuống Client Component để render UI
   return (
     <ProjectClientPage
       project={data.project}

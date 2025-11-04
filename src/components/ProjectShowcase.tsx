@@ -1,17 +1,18 @@
 // src/components/ProjectShowcase.tsx
-'use client'; // 1. BẮT BUỘC: Vì chúng ta dùng hooks
+'use client'; 
 
 import Image from 'next/image';
 import Container from './Container';
-import { useEffect, useRef, useState } from 'react'; // 2. BẮT BUỘC: Import hooks
+import { useEffect, useRef, useState } from 'react';
 
-// Import 3 ảnh của bạn (giữ nguyên)
+// Import ảnh (giữ nguyên)
 import projectImg1 from '../assets/section_02/Portfolio_06.png';
 import projectImg2 from '../assets/section_02/Portfolio_05.png';
 import projectImg3 from '../assets/section_02/Portfolio_04.png';
 
 // Dữ liệu (giữ nguyên)
 const featuredProjects = [
+  // ... (dữ liệu của bạn giữ nguyên)
   {
     id: 1,
     category: 'Commercial / Event',
@@ -59,15 +60,15 @@ const featuredProjects = [
   },
 ];
 
-// 3. Component ProjectItem (Mục con) - Đã cập nhật
+
+// Component ProjectItem (Mục con)
 function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
   const isImageLeft = project.align === 'right';
-
-  // 4. Logic animation cho TỪNG ITEM
   const itemRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // ... (logic IntersectionObserver giữ nguyên)
     const item = itemRef.current;
     if (!item) return;
 
@@ -80,7 +81,7 @@ function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
         }
       },
       {
-        threshold: 0.2, // Kích hoạt khi 20% item hiện ra
+        threshold: 0.2, 
       }
     );
 
@@ -89,26 +90,25 @@ function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
   }, []);
 
   return (
-    // 5. Áp dụng ref và animation fade-in tổng thể
     <div
       ref={itemRef}
+      // ... (animation class giữ nguyên)
       className={`grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center
                   transition-opacity duration-[2000ms] ease-out
                   ${isVisible ? 'opacity-100' : 'opacity-0'}
                 `}
     >
-      {/* Cột Hình ảnh */}
+      {/* Cột Hình ảnh (Giữ nguyên) */}
       <div
         className={`w-full h-96 md:h-[500px] relative overflow-hidden rounded-lg shadow-lg
                     ${isImageLeft ? 'md:order-1' : 'md:order-2'}
-                    
                     transition-transform duration-[2000ms] ease-out
                     ${
                       isVisible
                         ? 'translate-x-0'
                         : isImageLeft
-                        ? '-translate-x-40' // <-- ĐÃ THAY ĐỔI
-                        : 'translate-x-40' // <-- ĐÃ THAY ĐỔI
+                        ? '-translate-x-40' 
+                        : 'translate-x-40' 
                     }
                   `}
       >
@@ -126,43 +126,47 @@ function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
       <div
         className={`flex flex-col justify-center
                     ${isImageLeft ? 'md:order-2' : 'md:order-1'}
-                    
                     transition-transform duration-[2000ms] ease-out
                     ${
                       isVisible
                         ? 'translate-x-0'
                         : isImageLeft
-                        ? 'translate-x-40' // <-- ĐÃ THAY ĐỔI
-                        : '-translate-x-40' // <-- ĐÃ THAY ĐỔI
+                        ? 'translate-x-40' 
+                        : '-translate-x-40' 
                     }
                   `}
       >
-        <span className="text-sm uppercase tracking-widest text-gray-500 dark:text-gray-400">
+        {/* SỬA 1: Dùng biến CSS cho văn bản phụ */}
+        <span className="text-sm uppercase tracking-widest text-[var(--glow-color)]">
           {project.category}
         </span>
-        <h3 className="text-2xl md:text-3xl font-light mt-2">
+
+        {/* SỬA 2: Dùng biến CSS cho tiêu đề chính */}
+        <h3 className="text-2xl md:text-3xl font-light mt-2 text-[var(--foreground)]">
           {project.title}
         </h3>
-        <p className="mt-4 text-gray-700 dark:text-gray-300">
-          {project.description}
-        </p>
-        <p className="mt-4 text-gray-700 dark:text-gray-300">
-          {project.description}
-        </p>
 
+        {/* SỬA 3: Dùng biến CSS cho mô tả (giảm độ đậm) */}
+        {/* Chúng ta sẽ dùng glow-color để nó mờ hơn foreground một chút */}
+        <p className="mt-4 text-[var(--glow-color)]">
+          {project.description}
+        </p>
+        
         {/* Thông tin Credits */}
-        <ul className="mt-5 space-y-2 text-sm text-gray-600 dark:text-gray-400 border-l border-gray-200 dark:border-gray-700 pl-4">
+        {/* SỬA 4: Dùng biến CSS cho credits (văn bản phụ) */}
+        <ul className="mt-5 space-y-2 text-sm text-[var(--glow-color)] border-l border-gray-200 dark:border-gray-700 pl-4">
           {project.credits.map((credit) => (
             <li key={credit.label}>
-              <strong>{credit.label}:</strong> {credit.value}
+              <strong className="text-[var(--foreground)]">{credit.label}:</strong> {credit.value}
             </li>
           ))}
         </ul>
 
         {/* Nút kêu gọi hành động */}
+        {/* SỬA 5: Dùng biến CSS cho link */}
         <a
           href={project.link}
-          className="mt-6 inline-block font-medium text-gray-800 dark:text-white group"
+          className="mt-6 inline-block font-medium text-[var(--foreground)] group"
         >
           Xem chi tiết dự án
           <span className="inline-block transition-transform duration-300 group-hover:translate-x-2">
@@ -174,13 +178,13 @@ function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
   );
 }
 
-// 3. Component Section chính
+// Component Section chính
 export default function ProjectShowcase() {
-  // 6. Logic animation cho TIÊU ĐỀ SECTION
   const titleRef = useRef<HTMLDivElement>(null);
   const [titleVisible, setTitleVisible] = useState(false);
 
   useEffect(() => {
+    // ... (logic IntersectionObserver giữ nguyên)
     const title = titleRef.current;
     if (!title) return;
 
@@ -193,7 +197,7 @@ export default function ProjectShowcase() {
         }
       },
       {
-        threshold: 0.5, // Kích hoạt khi 50% tiêu đề hiện ra
+        threshold: 0.5, 
       }
     );
 
@@ -205,34 +209,37 @@ export default function ProjectShowcase() {
     <section
       id="projects"
       className={`
-        py-16 md:py-24 text-[--foreground]
+        py-16 md:py-24 
         animated-gradient 
         overflow-hidden 
-      `}
+      `} // Nền gradient tự đổi màu (Đã đúng)
       style={{ minHeight: 0, fontSize: 'initial' }}
     >
       <Container>
-        {/* 7. Áp dụng ref và animation cho tiêu đề */}
         <div
           ref={titleRef}
+          // ... (animation class giữ nguyên)
           className={`text-center mb-12 md:mb-20
                       transition-all duration-[2000ms] ease-out
                       ${
                         titleVisible
                           ? 'opacity-100 translate-y-0'
-                          : 'opacity-0 translate-y-20' // <-- ĐÃ THAY ĐỔI
+                          : 'opacity-0 translate-y-20'
                       }
                     `}
         >
-          <h2 className="text-3xl md:text-5xl font-light tracking-tighter">
+          {/* SỬA 6: Dùng biến CSS cho tiêu đề section */}
+          <h2 className="text-3xl md:text-5xl font-light tracking-tighter text-[var(--foreground)]">
             Dự Án Tiêu Biểu
           </h2>
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mt-2">
+
+          {/* SỬA 7: Dùng biến CSS cho phụ đề section */}
+          <p className="text-lg md:text-xl text-[var(--glow-color)] mt-2">
             Câu chuyện và bối cảnh đằng sau những tác phẩm.
           </p>
         </div>
 
-        {/* Danh sách các dự án (Tự động chạy animation) */}
+        {/* Danh sách các dự án */}
         <div className="space-y-16 md:space-y-24">
           {featuredProjects.map((project) => (
             <ProjectItem key={project.id} project={project} />

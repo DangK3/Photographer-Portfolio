@@ -55,13 +55,11 @@ export default function AboutMilestonesSection() {
     // Bọc trong 1 <section> để dễ quản lý
     <section id="milestones" className="py-16 md:py-24">
     <Container>
-
- 
         <div className="container mx-auto px-4 text-center mb-10">
             <h2 className="text-4xl md:text-5xl font-light tracking-tighter">
             Hành Trình Của Oni
             </h2>
-            <p className="text-lg text-gray-700 dark:text-gray-300 mt-2">
+            <p className="text-lg text-[var(--foreground)] mt-2">
             Từ ý tưởng đến một studio chuyên nghiệp.
             </p>
         </div>

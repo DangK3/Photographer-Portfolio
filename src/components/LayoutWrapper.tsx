@@ -60,8 +60,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
       {/* 2. HEADER MỚI (Fixed) */}
       {/* Header này luôn ở đó, nhưng được ẩn/hiện bằng 'translate' */}
       <div
-        className={`fixed top-0 left-0 right-0 z-50 
-                   transition-transform duration-300 ease-in-out backdrop-blur-lg bg-[#1c1c1c]
+        className={`fixed top-0 left-0 right-0 z-50 bg-[var(--background)] 
+                      text-[var(--foreground)] border-b border-[var(--foreground)]
+                   transition-transform duration-300 ease-in-out 
                    ${
                      showFixedHeader ? 'translate-y-0' : '-translate-y-full'
                    }`}

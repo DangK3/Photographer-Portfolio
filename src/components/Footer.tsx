@@ -26,10 +26,16 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer
+  <footer
       ref={footerRef}
-      className={`w-full bg-black text-white text-center py-8 transition-all duration-700 ease-out
+      className={`w-full text-center py-8 transition-all duration-700 ease-out
         ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
+        
+        // Mặc định (Light): nền sáng, chữ tối
+        bg-gray-100 text-gray-700 
+        
+        // Khi Dark: nền đen, chữ trắng
+        dark:bg-black dark:text-white 
       `}
     >
   Đ. Lý Thường Kiệt, Phường Phú Thọ, Quận 11, Thành phố Hồ Chí Minh, Việt Nam </footer>

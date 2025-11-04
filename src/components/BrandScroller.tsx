@@ -89,8 +89,8 @@ const BrandList = ({ 'aria-hidden': ariaHidden = false }) => (
           target="_blank"
           rel="noopener noreferrer"
           href={brand.href}
-          className="border border-black/20 dark:border-white/20 
-                     bg-black/90 dark:bg-white/90 
+          className="border border-[var(--foreground)]
+                     bg-white 
                      grid place-content-center p-3 rounded-md
                      transition-opacity hover:opacity-70" /* <-- THAY ĐỔI NỀN ICON */
         >

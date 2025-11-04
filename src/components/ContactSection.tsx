@@ -30,7 +30,7 @@ export default function ContactSection() {
 <section
       id="contact"
       className="relative pt-12 pb-6 overflow-hidden 
-                 bg-linear-to-b dark:to-gray-950 dark:from-gray-950 to-[#dadada] from-[#ebebeb] 
+                 bg-linear-to-b to-[var(--to-linear)] from-[var(--from-linear)] 
                  dark:text-white text-black" 
       style={{ minHeight: 0, fontSize: 'initial' }}
     >
@@ -52,13 +52,12 @@ export default function ContactSection() {
 
       {/* 4. NỘI DUNG (đặt z-index cao hơn) */}
       <Container className="relative z-20 mt-16 mb-12 lg:mt-24 lg:mb-14">
-        <div className="relative md:border-l-1 border-black dark:border-white">
+        <div className="relative md:border-l-1 border-[var(--foreground)]">
        {/* 1. THAY ĐỔI: TIÊU ĐỀ DỌC (Chỉ hiện từ 'md' trở lên) */}
           <div className="hidden md:flex absolute top-0 -left-16 md:-left-24 w-16 md:w-24 h-full items-center justify-center pointer-events-none">
             <h2
               className="transform -rotate-90 whitespace-nowrap text-4xl md:text-5xl 
-                         font-light tracking-widest uppercase 
-                         text-black/80 dark:text-white/80"
+                         font-light tracking-widest uppercase text-[var(--foreground)]"
             >
               Liên Hệ
             </h2>
@@ -66,7 +65,7 @@ export default function ContactSection() {
 
           {/* 2. THÊM MỚI: TIÊU ĐỀ NGANG (Chỉ hiện trên di động) */}
           <div className="md:hidden text-center mb-12">
-            <h2 className="text-4xl font-light tracking-tighter">
+            <h2 className="text-4xl font-light tracking-tighter text-[var(--foreground)]">
               Liên Hệ
             </h2>
           </div>
@@ -76,7 +75,7 @@ export default function ContactSection() {
             
             {/* CỘT 1: FORM */}
             <div>
-              <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+              <p className="text-lg text-[var(--foreground)] mb-6">
                 Để lại lời nhắn cho chúng tôi bằng cách điền vào biểu mẫu bên dưới:
               </p>
               {/* ... (phần form giữ nguyên) ... */}
@@ -90,7 +89,7 @@ export default function ContactSection() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium mb-1"
+                    className="block border-[var(--foreground)]/60 focus:border-[var(--foreground)] text-sm font-medium mb-1 text-[var(--foreground)]"
                   >
                     Email của bạn
                   </label>
@@ -100,15 +99,15 @@ export default function ContactSection() {
                     name="email"
                     required
                     className="block w-full p-3 bg-transparent 
-                               border border-black/30 dark:border-white/30
-                               focus:ring-0 focus:border-black dark:focus:border-white
-                               transition-colors"
+                               border border-[var(--foreground)]/60
+                               focus:ring-0 focus:border-[var(--foreground)] 
+                               transition-colors text-[var(--foreground)]"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="message"
-                    className="block text-sm font-medium mb-1"
+                    className="block text-sm font-medium mb-1 text-[var(--foreground)]"
                   >
                     Lời nhắn
                   </label>
@@ -117,9 +116,9 @@ export default function ContactSection() {
                     name="message"
                     rows={5}
                     required
-                    className="block w-full p-3 bg-transparent 
-                               border border-black/30 dark:border-white/30
-                               focus:ring-0 focus:border-black dark:focus:border-white
+                    className="block w-full p-3 bg-transparent text-[var(--foreground)]
+                               border border-[var(--foreground)]/60
+                               focus:ring-0 focus:border-[var(--foreground)] 
                                transition-colors"
                   ></textarea>
                 </div>
@@ -127,11 +126,11 @@ export default function ContactSection() {
                   <button
                     type="submit"
                     className="py-3 px-8 bg-transparent 
-                               border border-black dark:border-white 
-                               text-black dark:text-white 
-                               hover:bg-black hover:text-[#ebebeb] 
+                               border border-[var(--foreground)]/60
+                               text-[var(--foreground)] 
+                               hover:bg-black 
                                dark:hover:bg-white dark:hover:text-gray-950
-                               transition-colors duration-300"
+                               transition-colors duration-300 cursor-pointer font-bold"
                   >
                     Gửi Lời Nhắn
                   </button>
@@ -141,17 +140,17 @@ export default function ContactSection() {
 
             {/* CỘT 2: EMAIL COPY */}
             <div>
-              <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
+              <p className="text-lg mb-6 text-[var(--foreground)]">
                 Hoặc nhấn để sao chép email:
               </p>
               {/* ... (phần nút copy giữ nguyên) ... */}
               <button
                 onClick={handleCopy}
                 className="w-full text-left p-4 bg-transparent 
-                           border border-black/30 dark:border-white/30
+                           border border-[var(--foreground)]/60
                            text-lg md:text-xl font-mono 
-                           hover:border-black dark:hover:border-white
-                           transition-all duration-300 cursor-pointer"
+                           hover:border-[var(--foreground)]
+                           transition-all duration-300 cursor-pointer text-[var(--foreground)]"
               >
                 {copyText}
               </button>
