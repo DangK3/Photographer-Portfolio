@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
    <html lang="vi" suppressHydrationWarning>
      <body className="bg-[var(--background)] 
-                      text-[var(--foreground)] border-b 
+                      text-[var(--foreground)]
                        antialiased flex flex-col min-h-screen
                        transition-colors duration-300">
         <Providers>
