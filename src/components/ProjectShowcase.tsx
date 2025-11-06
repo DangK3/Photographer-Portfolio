@@ -4,18 +4,16 @@
 import Image from 'next/image';
 import Container from './Container';
 import { useEffect, useRef, useState } from 'react';
-
+import Link from 'next/link';
 // Import ảnh (giữ nguyên)
 import projectImg1 from '../assets/section_02/Portfolio_06.png';
 import projectImg2 from '../assets/section_02/Portfolio_05.png';
 import projectImg3 from '../assets/section_02/Portfolio_04.png';
 
-// Dữ liệu (giữ nguyên)
 const featuredProjects = [
-  // ... (dữ liệu của bạn giữ nguyên)
   {
     id: 1,
-    category: 'Commercial / Event',
+    category: 'Thương mại',
     title: "Khoảnh khắc 'Playful' tại Sự kiện Dior",
     description:
       'Nắm bắt tinh thần trẻ trung, phá cách tại sự kiện độc quyền của Dior. Bức ảnh này là sự giao thoa giữa nét thanh lịch cổ điển của thương hiệu và một chút nổi loạn đương đại, thể hiện qua hình ảnh kẹo cao su.',
@@ -25,12 +23,12 @@ const featuredProjects = [
       { label: 'Year', value: '2024' },
     ],
     image: projectImg1,
-    link: '#',
+    link: '/projects/khoanh-khac-playful-dior',
     align: 'left',
   },
   {
     id: 2,
-    category: 'Fashion Editorial',
+    category: 'Thời trang',
     title: "Hơi thở 'Golden Hour' cho Tạp chí L'Officiel",
     description:
       'Một bộ ảnh editorial khám phá sự kết nối giữa con người và thiên nhiên. Chúng tôi sử dụng ánh sáng vàng óng của buổi chiều tà để tôn lên sự mềm mại của chất liệu vải và trạng thái thư thái, an yên tuyệt đối.',
@@ -40,12 +38,12 @@ const featuredProjects = [
       { label: 'Location', value: 'Đồng cỏ lau, Đà Lạt' },
     ],
     image: projectImg2,
-    link: '#',
+    link: '/projects/hoi-tho-golden-hour',
     align: 'right',
   },
   {
     id: 3,
-    category: 'Personal Project',
+    category: 'Cá nhân',
     title: "Dự án cá nhân: 'Ngọn lửa giữa Tuyết'",
     description:
       'Dự án cá nhân này khám phá sự tương phản giữa cái lạnh buốt của ngoại cảnh và hơi ấm nội tâm. Ngọn lửa tượng trưng cho hy vọng và sức sống mỏng manh trong một khung cảnh cô đơn, rộng lớn và tĩnh lặng.',
@@ -55,7 +53,7 @@ const featuredProjects = [
       { label: 'Location', value: 'Hokkaido, Japan' },
     ],
     image: projectImg3,
-    link: '#',
+    link: '/projects/ngon-lua-giua-tuyet',
     align: 'left',
   },
 ];
@@ -98,7 +96,6 @@ function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
                   ${isVisible ? 'opacity-100' : 'opacity-0'}
                 `}
     >
-      {/* Cột Hình ảnh (Giữ nguyên) */}
       <div
         className={`w-full h-96 md:h-[500px] relative overflow-hidden rounded-lg shadow-lg
                     ${isImageLeft ? 'md:order-1' : 'md:order-2'}
@@ -122,7 +119,6 @@ function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
         />
       </div>
 
-      {/* Cột Văn bản */}
       <div
         className={`flex flex-col justify-center
                     ${isImageLeft ? 'md:order-2' : 'md:order-1'}
@@ -136,24 +132,18 @@ function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
                     }
                   `}
       >
-        {/* SỬA 1: Dùng biến CSS cho văn bản phụ */}
         <span className="text-sm uppercase tracking-widest text-[var(--glow-color)]">
           {project.category}
         </span>
 
-        {/* SỬA 2: Dùng biến CSS cho tiêu đề chính */}
         <h3 className="text-2xl md:text-3xl font-light mt-2 text-[var(--foreground)]">
           {project.title}
         </h3>
 
-        {/* SỬA 3: Dùng biến CSS cho mô tả (giảm độ đậm) */}
-        {/* Chúng ta sẽ dùng glow-color để nó mờ hơn foreground một chút */}
         <p className="mt-4 text-[var(--glow-color)]">
           {project.description}
         </p>
         
-        {/* Thông tin Credits */}
-        {/* SỬA 4: Dùng biến CSS cho credits (văn bản phụ) */}
         <ul className="mt-5 space-y-2 text-sm text-[var(--glow-color)] border-l border-gray-200 dark:border-gray-700 pl-4">
           {project.credits.map((credit) => (
             <li key={credit.label}>
@@ -162,9 +152,7 @@ function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
           ))}
         </ul>
 
-        {/* Nút kêu gọi hành động */}
-        {/* SỬA 5: Dùng biến CSS cho link */}
-        <a
+        <Link
           href={project.link}
           className="mt-6 inline-block font-medium text-[var(--foreground)] group"
         >
@@ -172,7 +160,7 @@ function ProjectItem({ project }: { project: (typeof featuredProjects)[0] }) {
           <span className="inline-block transition-transform duration-300 group-hover:translate-x-2">
             &rarr;
           </span>
-        </a>
+        </Link>
       </div>
     </div>
   );

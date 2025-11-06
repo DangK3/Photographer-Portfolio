@@ -1,8 +1,9 @@
 // src/app/gioi-thieu/page.tsx
-
 import type { Metadata } from 'next';
 import AboutMilestonesSection from '@/components/AboutMilestonesSection';
 import AboutPhilosophySection from '@/components/AboutPhilosophySection';
+import AboutBtsSection from '@/components/BtsSection';
+import AboutContactSection from '@/components/ContactSection';
 
 // 1. Thêm Metadata (SEO) cho trang Giới Thiệu
 export const metadata: Metadata = {
@@ -24,6 +25,10 @@ export default function GioiThieuPage() {
       <AboutMilestonesSection />
 
       <AboutPhilosophySection />
+
+      <AboutBtsSection />
+
+      <AboutContactSection />
     </main>
   );
 }

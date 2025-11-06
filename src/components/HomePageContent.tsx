@@ -1,6 +1,6 @@
 // src/components/HomePageContent.tsx
 
-'use client'; // Bắt buộc, vì chúng ta dùng dynamic import và các component con đều là 'use client'
+'use client';
 
 import dynamic from 'next/dynamic';
 
@@ -25,10 +25,6 @@ const DynamicProjectShowcase = dynamic(
   { ssr: false, loading: () => <LoadingSpinner /> }
 );
 
-const DynamicBtsSection = dynamic(
-  () => import('@/components/BtsSection'),
-  { ssr: false, loading: () => <LoadingSpinner /> }
-);
 
 const DynamicContactSection = dynamic(
   () => import('@/components/ContactSection'),
@@ -43,20 +39,19 @@ export default function HomePageContent() {
       <HeroSection />
 
       {/* Section 02 (Tải lười) */}
-      <section id="portfolio" className="py-16 md:py-24">
+      <section id="portfolio" className="md:pt-24">
         <DynamicPortfolioSection />
       </section>
 
       {/* Section 03 (Tải lười) */}
-      <section id="showcase" className="py-16 md:py-24">
+      <section id="showcase" className="md:pt-24">
         <DynamicProjectShowcase />
       </section>
 
       {/* Section 04 (Tải lười) */}
-      <DynamicBtsSection />
-
-      {/* Section 05 (Tải lười) */}
-      <DynamicContactSection />
+      <section id="contact">
+        <DynamicContactSection />
+      </section>
     </main>
   );
 }

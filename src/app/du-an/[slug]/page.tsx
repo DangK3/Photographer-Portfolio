@@ -1,6 +1,5 @@
-// src/app/projects/[slug]/page.tsx (SỬA LỖI TRIỆT ĐỂ)
-
-import { Metadata, ResolvingMetadata } from 'next';
+// src/app/projects/[slug]/page.tsx
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import projects from '../../../data/project';
 import ProjectClientPage from './ProjectClientPage';
@@ -38,9 +37,7 @@ const getProjectData = cache(async (slug: string) => {
 
 // 2. SỬA HÀM METADATA
 export async function generateMetadata(
-  { params, searchParams }: Props, // Dùng Props
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+  { params }: Props): Promise<Metadata> {
   
   // ⛔ BẠN PHẢI XÓA DÒNG "await params" Ở ĐÂY ⛔
   // const awaitedParams = await params; // <--- XÓA DÒNG NÀY
@@ -82,7 +79,7 @@ export async function generateMetadata(
 }
 
 // 4. SỬA COMPONENT TRANG
-export default async function ProjectDetailPage({ params, searchParams }: Props) { // Dùng Props
+export default async function ProjectDetailPage({ params }: Props) { // Dùng Props
   
   // ⛔ BẠN PHẢI XÓA DÒNG "await params" Ở ĐÂY ⛔
   // const awaitedParams = await params; // <--- XÓA DÒNG NÀY

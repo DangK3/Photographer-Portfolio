@@ -50,7 +50,7 @@ const Scene: React.FC<SceneProps> = ({ project, onVisible, isActive }) => {
             </span>
             <h3 className={styles.sceneTitle}>{project.title}</h3>
             <p className={styles.sceneDescription}>{project.description}</p>
-            <a href={`/projects/${project.slug}`} className={styles.sceneLink}>
+            <a href={`/du-an/${project.slug}`} className={styles.sceneLink}>
               Xem chi tiết dự án &rarr;
             </a>
           </div>

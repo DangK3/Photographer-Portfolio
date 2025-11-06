@@ -29,7 +29,7 @@ export default function ContactSection() {
   return (
 <section
       id="contact"
-      className="relative pt-12 pb-6 overflow-hidden 
+      className="relative py-14 overflow-hidden 
                  bg-linear-to-b to-[var(--to-linear)] from-[var(--from-linear)] 
                  dark:text-white text-black" 
       style={{ minHeight: 0, fontSize: 'initial' }}
@@ -64,7 +64,7 @@ export default function ContactSection() {
           </div>
 
           {/* 2. THÊM MỚI: TIÊU ĐỀ NGANG (Chỉ hiện trên di động) */}
-          <div className="md:hidden text-center mb-12">
+          <div className="md:hidden mb-12">
             <h2 className="text-4xl font-light tracking-tighter text-[var(--foreground)]">
               Liên Hệ
             </h2>

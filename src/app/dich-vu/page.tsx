@@ -59,15 +59,7 @@ useEffect(() => {
         }
       },
       {
-        /*
-          Giải thích:
-          - rootMargin: "-20% 0px -80% 0px"
-            Tạo ra một "vùng kích hoạt" (trigger zone) nằm ngang.
-            Bắt đầu từ 20% (tính từ trên xuống)
-            Kết thúc ở 80% (tính từ trên xuống)
-            -> Nó tạo ra một "vùng đệm" ở giữa màn hình.
-        */
-        rootMargin: '-40% 0px -70% 0px',
+        rootMargin: '-50% 0px 0% 0px',
 
         /*
           - threshold: 0

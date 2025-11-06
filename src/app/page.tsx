@@ -6,7 +6,7 @@ import HomePageContent from '@/components/HomePageContent'; // 1. Import compone
 // 2. Export đối tượng Metadata (SEO)
 //    (Bạn hãy thay đổi nội dung bên dưới cho phù hợp)
 export const metadata: Metadata = {
-  title: 'Oni Studio | Nhiếp ảnh Thương mại & Thời trang Chuyên nghiệp',
+  title: 'Oni Studio',
   description: 'Oni Studio - Chuyên cung cấp dịch vụ nhiếp ảnh thương mại, thời trang, và cá nhân chuyên nghiệp. Khám phá portfolio và liên hệ để hợp tác.',
   
   // Từ khóa (Tùy chọn)
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
   // Open Graph (cho Facebook, LinkedIn...)
   openGraph: {
-    title: 'Oni Studio | Nhiếp ảnh Thương mại & Thời trang Chuyên nghiệp',
+    title: 'Oni Studio',
     description: 'Khám phá portfolio ảnh thương mại, thời trang, và cá nhân từ Oni Studio.',
     url: 'https://www.your-domain.com', // <-- THAY BẰNG DOMAIN CỦA BẠN
     siteName: 'Oni Studio',

@@ -4,9 +4,6 @@
 @import "yet-another-react-lightbox/plugins/thumbnails.css";
 /* src/app/globals.css */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 :root {
   /* Chuyển từ hex sang các giá trị RGB (không có 'rgb()' ) */
   --background: #f4f4f4;
