@@ -1,22 +1,22 @@
-// src/app/projects/[slug]/page.tsx
+// src/app/du-an/[slug]/page.tsx
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import projects from '../../../data/project';
+import { allProjects as projects } from '../../../data/projects-master-data'; 
 import ProjectClientPage from './ProjectClientPage';
 import { cache } from 'react';
 
-// 1. DÙNG TYPE 'Props' CHUẨN
 type Props = {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ slug: string }>;
 };
 
+// Hàm này BÂY GIỜ sẽ đọc từ file "master" (allProjects)
 export async function generateStaticParams() {
   return projects.map((project) => ({
     slug: project.slug,
   }));
 }
 
+// Hàm này BÂY GIỜ sẽ đọc từ file "master" (allProjects)
 const getProjectData = cache(async (slug: string) => {
   const projectIndex = projects.findIndex((p) => p.slug === slug);
   
@@ -35,42 +35,34 @@ const getProjectData = cache(async (slug: string) => {
   };
 });
 
-// 2. SỬA HÀM METADATA
+// Hàm này BÂY GIỜ sẽ đọc từ file "master"
 export async function generateMetadata(
-  { params }: Props): Promise<Metadata> {
+  { params }: Props
+): Promise<Metadata> {
+  // Bắt buộc phải 'await params' trước
+  const { slug } = await params; 
   
-  // ⛔ BẠN PHẢI XÓA DÒNG "await params" Ở ĐÂY ⛔
-  // const awaitedParams = await params; // <--- XÓA DÒNG NÀY
-  const data = await getProjectData(params.slug); // Dùng trực tiếp params.slug
+  const data = await getProjectData(slug); 
 
   if (!data) {
     return { title: 'Project Not Found' };
   }
 
-  // Sửa lỗi StaticImageData
-  let ogUrl: string;
-  let ogWidth: number = 1200;
-  let ogHeight: number = 630;
-
-  if (typeof data.project.imageUrl === 'string') {
-    ogUrl = data.project.imageUrl;
-  } else {
-    ogUrl = data.project.imageUrl.src;
-    ogWidth = data.project.imageUrl.width;
-    ogHeight = data.project.imageUrl.height;
-  }
+  const ogUrl = typeof data.project.src === 'string' 
+    ? data.project.src 
+    : data.project.src.src;
   
   return {
     title: `${data.project.title} - Oni Studio`,
-    description: data.project.description.substring(0, 150),
+    description: data.project.description?.substring(0, 150),
     openGraph: {
       title: `${data.project.title} - Oni Studio`,
-      description: data.project.description.substring(0, 150),
+      description: data.project.description?.substring(0, 150),
       images: [
         {
           url: ogUrl,
-          width: ogWidth,
-          height: ogHeight,
+          width: data.project.src.width,
+          height: data.project.src.height,
           alt: data.project.title,
         },
       ],
@@ -78,12 +70,12 @@ export async function generateMetadata(
   };
 }
 
-// 4. SỬA COMPONENT TRANG
-export default async function ProjectDetailPage({ params }: Props) { // Dùng Props
-  
-  // ⛔ BẠN PHẢI XÓA DÒNG "await params" Ở ĐÂY ⛔
-  // const awaitedParams = await params; // <--- XÓA DÒNG NÀY
-  const data = await getProjectData(params.slug); // Dùng trực tiếp params.slug
+// Component Trang (Đã sửa)
+export default async function ProjectDetailPage({ params }: Props) {
+  // Bắt buộc phải 'await params' trước
+  const { slug } = await params;
+
+  const data = await getProjectData(slug);
 
   if (!data) {
     notFound();

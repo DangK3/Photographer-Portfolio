@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Container from './Container'; // Tận dụng Container bạn đã có
-import projects from '../data/project'; // Import dữ liệu Section 04
+import projects from '../data/bts'; // Import dữ liệu Section 04
 import styles from '../app/styles/BtsSection.module.css'; // File CSS module mới
 
 // Component con cho từng "cảnh" text
@@ -50,9 +50,6 @@ const Scene: React.FC<SceneProps> = ({ project, onVisible, isActive }) => {
             </span>
             <h3 className={styles.sceneTitle}>{project.title}</h3>
             <p className={styles.sceneDescription}>{project.description}</p>
-            <a href={`/du-an/${project.slug}`} className={styles.sceneLink}>
-              Xem chi tiết dự án &rarr;
-            </a>
           </div>
         </Container>
       </div>
@@ -69,7 +66,7 @@ export default function BtsSection() {
       <div className={styles.stickyImageWrapper}>
         {btsProjects.map((project, index) => (
           <div
-            key={project.slug}
+            key={project.title}
             className={`${styles.imageContainer} ${
               activeIndex === index ? styles.imageActive : ''
             }`}
@@ -103,7 +100,7 @@ export default function BtsSection() {
       <div className={styles.textColumn}>
         {btsProjects.map((project, index) => (
           <Scene
-            key={project.slug}
+           key={project.title}
             project={project}
             onVisible={() => setActiveIndex(index)}
             isActive={activeIndex === index}

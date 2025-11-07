@@ -20,7 +20,7 @@ export default function NotFound() {
       <div className="flex flex-col items-center justify-center text-center py-24 md:py-32 min-h-[calc(100vh_-_250px)]">
         
         {/* Mã lỗi 404 */}
-        <span className="text-7xl md:text-9xl font-light tracking-tighter text-black/80 dark:text-white/80">
+        <span className="text-7xl md:text-9xl font-light tracking-tighter text-[var(--foreground)]">
           404
         </span>
         
@@ -30,7 +30,7 @@ export default function NotFound() {
         </h1>
         
         {/* Mô tả */}
-        <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-lg text-[var(--sub-text)]">
           Rất tiếc, chúng tôi không thể tìm thấy trang bạn yêu cầu.
         </p>
 
@@ -41,10 +41,9 @@ export default function NotFound() {
         <Link
           href="/"
           className="mt-10 py-3 px-8 bg-transparent 
-                     border border-black dark:border-white 
-                     text-black dark:text-white 
-                     hover:bg-black hover:text-[#ebebeb] 
-                     dark:hover:bg-white dark:hover:text-gray-950
+                     border border-[var(--foreground)] 
+                     text-[var(--foreground)] hover:text-[var(--background)]
+                     hover:bg-[var(--foreground)]
                      transition-colors duration-300 cursor-pointer"
         >
           Quay về Trang chủ

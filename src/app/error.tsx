@@ -24,7 +24,7 @@ export default function Error({
       <div className="flex flex-col items-center justify-center text-center py-24 md:py-32 min-h-[calc(100vh_-_250px)]">
         
         {/* Mã lỗi */}
-        <span className="text-7xl md:text-9xl font-light tracking-tighter text-black/80 dark:text-white/80">
+        <span className="text-7xl md:text-9xl font-light tracking-tighter text-[var(--foreground)]">
           Lỗi
         </span>
         
@@ -34,7 +34,7 @@ export default function Error({
         </h1>
         
         {/* Mô tả */}
-        <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-lg text-[var(--sub-text)]">
           Rất tiếc, đã có sự cố ngoài ý muốn. Bạn có thể thử lại.
         </p>
 
@@ -47,10 +47,9 @@ export default function Error({
           <button
             onClick={() => reset()}
             className="py-3 px-8 bg-transparent 
-                       border border-black dark:border-white 
-                       text-black dark:text-white 
-                       hover:bg-black hover:text-[#ebebeb] 
-                       dark:hover:bg-black dark:hover:text-white
+                       border border-[var(--foreground)] 
+                       text-[var(--foreground)] 
+                       hover:bg-[var(--foreground)] hover:text-[var(--background)] 
                        transition-colors duration-300 cursor-pointer"
           >
             Thử Lại
@@ -60,10 +59,9 @@ export default function Error({
           <Link
             href="/"
             className="py-3 px-8 bg-transparent 
-                       border border-black dark:border-white 
-                       text-black dark:text-white 
-                       hover:bg-black hover:text-[#ebebeb] 
-                       dark:hover:bg-white dark:hover:text-gray-950
+                       border border-[var(--foreground)] 
+                       text-[var(--foreground)] 
+                       hover:bg-[var(--foreground)] hover:text-[var(--background)] 
                        transition-colors duration-300 cursor-pointer"
           >
             Quay về Trang chủ

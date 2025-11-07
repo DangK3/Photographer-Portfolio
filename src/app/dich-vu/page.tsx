@@ -375,13 +375,13 @@ export default function DichVuPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               {strobes.map((item) => (
                 <div key={item.name} className="border border-[var(--foreground)]/30 rounded-lg overflow-hidden bg-[var(--background)] flex flex-col">
-                  <div className="relative w-full h-40">
+                  <div className="relative w-full h-40 bg-white">
                     <Image
                       src={item.img}
                       alt={item.name}
                       fill
                       sizes="(max-width: 768px) 50vw, 25vw"
-                      className="object-cover"
+                      className="object-contain p-2"
                       placeholder="blur"
                     />
                   </div>
@@ -400,13 +400,13 @@ export default function DichVuPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
               {modifiers.map((item) => (
                 <div key={item.name} className="border border-[var(--foreground)]/30 rounded-lg overflow-hidden bg-[var(--background)] flex flex-col">
-                  <div className="relative w-full h-40">
+                  <div className="relative w-full h-40 bg-white">
                     <Image
                       src={item.img}
                       alt={item.name}
                       fill
                       sizes="(max-width: 768px) 50vw, 25vw"
-                      className="object-cover"
+                      className="object-contain p-2"
                       placeholder="blur"
                     />
                   </div>

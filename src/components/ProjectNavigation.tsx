@@ -1,11 +1,11 @@
 // src/components/ProjectNavigation.tsx
 import React from 'react';
 import Link from 'next/link';
-import styles from '../app/styles/ProjectDetail.module.css'; // Giả sử file CSS ở src/styles/
+import styles from '../app/styles/ProjectArticle.module.css'; 
 
 interface ProjectNavigationProps {
-  prevProjectSlug: string | null; // Có thể là string hoặc null
-  nextProjectSlug: string | null; // Có thể là string hoặc null
+  prevProjectSlug: string | null;
+  nextProjectSlug: string | null;
 }
 
 const ProjectNavigation: React.FC<ProjectNavigationProps> = ({ prevProjectSlug, nextProjectSlug }) => {
@@ -13,22 +13,28 @@ const ProjectNavigation: React.FC<ProjectNavigationProps> = ({ prevProjectSlug, 
     <div className={styles.projectNavigation}>
       {/* Nút Previous */}
       {prevProjectSlug ? (
-        <Link href={`/projects/${prevProjectSlug}`} className={styles.navLink}>
-          &larr; Previous Project
+        // Trường hợp 1: Có dự án trước -> Link bình thường
+        <Link href={`/du-an/${prevProjectSlug}`} className={styles.navLink}>
+          &larr; Dự án trước
         </Link>
       ) : (
-        // Hiển thị nút mờ đi nếu không có dự án trước đó
-        <span className={`${styles.navLink} ${styles.disabled}`}>&larr; Previous Project</span>
+        // Trường hợp 2: Đã ở đầu -> Link về Trang chủ
+        <Link href="/" className={styles.navLink} title="Về trang chủ">
+          &larr; Trang chủ
+        </Link>
       )}
 
       {/* Nút Next */}
       {nextProjectSlug ? (
-        <Link href={`/projects/${nextProjectSlug}`} className={styles.navLink}>
-          Next Project &rarr;
+        // Trường hợp 1: Có dự án tiếp theo -> Link bình thường
+        <Link href={`/du-an/${nextProjectSlug}`} className={styles.navLink}>
+          Dự án tiếp theo &rarr;
         </Link>
       ) : (
-        // Hiển thị nút mờ đi nếu không có dự án tiếp theo
-        <span className={`${styles.navLink} ${styles.disabled}`}>Next Project &rarr;</span>
+        // Trường hợp 2: Đã ở cuối -> Link về Trang chủ
+        <Link href="/" className={styles.navLink} title="Về trang chủ">
+          Trang chủ &rarr;
+        </Link>
       )}
     </div>
   );
