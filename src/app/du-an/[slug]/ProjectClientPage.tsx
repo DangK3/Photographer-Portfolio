@@ -1,6 +1,6 @@
 // src/app/du-an/[slug]/ProjectClientPage.tsx
 'use client'; 
-
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image'; // Import Image
 import { useInView } from 'react-intersection-observer';
 import { Project } from '../../../data/projects-master-data'; 
@@ -37,11 +37,32 @@ export default function ProjectClientPage({
 }: ProjectClientPageProps) {
 
   const [navRef, navInView] = useInView({ threshold: 0.1, triggerOnce: true });
+  const [currentTime, setCurrentTime] = useState<string>('');
 
-  // Giải nén 'credits'
-  const client = project.credits?.find(c => c.label === 'Client' || c.label === 'Magazine' || c.label === 'Concept')?.value;
-  const year = project.credits?.find(c => c.label === 'Year')?.value;
-  const location = project.credits?.find(c => c.label === 'Location')?.value;
+  // Hook để cập nhật thời gian mỗi giây
+  useEffect(() => {
+    // Hàm lấy thời gian hiện tại theo múi giờ của location (tạm thời dùng múi giờ máy khách hoặc mặc định)
+    // Để chính xác hơn, bạn cần biết múi giờ của từng location.
+    // Ví dụ đơn giản: hiển thị giờ địa phương của người dùng
+    const updateTime = () => {
+      const now = new Date();
+      // Định dạng: HH:mm:ss DD/MM/YYYY
+      const formattedTime = now.toLocaleString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+      setCurrentTime(formattedTime);
+    };
+
+    updateTime(); // Gọi ngay lập tức
+    const timer = setInterval(updateTime, 1000); // Cập nhật mỗi giây
+
+    return () => clearInterval(timer); // Dọn dẹp khi component unmount
+  }, []);
 
   return (
     // *** THAY ĐỔI: Bố cục layout "Tạp chí" (max-w-3xl) ***
@@ -52,12 +73,13 @@ export default function ProjectClientPage({
         {project.title}
       </h1>
 
-      {/* 2. THÔNG TIN (Credits) */}
       <div className={styles.creditsBar}>
         <ul className={styles.creditsList}>
-          {client && <li><strong>{project.credits?.find(c => c.label.includes('Client'))?.label || 'Client'}:</strong> {client}</li>}
-          {year && <li><strong>Year:</strong> {year}</li>}
-          {location && <li><strong>Location:</strong> {location}</li>}
+          {location && (
+            <li>
+              {currentTime && <span className="opacity-70 ml-2">({currentTime})</span>}
+            </li>
+          )}
         </ul>
       </div>
 
