@@ -1,29 +1,46 @@
 // src/app/du-an/[slug]/ProjectClientPage.tsx
-'use client'; 
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image'; // Import Image
-import { useInView } from 'react-intersection-observer';
-import { Project } from '../../../data/projects-master-data'; 
-// *** XÓA: ProjectDetailImage và ProjectInfo ***
-import ProjectNavigation from '@/components/ProjectNavigation';
-// *** THAY ĐỔI: Dùng CSS Module mới ***
-import styles from '../../styles/ProjectArticle.module.css'; // Chúng ta sẽ dùng file CSS mới
+'use client';
 
-// Component con để render ảnh (giống trang Gucci)
-const ArticleImage: React.FC<{ image: Project['src'] }> = ({ image }) => (
-  // Dùng w-full (trên mobile) và md:w-[48.75%] (giống Gucci)
-  <div className="w-full md:w-[48.75%] flex-shrink-0">
+import React, { useState, useMemo, useCallback } from 'react';
+import Image, { StaticImageData } from 'next/image';
+import { useInView } from 'react-intersection-observer';
+import { Project } from '../../../data/projects-master-data';
+import ProjectNavigation from '@/components/ProjectNavigation';
+import styles from '../../styles/ProjectArticle.module.css';
+
+// --- LIGHTBOX IMPORTS ---
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import Captions from 'yet-another-react-lightbox/plugins/captions';
+import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
+import 'yet-another-react-lightbox/styles.css';
+import 'yet-another-react-lightbox/plugins/captions.css';
+import 'yet-another-react-lightbox/plugins/thumbnails.css';
+
+// --- 1. Component con render ảnh (Tối ưu với React.memo) ---
+interface ArticleImageProps {
+  image: StaticImageData;
+  onClick: () => void;
+}
+
+const ArticleImage = React.memo(({ image, onClick }: ArticleImageProps) => (
+  <div
+    className="w-full md:w-[48.75%] flex-shrink-0 cursor-pointer overflow-hidden rounded-sm shadow-xs transition-all duration-300 hover:shadow-md"
+    onClick={onClick}
+  >
     <Image
       src={image}
-      alt={image.src.toString()} // Dùng src làm alt tạm
-      width={image.width}
-      height={image.height}
-      className="max-w-full h-auto rounded-lg shadow-md"
-      quality={85}
+      alt="Project detail image" // Alt text tốt hơn
+      placeholder="blur" // Thêm hiệu ứng blur khi load
+      className="max-w-full h-auto transition-opacity duration-300 hover:opacity-95"
+      quality={90}
+      sizes="(max-width: 768px) 100vw, 50vw"
     />
   </div>
-);
+));
+ArticleImage.displayName = 'ArticleImage';
 
+// --- 2. Component chính ---
 interface ProjectClientPageProps {
   project: Project;
   prevProjectSlug: string | null;
@@ -35,131 +52,144 @@ export default function ProjectClientPage({
   prevProjectSlug,
   nextProjectSlug,
 }: ProjectClientPageProps) {
-
   const [navRef, navInView] = useInView({ threshold: 0.1, triggerOnce: true });
-  const [currentTime, setCurrentTime] = useState<string>('');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Hook để cập nhật thời gian mỗi giây
-  useEffect(() => {
-    // Hàm lấy thời gian hiện tại theo múi giờ của location (tạm thời dùng múi giờ máy khách hoặc mặc định)
-    // Để chính xác hơn, bạn cần biết múi giờ của từng location.
-    // Ví dụ đơn giản: hiển thị giờ địa phương của người dùng
-    const updateTime = () => {
-      const now = new Date();
-      // Định dạng: HH:mm:ss DD/MM/YYYY
-      const formattedTime = now.toLocaleString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
-      setCurrentTime(formattedTime);
-    };
+  // Lấy thông tin Location (nếu có)
+  const locationCredit = useMemo(
+    () => project.credits?.find((c) => c.label === 'Location'),
+    [project.credits]
+  );
 
-    updateTime(); // Gọi ngay lập tức
-    const timer = setInterval(updateTime, 1000); // Cập nhật mỗi giây
+  // Tạo danh sách tất cả ảnh cho Lightbox
+  const allProjectImages = useMemo(() => {
+    return (
+      project.articleBody
+        ?.filter((block) => block.type === 'imageRow')
+        .flatMap((block) => (block as { images: StaticImageData[] }).images) || []
+    );
+  }, [project.articleBody]);
 
-    return () => clearInterval(timer); // Dọn dẹp khi component unmount
-  }, []);
+  // Tạo slides cho Lightbox
+  const lightboxSlides = useMemo(
+    () => allProjectImages.map((img) => ({ src: img.src })),
+    [allProjectImages]
+  );
+
+  // Hàm xử lý click mở Lightbox (dùng useCallback để tối ưu)
+  const handleImageClick = useCallback(
+    (clickedImage: StaticImageData) => {
+      // Tìm index chính xác của ảnh vừa click trong mảng tổng
+      const index = allProjectImages.findIndex((img) => img.src === clickedImage.src);
+      if (index !== -1) {
+        setLightboxIndex(index);
+        setLightboxOpen(true);
+      }
+    },
+    [allProjectImages]
+  );
 
   return (
-    // *** THAY ĐỔI: Bố cục layout "Tạp chí" (max-w-3xl) ***
-    <article className={styles.articleContainer}>
-      
-      {/* 1. TIÊU ĐỀ */}
-      <h1 className={styles.articleTitle}>
-        {project.title}
-      </h1>
-
-      <div className={styles.creditsBar}>
-        <ul className={styles.creditsList}>
-          {location && (
+    <>
+      <article className={styles.articleContainer}>
+        {/* HEADER */}
+        <h1 className={styles.articleTitle}>{project.title}</h1>
+        <div className={styles.creditsBar}>
+         <ul className={styles.creditsList}>
+          {locationCredit && (
             <li>
-              {currentTime && <span className="opacity-70 ml-2">({currentTime})</span>}
+              <strong className="mr-1">Location:</strong> {locationCredit.value}
             </li>
           )}
         </ul>
-      </div>
-
-      {/* 3. ĐOẠN MỞ ĐẦU (Intro) */}
-      <div className={styles.textWrap}>
-        <p>{project.description}</p>
-      </div>
-
-      {/* 4. NỘI DUNG "DÀI" (Render từ 'articleBody') */}
-      <div className="space-y-8 md:space-y-12">
-        {project.articleBody?.map((block, index) => {
-          
-          if (block.type === 'heading') {
-            return (
-              <div key={index} className={styles.highlightWrap}>
-                <h2>{block.content}</h2>
-              </div>
-            );
-          }
-          
-          if (block.type === 'paragraph') {
-            return (
-              <div key={index} className={styles.textWrap}>
-                <p>{block.content}</p>
-              </div>
-            );
-          }
-
-          if (block.type === 'imageRow') {
-            return (
-              <div key={index} className={styles.imageRow}>
-                {block.images.map((img, imgIndex) => (
-                  <ArticleImage key={imgIndex} image={img} />
-                ))}
-              </div>
-            );
-          }
-
-          
-          return null;
-        })}
-      </div>
-        {project.credits && project.credits.length > 0 && (
-        <div className="mt-16 md:mt-24 pt-8 border-t border-[var(--foreground)]/20">
-          <h3 className="text-xl md:text-2xl font-light mb-6 text-center text-[var(--foreground)]">
-            Credits
-          </h3>
-          {/* Container cho danh sách: Dùng Grid 2 cột trên Desktop để tiết kiệm diện tích */}
-          <ul className="grid grid-cols-1 gap-x-12 gap-y-3 max-w-4xl mx-auto">
-            {project.credits.map((credit, index) => (
-              <li key={index} className="flex items-baseline text-sm md:text-base">
-                {/* LABEL: Chiếm 40% chiều rộng, căn phải.
-                  Thêm 'pr-3' để tạo khoảng cách (gap) an toàn với phần giá trị.
-                */}
-                <strong className="w-[50%] text-right pr-3 font-semibold text-[var(--foreground)] opacity-80 shrink-0">
-                  {credit.label}
-                </strong>
-                
-                {/* VALUE: Chiếm 60% còn lại, căn trái.
-                */}
-                <span className="w-[50%] text-left text-[var(--foreground)] opacity-90">
-                  {credit.value}
-                </span>
-              </li>
-            ))}
-          </ul>
         </div>
-      )}
-      {/* 5. ĐIỀU HƯỚNG (Giữ nguyên) */}
-      <div
-        ref={navRef}
-        className={`mt-16 md:mt-24 ${
-          navInView ? styles.fade_in_visible : styles.fade_in_hidden
-        }`}
-      >
-        <ProjectNavigation
-          prevProjectSlug={prevProjectSlug}
-          nextProjectSlug={nextProjectSlug}
-        />
-      </div>
-    </article>
+
+        {/* INTRO */}
+        <div className={styles.textWrap}>
+          <p>{project.description}</p>
+        </div>
+
+        {/* ARTICLE BODY */}
+        <div className="space-y-8 md:space-y-12">
+          {project.articleBody?.map((block, index) => {
+            switch (block.type) {
+              case 'heading':
+                return (
+                  <div key={index} className={styles.highlightWrap}>
+                    <h2>{block.content}</h2>
+                  </div>
+                );
+              case 'paragraph':
+                return (
+                  <div key={index} className={styles.textWrap}>
+                    <p>{block.content}</p>
+                  </div>
+                );
+              case 'imageRow':
+                return (
+                  <div key={index} className={styles.imageRow}>
+                    {block.images.map((img, imgIndex) => (
+                      <ArticleImage
+                        key={`${index}-${imgIndex}`}
+                        image={img}
+                        // Truyền hàm xử lý click thay vì index cứng
+                        onClick={() => handleImageClick(img)}
+                      />
+                    ))}
+                  </div>
+                );
+              default:
+                return null;
+            }
+          })}
+        </div>
+
+        {/* FOOTER CREDITS */}
+        {project.credits && project.credits.length > 0 && (
+          <div className="mt-16 md:mt-24 pt-8 border-t border-[var(--foreground)]/20">
+            <h3 className="text-xl md:text-2xl font-light mb-6 text-center text-[var(--foreground)]">
+              Credits
+            </h3>
+            <ul className="grid grid-cols-1 gap-y-2 max-w-md mx-auto">
+              {project.credits.map((credit, index) => (
+                <li key={index} className="flex text-sm md:text-base">
+                  <span className="w-1/2 text-right pr-4 font-semibold opacity-70">
+                    {credit.label}
+                  </span>
+                  <span className="w-1/2 text-left opacity-90">{credit.value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* NAVIGATION */}
+        <div
+          ref={navRef}
+          className={`mt-16 md:mt-24 ${
+            navInView ? styles.fade_in_visible : styles.fade_in_hidden
+          }`}
+        >
+          <ProjectNavigation
+            prevProjectSlug={prevProjectSlug}
+            nextProjectSlug={nextProjectSlug}
+          />
+        </div>
+      </article>
+
+      {/* LIGHTBOX */}
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        index={lightboxIndex}
+        slides={lightboxSlides}
+        plugins={[Zoom, Thumbnails, Captions]}
+        animation={{ fade: 300, swipe: 250 }} // Thêm hiệu ứng swipe mượt mà
+        carousel={{ finite: false }} // Cho phép cuộn vô hạn
+        controller={{ closeOnBackdropClick: true }} // Đóng khi click ra ngoài
+        zoom={{ maxZoomPixelRatio: 3 }}
+      />
+    </>
   );
 }

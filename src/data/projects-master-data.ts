@@ -8,12 +8,21 @@ import img03 from '../assets/section_02/Portfolio_03.png';
 import img04 from '../assets/section_02/Portfolio_04.png';
 import img05 from '../assets/section_02/Portfolio_05.png';
 import img06 from '../assets/section_02/Portfolio_06.png';
+import Personal_01_thumnails from '../assets/personal/Personal_01_thumnails.webp';
 
 // (*** QUAN TRỌNG: Bạn cần import thêm ảnh cho gallery của từng dự án ***)
 // Ví dụ:
 // import dior_gallery_1 from '../assets/projects/dior/dior_01.jpg';
 // import dior_gallery_2 from '../assets/projects/dior/dior_02.jpg';
 // import hokkaido_gallery_1 from '../assets/projects/hokkaido/hokkaido_01.jpg';
+import Personal_01_02 from '../assets/personal/Personal_01_02.webp';
+import Personal_01_03 from '../assets/personal/Personal_01_03.webp';
+import Personal_01_04 from '../assets/personal/Personal_01_04.webp';
+import Personal_01_05 from '../assets/personal/Personal_01_05.webp';
+import Personal_01_06 from '../assets/personal/Personal_01_06.webp';
+import Personal_01_07 from '../assets/personal/Personal_01_07.webp';
+import Personal_01_08 from '../assets/personal/Personal_01_08.webp';
+import Personal_01_09 from '../assets/personal/Personal_01_09.webp';
 
 
 // 1. Định nghĩa kiểu cho nội dung bài viết
@@ -65,7 +74,7 @@ export const allProjects: Project[] = [
       { label: 'Set Designer', value: 'Harry Le, Long Tran' },
       { label: 'Accessories', value: 'Dat Duong' },
       { label: 'Support', value: 'Ngoc Ha' },
-      { label: 'Location', value: 'Hello Studios' },
+      { label: 'Location', value: 'Oni Studio' },
     ],
     articleBody: [
       {
@@ -119,7 +128,7 @@ export const allProjects: Project[] = [
       { label: 'Set Designer', value: 'Harry Le, Long Tran' },
       { label: 'Accessories', value: 'Dat Duong' },
       { label: 'Support', value: 'Ngoc Ha' },
-      { label: 'Location', value: 'Hello Studios' },
+      { label: 'Location', value: 'Oni Studio' },
     ],
     articleBody: [
       {
@@ -158,7 +167,7 @@ export const allProjects: Project[] = [
     category: 'Cá nhân',
     src: img03,
     colSpan: 'md:col-span-1',
-    rowSpan: 'md:row-span-1',
+    rowSpan: 'md:row-span-2',
     featured: false, // Không phải dự án tiêu biểu
     description: "Nhiếp ảnh chân dung không phải là ghi lại một khuôn mặt, mà là bắt giữ một thế giới nội tâm. Đây là một hành trình vào tĩnh lặng, nơi ánh sáng và bóng tối đối thoại trên bề mặt của cảm xúc, khám phá vẻ đẹp nằm ngay trong những điều không hoàn hảo.",
     credits: [
@@ -173,7 +182,7 @@ export const allProjects: Project[] = [
       { label: 'Set Designer', value: 'Harry Le, Long Tran' },
       { label: 'Accessories', value: 'Dat Duong' },
       { label: 'Support', value: 'Ngoc Ha' },
-      { label: 'Location', value: 'Hello Studios' },
+      { label: 'Location', value: 'Oni Studio' },
     ],
     articleBody: [
       {
@@ -203,7 +212,7 @@ export const allProjects: Project[] = [
     ]
   },
   // ----------------------------------------------------
-  // DỰ ÁN 4: HOKKAIDO (Từ Showcase)
+  // DỰ ÁN 4: HOKKAIDO 
   // ----------------------------------------------------
   {
     id: 4,
@@ -212,8 +221,8 @@ export const allProjects: Project[] = [
     category: 'Cá nhân',
     src: img04,
     colSpan: 'md:col-span-1',
-    rowSpan: 'md:row-span-1',
-    featured: true, // <-- Đánh dấu là dự án "tiêu biểu"
+    rowSpan: 'md:row-span-2',
+    featured: false, // <-- Đánh dấu là dự án "tiêu biểu"
     description: "Dự án cá nhân này khám phá sự tương phản giữa cái lạnh buốt của ngoại cảnh và hơi ấm nội tâm...",
     credits: [
       { label: 'Producer', value: 'Thanh Hang - Choo Production' },
@@ -227,7 +236,7 @@ export const allProjects: Project[] = [
       { label: 'Set Designer', value: 'Harry Le, Long Tran' },
       { label: 'Accessories', value: 'Dat Duong' },
       { label: 'Support', value: 'Ngoc Ha' },
-      { label: 'Location', value: 'Hello Studios' },
+      { label: 'Location', value: 'Oni Studio' },
     ],
     align: 'left',
     articleBody: [
@@ -258,7 +267,7 @@ export const allProjects: Project[] = [
     ]
   },
   // ----------------------------------------------------
-  // DỰ ÁN 5: L'OFFICIEL (Từ Showcase)
+  // DỰ ÁN 5: L'OFFICIEL 
   // ----------------------------------------------------
   {
     id: 5,
@@ -282,7 +291,7 @@ export const allProjects: Project[] = [
       { label: 'Set Designer', value: 'Harry Le, Long Tran' },
       { label: 'Accessories', value: 'Dat Duong' },
       { label: 'Support', value: 'Ngoc Ha' },
-      { label: 'Location', value: 'Hello Studios' },
+      { label: 'Location', value: 'Oni Studio' },
     ],
     align: 'right',
     articleBody: [
@@ -313,7 +322,7 @@ export const allProjects: Project[] = [
     ]
   },
   // ----------------------------------------------------
-  // DỰ ÁN 6: DIOR (Từ Showcase)
+  // DỰ ÁN 6: DIOR 
   // ----------------------------------------------------
   {
     id: 6,
@@ -337,7 +346,7 @@ export const allProjects: Project[] = [
       { label: 'Set Designer', value: 'Harry Le, Long Tran' },
       { label: 'Accessories', value: 'Dat Duong' },
       { label: 'Support', value: 'Ngoc Ha' },
-      { label: 'Location', value: 'Hello Studios' },
+      { label: 'Location', value: 'Oni Studio' },
     ],
     align: 'left',
     articleBody: [
@@ -364,6 +373,65 @@ export const allProjects: Project[] = [
       {
         type: 'paragraph',
         content: "Để bắt trọn năng lượng này, ánh sáng flash sắc nét (hard light) được sử dụng để 'đóng băng' khoảnh khắc, tạo ra sự kịch tính và làm nổi bật màu sắc. Bối cảnh Pop-up Store, với kiến trúc hiện đại, trở thành một sân khấu cho cá tính, nơi mỗi bức ảnh là một tuyên ngôn về phong cách."
+      }
+    ]
+  },
+  // ----------------------------------------------------
+  // DỰ ÁN 7: SG 1990 
+  // ----------------------------------------------------
+  {
+    id: 7,
+    slug: 'net-lang-du-sai-gon-thap-nien-90',
+    title: "Nét Lãng Du Sài Gòn Thập Niên 90",
+    category: 'Cá nhân',
+    src: Personal_01_thumnails,
+    colSpan: 'md:col-span-1',
+    rowSpan: 'md:row-span-1',
+    featured: true, // <-- Đánh dấu là dự án "tiêu biểu"
+    description: "Không khí hoài cổ, lãng mạn và có chút bụi bặm của Sài Gòn những năm 90.",
+    credits: [
+      { label: 'Producer', value: 'Le Minh Phat' },
+      { label: 'Art Director', value: 'Thien Nguyen' },
+      { label: 'Photographer', value: 'Evis Tran' },
+      { label: 'Model', value: 'Tran Hai Dang' },
+      { label: 'Stylist', value: 'Bao Ngan' },
+      { label: 'Stylist Assistant', value: 'Nguyen Phuong Vy' },
+      { label: 'Lighting', value: 'An Pham, Huy Tran, Dat Ho Thanh' },
+      { label: 'MUA', value: 'Hai Ngoc Nguyen, Tu Anh, Tu Linh' },
+      { label: 'Set Designer', value: 'Harry Le, Long Tran' },
+      { label: 'Accessories', value: 'Dat Duong' },
+      { label: 'Support', value: 'Ngoc Ha' },
+      { label: 'Location', value: 'Oni Studio' },
+    ],
+    align: 'right',
+    articleBody: [
+      {
+        type: 'heading',
+        content: 'Ý Tưởng & Chủ Đề',
+      },
+      {
+        type: 'imageRow',
+        images: [Personal_01_02, Personal_01_03, Personal_01_04, Personal_01_05], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+      },
+      {
+        type: 'paragraph',
+        content: "Buổi chụp ảnh này sẽ tái hiện lại không khí hoài cổ, lãng mạn và có chút bụi bặm của Sài Gòn những năm 90. Chúng ta sẽ tập trung vào hình ảnh một chàng trai trẻ với phong cách thời trang 'high-fashion' nhưng vẫn giữ được nét thanh lịch, hòa mình vào khung cảnh đời thường của một con phố cũ. Bức ảnh sẽ mang đậm hơi thở của một tạp chí thời trang vintage, nơi sự giao thoa giữa quá khứ và hiện tại tạo nên một vẻ đẹp độc đáo."
+      },
+      {
+        type: 'heading',
+        content: 'Mục Tiêu & Phong Cách',
+      },
+      {
+        type: 'imageRow',
+        images: [Personal_01_06, Personal_01_07], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+      },
+      {
+        type: 'imageRow',
+        images: [Personal_01_08, Personal_01_09], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+      },
+      {
+        type: 'paragraph',
+        content: "Mục tiêu chính là tạo ra những bức ảnh chân dung toàn thân có tính nghệ thuật cao, lột tả được vẻ đẹp của thời trang và không gian. Phong cách ảnh sẽ là vintage với tông màu ấm, hơi ám vàng và hiệu ứng film fade để tăng tính hoài niệm. Ánh sáng tự nhiên kết hợp với chút ánh sáng nhân tạo (nếu cần) để tạo độ moody và sâu cho bức hình. Chàng trai sẽ thể hiện nhiều dáng pose tự nhiên, toát lên vẻ lãng tử, suy tư và cuốn hút."
       }
     ]
   },

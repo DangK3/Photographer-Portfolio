@@ -24,7 +24,7 @@ function GridItem({ item, onClick }: GridItemProps) {
   return (
     <div
       className={`
-        relative group cursor-pointer overflow-hidden rounded-lg 
+        relative group cursor-pointer overflow-hidden 
         h-80 md:h-auto ${item.colSpan} ${item.rowSpan}
       `}
       // h-80: Đặt chiều cao cố định trên mobile (khi chỉ có 1 cột)

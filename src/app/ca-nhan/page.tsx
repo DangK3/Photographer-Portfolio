@@ -1,58 +1,79 @@
-// app/ca-nhan/page.tsx
+// src/app/ca-nhan/page.tsx
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import Image from 'next/image';
 import Container from '@/components/Container';
-import PortfolioGrid from '@/components/PortfolioGrid'; 
-import { GridProject } from '@/types/grid-project';
-
-// Import ảnh thumbnail (ví dụ)
-import imgPer01 from '@/assets/section_02/Portfolio_03.png';
-import imgPer02 from '@/assets/section_02/Portfolio_04.png';
-import imgPer03 from '@/assets/section_02/Portfolio_05.png';
-import imgPer04 from '@/assets/section_02/Portfolio_01.png';
+import { allProjects } from '@/data/projects-master-data';
 
 export const metadata: Metadata = {
   title: 'Dự án Cá Nhân | Oni Studio',
   description: 'Những dự án thể hiện cái tôi cá nhân và thử nghiệm sáng tạo.',
 };
 
-// Data cho Grid Sạch (Tất cả item đều là 1x1)
-const personalGridData: GridProject[] = [
-  {
-    id: 'per1', src: imgPer01, title: 'Dự án 1', category: 'Personal',
-    colSpan: 'md:col-span-1', rowSpan: 'md:row-span-1',
-    slug: 'du-an-ca-nhan-1',
-  },
-  {
-    id: 'per2', src: imgPer02, title: 'Ngọn lửa Tuyết', category: 'Personal',
-    colSpan: 'md:col-span-1', rowSpan: 'md:row-span-1',
-    slug: 'ngon-lua-giua-tuyet', //
-  },
-  {
-    id: 'per3', src: imgPer03, title: 'Hơi thở Golden Hour', category: 'Personal',
-    colSpan: 'md:col-span-1', rowSpan: 'md:row-span-1',
-    slug: 'hoi-tho-golden-hour', //
-  },
-  {
-    id: 'per4', src: imgPer04, title: 'Thanh xuân', category: 'Personal',
-    colSpan: 'md:col-span-1', rowSpan: 'md:row-span-1',
-    slug: 'thanh-xuan-vuon-truong', //
-  },
-];
-
 export default function CaNhanPage() {
+  // 1. Lọc lấy các dự án thuộc danh mục 'Cá nhân'
+  const personalProjects = allProjects.filter(
+    (project) => project.category === 'Cá nhân'
+  );
+
   return (
     <Container className="py-16 md:py-24">
-      <div className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-light tracking-tighter">
+      {/* --- PHẦN HEADER --- */}
+      <div className="text-center mb-12 md:mb-16">
+        <h1 className="text-4xl md:text-5xl font-light tracking-tighter text-[var(--foreground)]">
           Cá Nhân
         </h1>
         <p className="text-lg mt-4 text-[var(--glow-color)]">
-          Những thử nghiệm, cảm hứng và các dự án cá nhân.
+          Những thử nghiệm, cảm hứng và góc nhìn riêng.
         </p>
       </div>
-      
-      {/* Truyền data (1x1) vào Grid 4 cột */}
-      <PortfolioGrid projects={personalGridData} />
+
+      {/* --- PHẦN GRID LAYOUT MỚI --- */}
+      <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] md:auto-rows-[300px] gap-3 md:gap-4">
+        {personalProjects.map((project, index) => (
+          <Link
+            key={project.id}
+            href={`/du-an/${project.slug}`}
+            // Áp dụng class col-span và row-span từ data của bạn
+            className={`relative group rounded-sm ${
+              index % 2 !== 0 ? 'top-[24px]' : ''
+            }`}
+          >
+            {/* Ảnh Thumbnail */}
+            <Image
+              src={project.src}
+              alt={project.title}
+              fill
+              sizes="(max-width: 768px) 50vw, 25vw"
+              className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
+            />
+
+            {/* Lớp phủ tối khi hover để làm nổi bật chữ */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+            {/* Thông tin dự án (chỉ hiện khi hover trên desktop) */}
+            <div className="absolute inset-0 p-4 flex flex-col justify-end translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+              <span className="text-[10px] md:text-xs text-white/80 uppercase tracking-widest mb-2">
+                {project.category || 'Project'} {/* Hiển thị năm hoặc text mặc định */}
+              </span>
+              <h3 className="text-white text-lg md:text-xl font-medium flex items-center gap-2">
+                {project.title}
+                {/* Mũi tên điều hướng nhỏ */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-4 h-4 opacity-0 -translate-x-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-x-0"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </h3>
+            </div>
+          </Link>
+        ))}
+      </div>
     </Container>
   );
 }

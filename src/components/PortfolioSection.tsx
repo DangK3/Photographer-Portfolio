@@ -19,7 +19,7 @@ export default function PortfolioSection() {
             Bộ Sưu Tập
           </h2>
           <p className="text-lg md:text-xl text-[var(--glow-color)] mt-2">
-            Những dự án và khoảnh khắc chọn lọc.
+            Những dự án và khoảnh khắc <span className='text-nowrap'> chọn lọc.</span>
           </p>
         </div>
         <PortfolioGrid projects={homePageGridData} />

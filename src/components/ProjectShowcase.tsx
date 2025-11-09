@@ -46,7 +46,7 @@ function ProjectItem({ project }: { project: Project }) {
                 `}
     >
       <div
-        className={`w-full h-96 md:h-[500px] relative overflow-hidden rounded-lg shadow-lg
+        className={`w-full h-96 md:h-[500px] relative overflow-hidden shadow-lg
                     ${isImageLeft ? 'md:order-1' : 'md:order-2'}
                     transition-transform duration-[2000ms] ease-out
                     ${
@@ -172,7 +172,7 @@ export default function ProjectShowcase() {
 
           {/* SỬA 7: Dùng biến CSS cho phụ đề section */}
           <p className="text-lg md:text-xl text-[var(--glow-color)] mt-2">
-            Câu chuyện và bối cảnh đằng sau những tác phẩm.
+            Câu chuyện và bối cảnh đằng sau <span className='text-nowrap'>những tác phẩm.</span>
           </p>
         </div>
 
