@@ -4,43 +4,27 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Container from '@/components/Container';
 import { allProjects } from '@/data/projects-master-data';
+import { seedProjectsByCategory } from '@/lib/seed-helpers';
 
-
+// 2. Định nghĩa số lượng bạn muốn hiển thị
+const DESIRED_PROJECT_COUNT = 24;
+const CATEGORY_SLUG = 'Thời trang';
 export const metadata: Metadata = {
   title: 'Dự án Thời Trang | Oni Studio',
   description: 'Các dự án editorial, lookbook và nhiếp ảnh thời trang.',
 };
 
-// export default function ThoiTrangPage() {
-  
-//   // *** THAY ĐỔI 3: Lọc (filter) theo category ***
-//   const fashionGridData = allProjects.filter(
-//     (project) => project.category === 'Thời trang'
-//   );
-
-//   return (
-//     <Container className="py-16 md:py-24">
-//       <div className="text-center mb-16">
-//         <h1 className="text-4xl md:text-5xl font-light tracking-tighter">
-//           Thời Trang
-//         </h1>
-//         <p className="text-lg mt-4 text-[var(--glow-color)]">
-//           Editorial, lookbook và các chiến dịch thời trang.
-//         </p>
-//       </div>
-      
-//       {/* Truyền dữ liệu đã lọc vào Grid */}
-//       <PortfolioGrid projects={fashionGridData} />
-//     </Container>
-//   );
-// }
 
 export default function CaNhanPage() {
   // 1. Lọc lấy các dự án thuộc danh mục 'Thời trang'
-  const personalProjects = allProjects.filter(
-    (project) => project.category === 'Thời trang'
+  // const personalProjects = allProjects.filter(
+  //   (project) => project.category === 'Thời trang'
+  // );
+  const personalProjects = seedProjectsByCategory(
+    allProjects,         // Danh sách gốc (chỉ 2-3 dự án 'thoi-trang')
+    CATEGORY_SLUG,       // Lọc theo danh mục này
+    DESIRED_PROJECT_COUNT  // Tạo ra 25 dự án
   );
-
   return (
     <Container className="py-16 md:py-24">
       {/* --- PHẦN HEADER --- */}

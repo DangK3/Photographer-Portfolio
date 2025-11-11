@@ -1,28 +1,29 @@
 // src/data/projects-master-data.ts
 import { StaticImageData } from 'next/image';
 
-// Import TẤT CẢ ảnh thumbnail của bạn (từ /section_02/)
-import img01 from '../assets/section_02/Portfolio_01.png';
-import img02 from '../assets/section_02/Portfolio_02.png';
-import img03 from '../assets/section_02/Portfolio_03.png';
-import img04 from '../assets/section_02/Portfolio_04.png';
-import img05 from '../assets/section_02/Portfolio_05.png';
-import img06 from '../assets/section_02/Portfolio_06.png';
-import Personal_01_thumnails from '../assets/personal/Personal_01_thumnails.webp';
+// Import TẤT CẢ ảnh thumbnail của bạn (từ /personal/)
+import Fashion_01_thumnails from '../assets/project/thoi-trang/Fashion_01_thumnails.webp';
+import Fashion_02_thumnails from '../assets/project/thoi-trang/Fashion_02_thumnails.webp';
+import Fashion_03_thumnails from '../assets/project/thoi-trang/Fashion_03_thumnails.webp';
 
-// (*** QUAN TRỌNG: Bạn cần import thêm ảnh cho gallery của từng dự án ***)
-// Ví dụ:
-// import dior_gallery_1 from '../assets/projects/dior/dior_01.jpg';
-// import dior_gallery_2 from '../assets/projects/dior/dior_02.jpg';
-// import hokkaido_gallery_1 from '../assets/projects/hokkaido/hokkaido_01.jpg';
-import Personal_01_02 from '../assets/personal/Personal_01_02.webp';
-import Personal_01_03 from '../assets/personal/Personal_01_03.webp';
-import Personal_01_04 from '../assets/personal/Personal_01_04.webp';
-import Personal_01_05 from '../assets/personal/Personal_01_05.webp';
-import Personal_01_06 from '../assets/personal/Personal_01_06.webp';
-import Personal_01_07 from '../assets/personal/Personal_01_07.webp';
-import Personal_01_08 from '../assets/personal/Personal_01_08.webp';
-import Personal_01_09 from '../assets/personal/Personal_01_09.webp';
+import Commercial_01_thumnails from '../assets/project/thuong-mai/Commercial_01_thumnails.webp';
+import Commercial_02_thumnails from '../assets/project/thuong-mai/Commercial_02_thumnails.webp';
+import Commercial_02_01 from '../assets/project/thuong-mai/Commercial_02_01.webp';
+import Commercial_02_02 from '../assets/project/thuong-mai/Commercial_02_02.webp';
+import Commercial_02_03 from '../assets/project/thuong-mai/Commercial_02_03.webp';
+
+import Personal_01_thumnails from '../assets/project/ca-nhan/Personal_01_thumnails.webp';
+
+import Personal_02_thumnails from '../assets/project/ca-nhan/Personal_02_thumnails.webp';
+import Personal_02_02 from '../assets/project/ca-nhan/Personal_02_02.webp';
+import Personal_02_03 from '../assets/project/ca-nhan/Personal_02_03.webp';
+import Personal_02_04 from '../assets/project/ca-nhan/Personal_02_04.webp';
+import Personal_02_05 from '../assets/project/ca-nhan/Personal_02_05.webp';
+import Personal_02_06 from '../assets/project/ca-nhan/Personal_02_06.webp';
+import Personal_02_07 from '../assets/project/ca-nhan/Personal_02_07.webp';
+import Personal_02_08 from '../assets/project/ca-nhan/Personal_02_08.webp';
+import Personal_02_09 from '../assets/project/ca-nhan/Personal_02_09.webp';
+
 
 
 // 1. Định nghĩa kiểu cho nội dung bài viết
@@ -57,7 +58,7 @@ export const allProjects: Project[] = [
     slug: 'thanh-xuan-vuon-truong',
     title: 'Thanh xuân vườn trường',
     category: 'Thời trang',
-    src: img01,
+    src: Fashion_01_thumnails,
     colSpan: 'md:col-span-2',
     rowSpan: 'md:row-span-2',
     featured: false, // Không phải dự án tiêu biểu
@@ -83,7 +84,7 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img01, img01], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Fashion_01_thumnails, Fashion_01_thumnails], 
       },
       {
         type: 'paragraph',
@@ -95,7 +96,7 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img01], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Fashion_01_thumnails], 
       },
       {
         type: 'paragraph',
@@ -111,7 +112,7 @@ export const allProjects: Project[] = [
     slug: 'chu-mo-hinh-zara',
     title: 'Chủ mô hình',
     category: 'Thương mại',
-    src: img02,
+    src: Commercial_01_thumnails,
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-1',
     featured: false, // Không phải dự án tiêu biểu
@@ -137,7 +138,7 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img02], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Commercial_01_thumnails], 
       },
       {
         type: 'paragraph',
@@ -149,7 +150,15 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img02, img02], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Commercial_01_thumnails, Commercial_01_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Commercial_01_thumnails, Commercial_01_thumnails],
+      },
+      {
+        type: 'imageRow',
+        images: [Commercial_01_thumnails, Commercial_01_thumnails],
       },
       {
         type: 'paragraph',
@@ -165,7 +174,7 @@ export const allProjects: Project[] = [
     slug: 'ca-nhan-01',
     title: 'Cá nhân',
     category: 'Cá nhân',
-    src: img03,
+    src: Personal_01_thumnails,
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-2',
     featured: false, // Không phải dự án tiêu biểu
@@ -191,7 +200,7 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img03], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Personal_01_thumnails, Personal_01_thumnails, Personal_01_thumnails], 
       },
       {
         type: 'paragraph',
@@ -203,7 +212,19 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img03, img03], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Personal_01_thumnails, Personal_01_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Personal_01_thumnails, Personal_01_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Personal_01_thumnails, Personal_01_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Personal_01_thumnails, Personal_01_thumnails], 
       },
       {
         type: 'paragraph',
@@ -218,8 +239,8 @@ export const allProjects: Project[] = [
     id: 4,
     slug: 'ngon-lua-giua-tuyet',
     title: "Ngọn lửa giữa Tuyết",
-    category: 'Cá nhân',
-    src: img04,
+    category: 'Thời trang',
+    src: Fashion_02_thumnails,
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-2',
     featured: false, // <-- Đánh dấu là dự án "tiêu biểu"
@@ -246,7 +267,7 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img04, img04], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Fashion_02_thumnails, Fashion_02_thumnails, Fashion_02_thumnails, Fashion_02_thumnails, Fashion_02_thumnails, Fashion_02_thumnails, Fashion_02_thumnails, Fashion_02_thumnails], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
       },
       {
         type: 'paragraph',
@@ -258,7 +279,7 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img04], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Fashion_02_thumnails], 
       },
       {
         type: 'paragraph',
@@ -274,7 +295,7 @@ export const allProjects: Project[] = [
     slug: 'hoi-tho-golden-hour',
     title: "Hơi thở 'Golden Hour'",
     category: 'Thời trang',
-    src: img05,
+    src: Fashion_03_thumnails,
     colSpan: 'md:col-span-2',
     rowSpan: 'md:row-span-1',
     featured: true, // <-- Đánh dấu là dự án "tiêu biểu"
@@ -301,7 +322,7 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img05, img05], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Fashion_03_thumnails, Fashion_03_thumnails], 
       },
       {
         type: 'paragraph',
@@ -313,7 +334,23 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img05, img05], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Fashion_03_thumnails, Fashion_03_thumnails,Fashion_03_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Fashion_03_thumnails, Fashion_03_thumnails,Fashion_03_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Fashion_03_thumnails, Fashion_03_thumnails,Fashion_03_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Fashion_03_thumnails, Fashion_03_thumnails,Fashion_03_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Fashion_03_thumnails, Fashion_03_thumnails,Fashion_03_thumnails], 
       },
       {
         type: 'paragraph',
@@ -329,7 +366,7 @@ export const allProjects: Project[] = [
     slug: 'khoanh-khac-playful-dior',
     title: "Khoảnh khắc 'Playful' Dior",
     category: 'Thương mại',
-    src: img06,
+    src: Commercial_02_thumnails,
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-1',
     featured: true, // <-- Đánh dấu là dự án "tiêu biểu"
@@ -356,7 +393,11 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img06], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Commercial_02_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Commercial_02_01, Commercial_02_02], 
       },
       {
         type: 'paragraph',
@@ -368,7 +409,11 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [img06, img06], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Commercial_02_02, Commercial_02_03], 
+      },
+       {
+        type: 'imageRow',
+        images: [Commercial_02_02, Commercial_02_03], 
       },
       {
         type: 'paragraph',
@@ -384,7 +429,7 @@ export const allProjects: Project[] = [
     slug: 'net-lang-du-sai-gon-thap-nien-90',
     title: "Nét Lãng Du Sài Gòn Thập Niên 90",
     category: 'Cá nhân',
-    src: Personal_01_thumnails,
+    src: Personal_02_thumnails,
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-1',
     featured: true, // <-- Đánh dấu là dự án "tiêu biểu"
@@ -411,7 +456,11 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [Personal_01_02, Personal_01_03, Personal_01_04, Personal_01_05], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Personal_02_thumnails], 
+      },
+      {
+        type: 'imageRow',
+        images: [Personal_02_02, Personal_02_03, Personal_02_04, Personal_02_05], 
       },
       {
         type: 'paragraph',
@@ -423,11 +472,11 @@ export const allProjects: Project[] = [
       },
       {
         type: 'imageRow',
-        images: [Personal_01_06, Personal_01_07], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Personal_02_06, Personal_02_07], 
       },
       {
         type: 'imageRow',
-        images: [Personal_01_08, Personal_01_09], // <-- THAY THẾ BẰNG ẢNH GALLERY CỦA BẠN
+        images: [Personal_02_08, Personal_02_09], 
       },
       {
         type: 'paragraph',

@@ -4,20 +4,28 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Container from '@/components/Container';
 import { allProjects } from '@/data/projects-master-data';
+import { seedProjectsByCategory } from '@/lib/seed-helpers';
 
-
-
+// 2. Định nghĩa số lượng bạn muốn hiển thị
+const DESIRED_PROJECT_COUNT = 24;
+const CATEGORY_SLUG = 'Thương mại';
 export const metadata: Metadata = {
   title: 'Dự án Thương Mại | Oni Studio',
   description: 'Các dự án nhiếp ảnh thương mại, sản phẩm và quảng cáo.',
 };
 
+
+
 export default function ThuongMaiPage() {
   // 1. Lọc lấy các dự án thuộc danh mục 'Cá nhân'
-  const personalProjects = allProjects.filter(
-    (project) => project.category === 'Thương mại'
+  // const personalProjects = allProjects.filter(
+  //   (project) => project.category === 'Thương mại'
+  // );
+ const personalProjects = seedProjectsByCategory(
+    allProjects,         // Danh sách gốc (chỉ 2-3 dự án 'thuong-mai')
+    CATEGORY_SLUG,       // Lọc theo danh mục này
+    DESIRED_PROJECT_COUNT  // Tạo ra 25 dự án
   );
-
   return (
     <Container className="py-16 md:py-24">
       {/* --- PHẦN HEADER --- */}
