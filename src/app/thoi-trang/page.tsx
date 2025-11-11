@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Container from '@/components/Container';
 import { allProjects } from '@/data/projects-master-data';
-import { seedProjectsByCategory } from '@/lib/seed-helpers';
+// Sửa import để khớp với kiểu dữ liệu mới trong seed-helpers
+import { seedProjectsByCategory, Project } from '@/lib/seed-helpers';
 
 // 2. Định nghĩa số lượng bạn muốn hiển thị
 const DESIRED_PROJECT_COUNT = 24;
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
 
 export default function CaNhanPage() {
   // 1. Lọc lấy các dự án thuộc danh mục 'Thời trang'
-  // const personalProjects = allProjects.filter(
+  // const fashionProjects = allProjects.filter(
   //   (project) => project.category === 'Thời trang'
   // );
-  const personalProjects = seedProjectsByCategory(
-    allProjects,         // Danh sách gốc (chỉ 2-3 dự án 'thoi-trang')
+const compatibleProjects = allProjects as Project[];
+
+  const fashionProjects = seedProjectsByCategory(
+    compatibleProjects,        // Danh sách gốc (chỉ 2-3 dự án 'thoi-trang')
     CATEGORY_SLUG,       // Lọc theo danh mục này
     DESIRED_PROJECT_COUNT  // Tạo ra 25 dự án
   );
@@ -39,10 +42,10 @@ export default function CaNhanPage() {
 
       {/* --- PHẦN GRID LAYOUT MỚI --- */}
       <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] md:auto-rows-[300px] gap-3 md:gap-4">
-        {personalProjects.map((project, index) => (
+        {fashionProjects.map((project, index) => (
           <Link
             key={project.id}
-            href={`/du-an/${project.slug}`}
+            href={`/du-an/${project.originalSlug}`}
             // Áp dụng class col-span và row-span từ data của bạn
             className={`relative group rounded-sm ${
               index % 2 !== 0 ? 'top-[24px]' : ''

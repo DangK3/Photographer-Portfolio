@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Container from '@/components/Container';
 import { allProjects } from '@/data/projects-master-data';
-import { seedProjectsByCategory } from '@/lib/seed-helpers';
+// Sửa import để khớp với kiểu dữ liệu mới trong seed-helpers
+import { seedProjectsByCategory, Project } from '@/lib/seed-helpers';
 
 // 2. Định nghĩa số lượng bạn muốn hiển thị
 const DESIRED_PROJECT_COUNT = 24;
@@ -19,8 +20,10 @@ export default function CaNhanPage() {
   // const personalProjects = allProjects.filter(
   //   (project) => project.category === 'Cá nhân'
   // );
+const compatibleProjects = allProjects as Project[];
+
   const personalProjects = seedProjectsByCategory(
-    allProjects,         // Danh sách gốc (chỉ 2-3 dự án 'ca-nhan')
+    compatibleProjects,         // Danh sách gốc (chỉ 2-3 dự án 'ca-nhan')
     CATEGORY_SLUG,       // Lọc theo danh mục này
     DESIRED_PROJECT_COUNT  // Tạo ra 25 dự án
   );
@@ -41,7 +44,7 @@ export default function CaNhanPage() {
         {personalProjects.map((project, index) => (
           <Link
             key={project.id}
-            href={`/du-an/${project.slug}`}
+            href={`/du-an/${project.originalSlug}`}
             // Áp dụng class col-span và row-span từ data của bạn
             className={`relative group rounded-sm ${
               index % 2 !== 0 ? 'top-[24px]' : ''
