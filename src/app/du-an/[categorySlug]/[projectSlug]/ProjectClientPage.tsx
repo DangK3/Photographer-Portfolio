@@ -4,11 +4,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import Image, { StaticImageData } from 'next/image';
 import { useInView } from 'react-intersection-observer';
-import { Project } from '../../../data/projects-master-data';
+import { Project } from '../../../../data/projects-master-data';
 import ProjectNavigation from '@/components/ProjectNavigation';
-import styles from '../../styles/ProjectArticle.module.css';
+import styles from '../../../styles/ProjectArticle.module.css';
 
-// --- LIGHTBOX IMPORTS ---
+// --- LIGHTBOX IMPORTS (Giữ nguyên) ---
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Captions from 'yet-another-react-lightbox/plugins/captions';
@@ -17,52 +17,82 @@ import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/captions.css';
 import 'yet-another-react-lightbox/plugins/thumbnails.css';
 
-// --- 1. Component con render ảnh (Tối ưu với React.memo) ---
+// --- 1. (CẬP NHẬT) Component con render ảnh ---
 interface ArticleImageProps {
   image: StaticImageData;
   onClick: () => void;
+  imageCount: number; // (MỚI) Thêm prop đếm số lượng ảnh
 }
 
-const ArticleImage = React.memo(({ image, onClick }: ArticleImageProps) => (
-  <div
-    className="w-full md:w-[48.75%] flex-shrink-0 cursor-pointer overflow-hidden rounded-sm shadow-xs transition-all duration-300 hover:shadow-md"
-    onClick={onClick}
-  >
-    <Image
-      src={image}
-      alt="Project detail image" // Alt text tốt hơn
-      placeholder="blur" // Thêm hiệu ứng blur khi load
-      className="max-w-full h-auto transition-opacity duration-300 hover:opacity-95"
-      quality={90}
-      sizes="(max-width: 768px) 100vw, 50vw"
-    />
-  </div>
-));
+const ArticleImage = React.memo(
+  ({ image, onClick, imageCount }: ArticleImageProps) => {
+    
+    // (MỚI) Hàm helper để quyết định class width
+    const getWidthClass = (count: number): string => {
+      switch (count) {
+        case 1:
+          return 'w-full'; // 1 ảnh -> Luôn full-width
+        case 2:
+          return 'w-full md:w-[48.75%]'; // 2 ảnh -> 1 cột (mobile), 2 cột (desktop)
+        case 3:
+          return 'w-full md:w-[32%]'; // 3 ảnh -> 1 cột (mobile), 3 cột (desktop)
+        case 4:
+          return 'w-full md:w-[24%]'; // 4 ảnh -> 2 cột (mobile), 4 cột (desktop)
+        default:
+          // Mặc định cho 5+ ảnh, hoặc lỗi
+          return 'w-full md:w-[24%]'; 
+      }
+    };
+
+    const widthClass = getWidthClass(imageCount);
+
+    return (
+      <div
+        // (CẬP NHẬT) Sử dụng `widthClass` động thay vì class cứng
+        className={`${widthClass} flex-shrink-0 cursor-pointer overflow-hidden rounded-sm shadow-xs transition-all duration-300 hover:shadow-md`}
+        onClick={onClick}
+      >
+        <Image
+          src={image}
+          alt="Project detail image"
+          placeholder="blur"
+          className="max-w-full h-auto transition-opacity duration-300 hover:opacity-95"
+          quality={90}
+          sizes={
+            imageCount === 1 ? '100vw' : 
+            imageCount === 2 ? '(max-width: 768px) 100vw, 50vw' :
+            imageCount === 3 ? '(max-width: 768px) 100vw, 33vw' :
+            '(max-width: 768px) 50vw, 25vw'
+          } // (CẬP NHẬT) Tối ưu sizes
+        />
+      </div>
+    );
+  }
+);
 ArticleImage.displayName = 'ArticleImage';
 
-// --- 2. Component chính ---
+// --- 2. Component chính (Chỉ cập nhật phần render) ---
 interface ProjectClientPageProps {
   project: Project;
-  prevProjectSlug: string | null;
-  nextProjectSlug: string | null;
+  prevProjectLink: string | null;
+  nextProjectLink: string | null;
 }
 
 export default function ProjectClientPage({
   project,
-  prevProjectSlug,
-  nextProjectSlug,
+  prevProjectLink,
+  nextProjectLink,
 }: ProjectClientPageProps) {
+  // ... (Tất cả state, memo, callback... giữ nguyên) ...
   const [navRef, navInView] = useInView({ threshold: 0.1, triggerOnce: true });
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  // Lấy thông tin Location (nếu có)
   const locationCredit = useMemo(
     () => project.credits?.find((c) => c.label === 'Location'),
     [project.credits]
   );
 
-  // Tạo danh sách tất cả ảnh cho Lightbox
   const allProjectImages = useMemo(() => {
     return (
       project.articleBody
@@ -71,16 +101,13 @@ export default function ProjectClientPage({
     );
   }, [project.articleBody]);
 
-  // Tạo slides cho Lightbox
   const lightboxSlides = useMemo(
     () => allProjectImages.map((img) => ({ src: img.src })),
     [allProjectImages]
   );
 
-  // Hàm xử lý click mở Lightbox (dùng useCallback để tối ưu)
   const handleImageClick = useCallback(
     (clickedImage: StaticImageData) => {
-      // Tìm index chính xác của ảnh vừa click trong mảng tổng
       const index = allProjectImages.findIndex((img) => img.src === clickedImage.src);
       if (index !== -1) {
         setLightboxIndex(index);
@@ -93,7 +120,6 @@ export default function ProjectClientPage({
   return (
     <>
       <article className={styles.articleContainer}>
-        {/* HEADER */}
         <h1 className={styles.articleTitle}>{project.title}</h1>
         <div className={styles.creditsBar}>
          <ul className={styles.creditsList}>
@@ -104,13 +130,11 @@ export default function ProjectClientPage({
           )}
         </ul>
         </div>
-
-        {/* INTRO */}
         <div className={styles.textWrap}>
           <p>{project.description}</p>
         </div>
 
-        {/* ARTICLE BODY */}
+        {/* ARTICLE BODY (Cập nhật logic render) */}
         <div className="space-y-8 md:space-y-12">
           {project.articleBody?.map((block, index) => {
             switch (block.type) {
@@ -127,14 +151,16 @@ export default function ProjectClientPage({
                   </div>
                 );
               case 'imageRow':
+                // (MỚI) Đếm số lượng ảnh trong hàng này
+                const imageCount = block.images.length;
                 return (
                   <div key={index} className={styles.imageRow}>
                     {block.images.map((img, imgIndex) => (
                       <ArticleImage
                         key={`${index}-${imgIndex}`}
                         image={img}
-                        // Truyền hàm xử lý click thay vì index cứng
                         onClick={() => handleImageClick(img)}
+                        imageCount={imageCount} // (MỚI) Truyền số lượng vào
                       />
                     ))}
                   </div>
@@ -145,7 +171,7 @@ export default function ProjectClientPage({
           })}
         </div>
 
-        {/* FOOTER CREDITS */}
+        {/* ... (FOOTER CREDITS, NAVIGATION, LIGHTBOX giữ nguyên) ... */}
         {project.credits && project.credits.length > 0 && (
           <div className="mt-16 md:mt-24 pt-8 border-t border-[var(--foreground)]/20">
             <h3 className="text-xl md:text-2xl font-light mb-6 text-center text-[var(--foreground)]">
@@ -164,7 +190,6 @@ export default function ProjectClientPage({
           </div>
         )}
 
-        {/* NAVIGATION */}
         <div
           ref={navRef}
           className={`mt-16 md:mt-24 ${
@@ -172,22 +197,21 @@ export default function ProjectClientPage({
           }`}
         >
           <ProjectNavigation
-            prevProjectSlug={prevProjectSlug}
-            nextProjectSlug={nextProjectSlug}
+            prevProjectLink={prevProjectLink}
+            nextProjectLink={nextProjectLink}
           />
         </div>
       </article>
 
-      {/* LIGHTBOX */}
       <Lightbox
         open={lightboxOpen}
         close={() => setLightboxOpen(false)}
         index={lightboxIndex}
         slides={lightboxSlides}
         plugins={[Zoom, Thumbnails, Captions]}
-        animation={{ fade: 300, swipe: 250 }} // Thêm hiệu ứng swipe mượt mà
-        carousel={{ finite: false }} // Cho phép cuộn vô hạn
-        controller={{ closeOnBackdropClick: true }} // Đóng khi click ra ngoài
+        animation={{ fade: 300, swipe: 250 }}
+        carousel={{ finite: false }}
+        controller={{ closeOnBackdropClick: true }}
         zoom={{ maxZoomPixelRatio: 3 }}
       />
     </>

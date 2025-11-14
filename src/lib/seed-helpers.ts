@@ -7,11 +7,13 @@ export interface Project {
   slug: string;
   title: string;
   description?: string;
-  category: string;
   src: StaticImageData;
+  category: string;
+  cateSlug: string;
   credits?: { label: string; value: string }[];
   articleBody?: ArticleBlock[];
-  
+  colSpan: string;
+  rowSpan: string;
   // Thêm các trường tùy chọn cho demo
   isMock?: boolean;
   originalSlug?: string; // Sẽ lưu slug gốc ở đây
@@ -53,8 +55,10 @@ export function seedProjectsByCategory(
       
       // 2. Lưu lại Slug GỐC (để dùng cho href)
       originalSlug: projectToCopy.slug, // Đây là slug thật (ví dụ: ca-nhan-01)
-      
+      cateSlug : projectToCopy.cateSlug,
       isMock: true,
+      colSpan: projectToCopy.colSpan,
+      rowSpan: projectToCopy.rowSpan,
     };
 
     seededList.push(newProject);

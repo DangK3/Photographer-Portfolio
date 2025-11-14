@@ -1,35 +1,44 @@
 // src/app/ca-nhan/page.tsx
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import Image from 'next/image';
 import Container from '@/components/Container';
 import { allProjects } from '@/data/projects-master-data';
-// Sửa import để khớp với kiểu dữ liệu mới trong seed-helpers
-import { seedProjectsByCategory, Project } from '@/lib/seed-helpers';
+import ProjectGrid from '../../components/project-grid';
+import { 
+  IS_DEMO_MODE, 
+  DESIRED_PROJECT_COUNT, 
+  SLUG_CATE_PERSONAL 
+} from '@/lib/constants';
+import { seedProjectsByCategory } from '@/lib/seed-helpers';
 
-// 2. Định nghĩa số lượng bạn muốn hiển thị
-const DESIRED_PROJECT_COUNT = 24;
-const CATEGORY_SLUG = 'Cá nhân';
+
 export const metadata: Metadata = {
   title: 'Dự án Cá Nhân | Oni Studio',
   description: 'Những dự án thể hiện cái tôi cá nhân và thử nghiệm sáng tạo.',
 };
-
-export default function CaNhanPage() {
-  // 1. Lọc lấy các dự án thuộc danh mục 'Cá nhân'
-  // const personalProjects = allProjects.filter(
-  //   (project) => project.category === 'Cá nhân'
-  // );
-const compatibleProjects = allProjects as Project[];
-
-  const personalProjects = seedProjectsByCategory(
-    compatibleProjects,         // Danh sách gốc (chỉ 2-3 dự án 'ca-nhan')
-    CATEGORY_SLUG,       // Lọc theo danh mục này
-    DESIRED_PROJECT_COUNT  // Tạo ra 25 dự án
+function getPersonalProjects() {
+  // Lấy dự án thật trước
+  const realProjects = allProjects.filter(
+    (p) => p.cateSlug === SLUG_CATE_PERSONAL
   );
+
+  // Nếu IS_DEMO_MODE = true, và chúng ta có dự án thật để làm mẫu...
+  if (IS_DEMO_MODE && realProjects.length > 0) {
+    // ...thì dùng hàm seed của bạn để nhân bản chúng
+    return seedProjectsByCategory(
+      realProjects, // Dùng mảng dự án thật làm "hạt giống"
+      'Cá nhân', // Tên category
+      DESIRED_PROJECT_COUNT // Số lượng mong muốn
+    );
+  }
+
+  // Nếu IS_DEMO_MODE = false, chỉ trả về dự án thật
+  return realProjects;
+}
+export default function CaNhanPage() {
+  const projectsToDisplay = getPersonalProjects();
+
   return (
     <Container className="py-16 md:py-24">
-      {/* --- PHẦN HEADER --- */}
       <div className="text-center mb-12 md:mb-16">
         <h1 className="text-4xl md:text-5xl font-light tracking-tighter text-[var(--foreground)]">
           Cá Nhân
@@ -37,54 +46,15 @@ const compatibleProjects = allProjects as Project[];
         <p className="text-lg mt-4 text-[var(--glow-color)]">
           Những thử nghiệm, cảm hứng và góc nhìn riêng.
         </p>
-      </div>
-
-      {/* --- PHẦN GRID LAYOUT MỚI --- */}
-      <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] md:auto-rows-[300px] gap-3 md:gap-4">
-        {personalProjects.map((project, index) => (
-          <Link
-            key={project.id}
-            href={`/du-an/${project.originalSlug}`}
-            // Áp dụng class col-span và row-span từ data của bạn
-            className={`relative group rounded-sm ${
-              index % 2 !== 0 ? 'top-[24px]' : ''
-            }`}
-          >
-            {/* Ảnh Thumbnail */}
-            <Image
-              src={project.src}
-              alt={project.title}
-              fill
-              sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
-            />
-
-            {/* Lớp phủ tối khi hover để làm nổi bật chữ */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-            {/* Thông tin dự án (chỉ hiện khi hover trên desktop) */}
-            <div className="absolute inset-0 p-4 flex flex-col justify-end translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-              <span className="text-[10px] md:text-xs text-white/80 uppercase tracking-widest mb-2">
-                {project.category || 'Project'} {/* Hiển thị năm hoặc text mặc định */}
-              </span>
-              <h3 className="text-white text-lg md:text-xl font-medium flex items-center gap-2">
-                {project.title}
-                {/* Mũi tên điều hướng nhỏ */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-4 h-4 opacity-0 -translate-x-2 transition-all duration-500 group-hover:opacity-100 group-hover:translate-x-0"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </h3>
-            </div>
-          </Link>
-        ))}
-      </div>
+      </div> 
+      
+      {projectsToDisplay.length > 0 ? (
+              <ProjectGrid allProjects={projectsToDisplay} />
+            ) : (
+              <p className="text-center text-[var(--sub-text)]">
+                Chưa có dự án nào trong mục này.
+              </p>
+            )}
     </Container>
   );
 }

@@ -1,20 +1,23 @@
 // src/components/ProjectNavigation.tsx
 import React from 'react';
 import Link from 'next/link';
-import styles from '../app/styles/ProjectArticle.module.css'; 
+import styles from '../app/styles/ProjectArticle.module.css';
 
 interface ProjectNavigationProps {
-  prevProjectSlug: string | null;
-  nextProjectSlug: string | null;
+  prevProjectLink: string | null; // <-- ĐỔI TÊN
+  nextProjectLink: string | null; // <-- ĐỔI TÊN
 }
 
-const ProjectNavigation: React.FC<ProjectNavigationProps> = ({ prevProjectSlug, nextProjectSlug }) => {
+const ProjectNavigation: React.FC<ProjectNavigationProps> = ({
+  prevProjectLink,
+  nextProjectLink,
+}) => {
   return (
     <div className={styles.projectNavigation}>
       {/* Nút Previous */}
-      {prevProjectSlug ? (
-        // Trường hợp 1: Có dự án trước -> Link bình thường
-        <Link href={`/du-an/${prevProjectSlug}`} className={styles.navLink}>
+      {prevProjectLink ? (
+        // Trường hợp 1: Có dự án trước -> Dùng link đã build
+        <Link href={prevProjectLink} className={styles.navLink}>
           &larr; Dự án trước
         </Link>
       ) : (
@@ -25,9 +28,9 @@ const ProjectNavigation: React.FC<ProjectNavigationProps> = ({ prevProjectSlug, 
       )}
 
       {/* Nút Next */}
-      {nextProjectSlug ? (
-        // Trường hợp 1: Có dự án tiếp theo -> Link bình thường
-        <Link href={`/du-an/${nextProjectSlug}`} className={styles.navLink}>
+      {nextProjectLink ? (
+        // Trường hợp 1: Có dự án tiếp theo -> Dùng link đã build
+        <Link href={nextProjectLink} className={styles.navLink}>
           Dự án tiếp theo &rarr;
         </Link>
       ) : (

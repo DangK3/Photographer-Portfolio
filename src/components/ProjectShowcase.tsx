@@ -102,7 +102,7 @@ function ProjectItem({ project }: { project: Project }) {
         </ul>
 
         <Link
-          href={`/du-an/${project.slug}`}
+          href={`/du-an/${project.cateSlug}/${project.slug}`}
           className="mt-6 inline-block font-medium text-[var(--foreground)] group"
         >
           Xem chi tiết dự án

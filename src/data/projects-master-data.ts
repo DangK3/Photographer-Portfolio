@@ -37,8 +37,9 @@ export interface Project {
   id: number;
   slug: string;
   title: string;
-  category: 'Thời trang' | 'Thương mại' | 'Cá nhân';
   src: StaticImageData; // Ảnh thumbnail
+  category: 'Thời trang' | 'Thương mại' | 'Cá nhân';
+  cateSlug: 'thoi-trang' | 'thuong-mai' | 'ca-nhan';
   colSpan: string;
   rowSpan: string;
   featured?: boolean;
@@ -57,8 +58,9 @@ export const allProjects: Project[] = [
     id: 1,
     slug: 'thanh-xuan-vuon-truong',
     title: 'Thanh xuân vườn trường',
-    category: 'Thời trang',
     src: Fashion_01_thumnails,
+    category: 'Thời trang',
+    cateSlug: 'thoi-trang',
     colSpan: 'md:col-span-2',
     rowSpan: 'md:row-span-2',
     featured: false, // Không phải dự án tiêu biểu
@@ -111,8 +113,9 @@ export const allProjects: Project[] = [
     id: 2,
     slug: 'chu-mo-hinh-zara',
     title: 'Chủ mô hình',
-    category: 'Thương mại',
     src: Commercial_01_thumnails,
+    category: 'Thương mại',
+    cateSlug: 'thuong-mai',
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-1',
     featured: false, // Không phải dự án tiêu biểu
@@ -173,8 +176,9 @@ export const allProjects: Project[] = [
     id: 3,
     slug: 'ca-nhan-01',
     title: 'Cá nhân',
-    category: 'Cá nhân',
     src: Personal_01_thumnails,
+    category: 'Cá nhân',
+    cateSlug: 'ca-nhan',
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-2',
     featured: false, // Không phải dự án tiêu biểu
@@ -239,8 +243,9 @@ export const allProjects: Project[] = [
     id: 4,
     slug: 'ngon-lua-giua-tuyet',
     title: "Ngọn lửa giữa Tuyết",
-    category: 'Thời trang',
     src: Fashion_02_thumnails,
+    category: 'Thời trang',
+    cateSlug: 'thoi-trang',
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-2',
     featured: false, // <-- Đánh dấu là dự án "tiêu biểu"
@@ -294,8 +299,9 @@ export const allProjects: Project[] = [
     id: 5,
     slug: 'hoi-tho-golden-hour',
     title: "Hơi thở 'Golden Hour'",
-    category: 'Thời trang',
     src: Fashion_03_thumnails,
+    category: 'Thời trang',
+    cateSlug: 'thoi-trang',
     colSpan: 'md:col-span-2',
     rowSpan: 'md:row-span-1',
     featured: true, // <-- Đánh dấu là dự án "tiêu biểu"
@@ -365,8 +371,9 @@ export const allProjects: Project[] = [
     id: 6,
     slug: 'khoanh-khac-playful-dior',
     title: "Khoảnh khắc 'Playful' Dior",
-    category: 'Thương mại',
     src: Commercial_02_thumnails,
+    category: 'Thương mại',
+    cateSlug: 'thuong-mai',
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-1',
     featured: true, // <-- Đánh dấu là dự án "tiêu biểu"
@@ -428,8 +435,9 @@ export const allProjects: Project[] = [
     id: 7,
     slug: 'net-lang-du-sai-gon-thap-nien-90',
     title: "Nét Lãng Du Sài Gòn Thập Niên 90",
-    category: 'Cá nhân',
     src: Personal_02_thumnails,
+    category: 'Cá nhân',
+    cateSlug: 'ca-nhan',
     colSpan: 'md:col-span-1',
     rowSpan: 'md:row-span-1',
     featured: true, // <-- Đánh dấu là dự án "tiêu biểu"
