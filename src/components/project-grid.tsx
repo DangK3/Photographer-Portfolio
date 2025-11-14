@@ -111,19 +111,37 @@ export default function ProjectGrid({ allProjects }: ProjectGridProps) {
     <>
       {/* (CẬP NHẬT) Dùng class wrapper động */}
       <div className={getGridWrapperClassName(gridCategory)}>
-        {displayedProjects.map((project, index) => (
+        {displayedProjects.map((project, index) => {
+          let imageSizes: string;
+          const colSpan = project.colSpan || '';
+
+          if (gridCategory === SLUG_CATE_PERSONAL) {
+            // Logic cho grid 'ca-nhan' (12 cột)
+            if (colSpan.includes('md:col-span-6')) { // 6/12 cột
+              imageSizes = '(max-width: 768px) 50vw, 50vw';
+            } else if (colSpan.includes('md:col-span-4')) { // 4/12 cột
+              imageSizes = '(max-width: 768px) 50vw, 33vw';
+            } else {
+              imageSizes = '(max-width: 768px) 50vw, 25vw'; // Fallback
+            }
+          } else {
+            // Logic cho 'thoi-trang' và 'thuong-mai' (4 cột)
+            // (Hiện tại layout 2 trang này đơn giản, nên dùng chung 1 sizes)
+            imageSizes = '(max-width: 768px) 50vw, 25vw';
+          }
+
+          return (
           <Link
             key={project.id}
             href={`/du-an/${project.cateSlug}/${project.originalSlug || project.slug}`}
             // (CẬP NHẬT) Dùng class item động
             className={getLinkClassName(project, index)}
           >
-            {/* --- Nội dung bên trong Link (giữ nguyên) --- */}
             <Image
               src={project.src}
               alt={project.title}
               fill
-              sizes="(max-width: 768px) 50vw, 25vw" // Bạn có thể cần tùy chỉnh lại 'sizes' nếu dùng 'ca-nhan'
+              sizes={imageSizes}
               className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -151,7 +169,8 @@ export default function ProjectGrid({ allProjects }: ProjectGridProps) {
             </div>
             {/* --- Hết nội dung bên trong Link --- */}
           </Link>
-        ))}
+        );
+      })}
       </div>
 
       {/* --- PHẦN LOADER (Giữ nguyên) --- */}

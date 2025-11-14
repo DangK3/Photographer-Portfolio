@@ -21,6 +21,15 @@ interface GridItemProps {
 // 2. Component Con (Grid Item)
 // Tạo component con để giữ code sạch sẽ
 function GridItem({ item, onClick }: GridItemProps) {
+  // (MỚI) Tính toán sizes động
+  const colSpan = item.colSpan || '';
+  // Kiểm tra xem có phải là ảnh rộng (span 2) trên desktop không
+  const isDoubleWidth = colSpan.includes('md:col-span-2');
+  
+  // Dựa vào đó để quyết định 'sizes'
+  const imageSizes = isDoubleWidth
+    ? '(max-width: 768px) 100vw, 50vw' // Mobile 100%, Desktop 50%
+    : '(max-width: 768px) 100vw, 25vw'; // Mobile 100%, Desktop 25%
   return (
     <div
       className={`
@@ -36,6 +45,7 @@ function GridItem({ item, onClick }: GridItemProps) {
         layout="fill"
         objectFit="cover"
         quality={85}
+        sizes={imageSizes}
         className="transition-transform duration-500 ease-in-out group-hover:scale-105" // Zoom nhẹ khi hover
       />
 
