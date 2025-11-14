@@ -1,0 +1,157 @@
+/* src/styles/BtsSection.module.css */
+
+.btsSection {
+  position: relative; /* Quan trọng để .stickyImageWrapper hoạt động */
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* --- 1. PHẦN ẢNH NỀN STICKY --- */
+
+.stickyImageWrapper {
+  position: sticky;
+  top: 0;
+  height: 100vh; /* Ảnh nền chiếm 100% chiều cao viewport */
+  width: 100%;
+  /* z-index: 0; (mặc định) */
+}
+
+.imageContainer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.imageActive {
+  opacity: 1;
+}
+
+/* Lớp phủ mờ tối (gradient) để chữ dễ đọc hơn */
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    transparent 100%
+  );
+}
+
+
+/* --- 2. PHẦN NỘI DUNG CUỘN (OVERLAY) --- */
+
+/* Tiêu đề section (nằm ở trên cùng) */
+.sectionHeader {
+  /* Đặt tương đối để đè lên trên ảnh */
+  position: relative; 
+  z-index: 2;
+  text-align: center;
+  /* Đẩy tiêu đề xuống 1 chút */
+  padding-top: 20vh;
+  padding-bottom: 20vh;
+  /* Chữ trắng cho dễ đọc */
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.sectionTitle {
+  font-size: 2.25rem; /* text-3xl */
+  font-weight: 300; /* font-light */
+}
+
+.sectionSubtitle {
+  font-size: 1.125rem; /* text-lg */
+  opacity: 0.9;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .sectionTitle {
+    font-size: 3rem; /* md:text-5xl */
+  }
+  .sectionSubtitle {
+    font-size: 1.25rem; /* md:text-xl */
+  }
+}
+
+/* Cột chứa các "cảnh" text */
+.textColumn {
+  position: relative;
+  z-index: 2; /* Đảm bảo text cuộn TRÊN ảnh */
+  width: 100%;
+}
+
+/* --- Nội dung từng "Cảnh" (Scene) --- */
+.scene {
+  /* Mỗi scene cao 100vh để khớp với 1 ảnh */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Căn giữa nội dung theo chiều dọc */
+  color: #ffffff; /* Chữ trắng */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.sceneContent {
+  /* Căn lề trái (hoặc giữa) cho nội dung text */
+  text-align: left;
+  max-width: 800px; /* Giới hạn chiều rộng khối text */
+  padding: 1rem 1.5rem;
+
+  opacity: 0.3; /* Mờ đi khi không active */
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+@media (min-width: 768px) {
+  .sceneContent {
+    /* Trên desktop, đẩy khối text sang bên trái */
+    margin-left: 10%; 
+  }
+}
+
+.sceneActive {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sceneCategory {
+  font-size: 0.875rem; /* text-sm */
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+.sceneTitle {
+  font-size: 2.25rem; /* text-2xl */
+  font-weight: 300; /* font-light */
+  margin: 0.5rem 0 1rem 0;
+}
+
+@media (min-width: 768px) {
+  .sceneTitle {
+    font-size: 3rem; /* md:text-3xl */
+  }
+}
+
+.sceneDescription {
+  font-size: 1rem;
+  line-height: 1.7;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+}
+
+.sceneLink {
+  color: #ffffff;
+  font-weight: 500;
+  display: inline-block;
+  transition: transform 0.3s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  padding-bottom: 2px;
+}
+.sceneLink:hover {
+  transform: translateX(4px);
+  border-bottom-color: #ffffff;
+}
