@@ -1,0 +1,136 @@
+/* Bố cục 2 cột trên Desktop */
+.stickyLayout {
+  display: flex;
+  flex-direction: row;
+  gap: 4rem; /* Khoảng cách giữa 2 cột */
+}
+
+/* Cột 1: Menu */
+.stickyNav {
+  /* Cột menu chiếm 1/3 (khoảng 30%) */
+  flex-basis: 33.33%; 
+  max-width: 300px; /* Giới hạn chiều rộng tối đa */
+  
+  /* Phần quan trọng: Dính lại */
+  position: sticky;
+  
+  /* Dính cách top (chừa chỗ cho Header của bạn) */
+  top: 120px; 
+  
+  /* Tự căn chỉnh chiều cao */
+  align-self: flex-start; 
+}
+
+.stickyNav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; /* Khoảng cách giữa các mục menu */
+}
+
+.stickyNav a {
+  text-decoration: none;
+  font-size: 1.1rem; /* 17.6px */
+  font-weight: 500;
+  color: var(--foreground);
+  opacity: 0.6; /* Màu chữ mờ mặc định */
+  transition: all 0.2s ease-in-out;
+}
+
+.stickyNav a:hover {
+  opacity: 0.8; /* Sáng hơn khi hover */
+}
+
+/* Đây là class Active khi cuộn tới */
+.stickyNav a.active {
+  color: var(--foreground);
+  opacity: 1; /* Rõ nét */
+  font-weight: 700;
+  border-left: 3px solid var(--foreground);
+  padding-left: 10px;
+}
+
+/* Cột 2: Nội dung */
+.contentColumn {
+  /* Cột nội dung chiếm phần còn lại */
+  flex: 1;
+  min-width: 0; /* Sửa lỗi flexbox overflow */
+}
+
+/* Mỗi Section nội dung */
+.sceneContent {
+  /* Thêm khoảng cách lớn giữa các section */
+  margin-bottom: 4rem; /* 64px */
+  padding-bottom: 4rem; /* 64px */
+  border-bottom: 1px solid var(--foreground);
+}
+.sceneContent:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Tiêu đề của mỗi Section */
+.contentTitle {
+  font-size: 2.25rem; /* 36px (to hơn, rõ ràng hơn) */
+  font-weight: 600;
+  margin-bottom: 2rem; /* 32px */
+}
+
+/* CSS cho ô màu phông nền */
+.colorSwatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--foreground);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Responsive cho Di Động (md: 768px) --- */
+@media (max-width: 768px) {
+  /* Xếp chồng 2 cột */
+  .stickyLayout {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .stickyNav {
+    position: relative;
+    top: 0;
+    flex-basis: auto;
+    width: 100%;
+    max-width: 100%;
+    
+    /* Chuyển thành hàng ngang cho gọn */
+    border-bottom: 1px solid var(--foreground);
+    padding-bottom: 1rem;
+  }
+  
+  .stickyNav ul {
+    flex-direction: row; /* Hàng ngang */
+    gap: 1.5rem;
+    overflow-x: auto; /* Cho phép cuộn ngang nếu không đủ chỗ */
+  }
+
+  /* Link trên di động */
+  .stickyNav a {
+    white-space: nowrap; /* Không cho chữ xuống hàng */
+  }
+
+  .stickyNav a.active {
+    transform: none; /* Bỏ hiệu ứng translate */
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .contentColumn {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .contentTitle {
+    font-size: 1.875rem; /* 30px trên mobile */
+  }
+}
