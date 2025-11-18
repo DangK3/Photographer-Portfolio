@@ -13,10 +13,6 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <Container>
-      {/* Chúng ta dùng min-h (chiều cao tối thiểu) để đẩy nội dung
-        vào giữa màn hình, trừ đi khoảng trống của Header và Footer.
-        Bạn có thể điều chỉnh '250px' cho phù hợp.
-      */}
       <div className="flex flex-col items-center justify-center text-center py-24 md:py-32 min-h-[calc(100vh_-_250px)]">
         
         {/* Mã lỗi 404 */}

@@ -3,6 +3,7 @@ import "./globals.css";
 import ScrollToTopButton from '@/components/ScrollToTopButton';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import { Providers } from './providers';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -28,7 +29,9 @@ export default function RootLayout({
                        antialiased flex flex-col min-h-screen
                        transition-colors duration-300">
         <Providers>
-          <LayoutWrapper>{children}</LayoutWrapper>
+          <LayoutWrapper>{children}
+            <Toaster position="bottom-right" richColors />
+          </LayoutWrapper>
           <ScrollToTopButton />
         </Providers>
       </body>
