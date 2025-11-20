@@ -1,0 +1,121 @@
+// src/app/login/page.tsx
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '../../../lib/supabase';
+import { toast } from 'sonner';
+import { Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Gọi hàm đăng nhập của Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.session) {
+        toast.success('Đăng nhập thành công!');
+        // Chuyển hướng vào trang Admin
+        router.push('/admin');
+      }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Lỗi xác thực';
+      toast.error('Đăng nhập thất bại: ' + msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[var(--admin-bg)] p-4 transition-colors duration-300">
+      <div className="w-full max-w-md bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-2xl shadow-xl p-8 animate-fade-in-up">
+        
+        {/* Logo / Header */}
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 bg-[var(--admin-primary)] rounded-xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-lg shadow-indigo-500/30">
+            O
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--admin-fg)]">Oni Studio Admin</h1>
+          <p className="text-[var(--admin-sub)] mt-2">Đăng nhập để quản lý hệ thống</p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-[var(--admin-fg)] mb-1.5">Email</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Mail size={18} className="text-[var(--admin-sub)]" />
+              </div>
+              <input
+                type="email"
+                required
+                className="w-full pl-10 pr-4 py-2.5 bg-[var(--admin-bg)] border border-[var(--admin-border)] text-[var(--admin-fg)] rounded-lg focus:ring-2 focus:ring-[var(--admin-primary)] focus:border-transparent outline-none transition-all"
+                placeholder="admin@onistudio.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--admin-fg)] mb-1.5">Mật khẩu</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock size={18} className="text-[var(--admin-sub)]" />
+              </div>
+              <input
+                type="password"
+                required
+                className="w-full pl-10 pr-4 py-2.5 bg-[var(--admin-bg)] border border-[var(--admin-border)] text-[var(--admin-fg)] rounded-lg focus:ring-2 focus:ring-[var(--admin-primary)] focus:border-transparent outline-none transition-all"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-2.5 cursor-pointer bg-[var(--admin-primary)] text-[var(--admin-primary-fg)] rounded-lg font-medium hover:opacity-90 transition-all shadow-md shadow-indigo-500/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                Đang xác thực...
+              </>
+            ) : (
+              <>
+                Đăng nhập
+                <ArrowRight size={18} />
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* Footer Text */}
+        <div className="mt-6 text-center text-xs text-[var(--admin-sub)]">
+          <p>Chỉ dành cho nhân viên được cấp quyền.</p>
+        </div>
+      </div>
+    </div>
+  );
+}

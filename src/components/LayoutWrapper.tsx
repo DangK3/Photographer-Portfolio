@@ -1,9 +1,9 @@
 // src/components/LayoutWrapper.tsx
-'use client'; // Bắt buộc, vì chúng ta dùng Hooks
-
+'use client'; 
 import { useState, useEffect, useRef, ReactNode } from 'react';
-import Header from '@/components/Header'; // Import header hiện tại
+import Header from '@/components/Header'; 
 import Footer from '@/components/Footer';
+import { usePathname } from 'next/navigation';
 
 interface LayoutWrapperProps {
   children: ReactNode;
@@ -16,6 +16,11 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const [headerHeight, setHeaderHeight] = useState(0);
   // Ref để tham chiếu đến header gốc và đo chiều cao
   const originalHeaderRef = useRef<HTMLDivElement>(null);
+
+  const pathname = usePathname();
+  // Kiểm tra xem trang hiện tại có phải là Admin không
+  const isAdminPage = pathname?.startsWith('/admin');
+  const isAdminLoginPage = pathname === '/login';
 
   // 1. Đo chiều cao của header gốc sau khi component mount
   useEffect(() => {
@@ -47,11 +52,12 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [headerHeight]); // Chạy lại mỗi khi headerHeight thay đổi
-
+  if (isAdminPage || isAdminLoginPage) {
+    return <>{children}</>;
+  }
   return (
     <>
       {/* 1. HEADER GỐC (Static) */}
-      {/* Nó nằm trong 1 div để chúng ta có thể đo chiều cao bằng ref */}
       {/* z-20: Nằm dưới header fixed (z-30) */}
       <div ref={originalHeaderRef} className="relative z-20">
         <Header />
@@ -67,14 +73,11 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
                      showFixedHeader ? 'translate-y-0' : '-translate-y-full'
                    }`}
       >
-        {/* Chúng ta tái sử dụng component Header của bạn */}
         <Header />
       </div>
 
-      {/* 3. Nội dung trang */}
       <main className="flex-1">{children}</main>
 
-      {/* 4. Footer */}
       <Footer />
     </>
   );
