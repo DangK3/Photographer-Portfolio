@@ -32,7 +32,7 @@ export default function ThemeToggle({ isAdmin = false }: ThemeToggleProps) {
 
   const iconClass = isAdmin
     ? "w-5 h-5" // Icon Admin nhỏ gọn hơn chút
-    : "w-6 h-6 text-black dark:text-white p-1";
+    : "w-6 h-6 p-1";
 
   // Icon Admin (Dùng Lucide cho đồng bộ với Admin Layout)
   // Hoặc dùng SVG cũ nhưng đổi màu theo biến admin

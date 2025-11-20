@@ -18,7 +18,12 @@ import {
   Clock
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
-
+import localFont from 'next/font/local'; 
+const logoFont = localFont({
+  src: '../../fonts/cameliya-regular.ttf',
+  display: 'swap',
+  variable: '--font-logo',
+});
 
 interface NavLinkProps {
   href: string;
@@ -162,8 +167,8 @@ export default function AdminLayout({
             <div className="w-8 h-8 bg-[var(--admin-primary)] rounded-lg flex items-center justify-center text-white font-bold">
               O
             </div>
-            <span className="text-xl font-bold tracking-tight text-[var(--admin-fg)]">
-              ONI ADMIN
+            <span className={`${logoFont.variable} text-xl font-bold tracking-widest text-[var(--admin-fg)] ${logoFont.className}`}>
+              Oni Admin
             </span>
           </div>
           <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-[var(--admin-sub)]">

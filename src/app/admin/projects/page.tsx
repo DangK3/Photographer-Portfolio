@@ -125,7 +125,7 @@ export default function ProjectListPage() {
       {/* Table View */}
       <div className="bg-[var(--admin-card)] rounded-xl border border-[var(--admin-border)] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+          <table className="w-full text-sm text-left min-w-[900px]">
             <thead className="bg-[var(--admin-bg)] text-[var(--admin-sub)] uppercase text-xs font-semibold border-b border-[var(--admin-border)]">
               <tr>
                 <th className="px-6 py-4">Hình ảnh</th>
