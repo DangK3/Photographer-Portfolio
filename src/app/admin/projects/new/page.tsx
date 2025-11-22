@@ -1,67 +1,44 @@
 // src/app/admin/projects/new/page.tsx
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { supabase } from '../../../../../lib/supabase';
 import { compressImage } from '@/lib/image-utils';
 import { toast } from 'sonner';
 import { 
-  ArrowLeft, 
-  Upload, 
-  X, 
-  Save, 
-  Loader2, 
-  ImagePlus 
+  ArrowLeft, Upload, X, Save, Loader2, ImagePlus, Plus, Type, AlignLeft, Trash2 
 } from 'lucide-react';
 
-
-// Helper: Hàm tạo Slug từ tiếng Việt
-const generateSlug = (str: string) => {
-  return str
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Xóa dấu tiếng Việt
-    .replace(/[đĐ]/g, 'd')
-    .replace(/[^a-z0-9\s-]/g, '') // Xóa ký tự đặc biệt
-    .trim()
-    .replace(/\s+/g, '-') // Thay khoảng trắng bằng dấu gạch ngang
-    + '-' + Date.now(); // Thêm timestamp để đảm bảo KHÔNG TRÙNG lặp
-};
-
-// --- 1. Định nghĩa Interfaces chuẩn ---
+// --- Interfaces ---
 interface Category {
   category_id: number;
   name: string;
 }
 
-interface ProjectImageInsert {
-  project_id: number;
-  image_url: string;
-  display_order: number;
+// Kiểu dữ liệu cho Form Builder
+type BlockType = 'heading' | 'paragraph' | 'imageRow';
+
+interface ContentBlock {
+  id: string; // ID tạm để quản lý UI
+  type: BlockType;
+  content?: string; // Dùng cho Heading/Paragraph
+  images?: File[]; // Dùng cho ImageRow (File chưa upload)
+  previews?: string[]; // Preview ảnh
 }
 
-// Helper: Hàm trích xuất thông báo lỗi an toàn từ biến unknown
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error) return error.message;
-  
-  if (typeof error === 'object' && error !== null) {
-    // Kiểm tra các trường lỗi thường gặp của Supabase
-    if ('message' in error) return String((error as { message: unknown }).message);
-    if ('error_description' in error) return String((error as { error_description: unknown }).error_description);
-    if ('details' in error) return String((error as { details: unknown }).details);
-  }
-  
-  return 'Đã xảy ra lỗi không xác định';
-};
+interface CreditItem {
+  label: string;
+  value: string;
+}
 
 export default function NewProjectPage() {
   const router = useRouter();
-  
-  // --- State Quản lý Form ---
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   
+  // Form cơ bản
   const [formData, setFormData] = useState({
     title: '',
     client_name: '',
@@ -70,389 +47,368 @@ export default function NewProjectPage() {
     is_featured: false,
   });
 
-  // --- State Quản lý Ảnh ---
+  // Thumbnail
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
-  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
-  // Ref để reset input file
-  const galleryInputRef = useRef<HTMLInputElement>(null);
+  // --- 1. QUẢN LÝ CREDITS ---
+  const [credits, setCredits] = useState<CreditItem[]>([
+    { label: 'Photographer', value: '' }, // Mặc định có 1 dòng
+  ]);
 
-  // 1. Lấy danh sách Category khi vào trang
+  const addCredit = () => setCredits([...credits, { label: '', value: '' }]);
+  const removeCredit = (index: number) => setCredits(credits.filter((_, i) => i !== index));
+  const updateCredit = (index: number, field: keyof CreditItem, value: string) => {
+    const newCredits = [...credits];
+    newCredits[index][field] = value;
+    setCredits(newCredits);
+  };
+
+  // --- 2. QUẢN LÝ NỘI DUNG BÀI VIẾT (BUILDER) ---
+  const [blocks, setBlocks] = useState<ContentBlock[]>([]);
+
+  const addBlock = (type: BlockType) => {
+    setBlocks([
+      ...blocks, 
+      { id: Math.random().toString(36).substr(2, 9), type, content: '', images: [], previews: [] }
+    ]);
+  };
+
+  const removeBlock = (id: string) => {
+    setBlocks(blocks.filter(b => b.id !== id));
+  };
+
+  const updateBlockContent = (id: string, content: string) => {
+    setBlocks(blocks.map(b => b.id === id ? { ...b, content } : b));
+  };
+
+  const handleBlockImagesChange = (id: string, files: FileList | null) => {
+    if (!files) return;
+    const newFiles = Array.from(files);
+    const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+
+    setBlocks(blocks.map(b => {
+      if (b.id === id) {
+        return {
+          ...b,
+          images: [...(b.images || []), ...newFiles],
+          previews: [...(b.previews || []), ...newPreviews]
+        };
+      }
+      return b;
+    }));
+  };
+
+  // Load Categories
   useEffect(() => {
     const fetchCategories = async () => {
-      // Ép kiểu data trả về thành Category[]
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('portfolio_categories')
         .select('category_id, name')
         .eq('is_active', true)
         .order('display_order');
-      
-      if (error) {
-        toast.error('Lỗi tải danh mục: ' + error.message);
-      } else if (data) {
-        // Dùng unknown làm bước đệm an toàn nếu Type Supabase chưa được generate
-        setCategories(data as unknown as Category[]);
-      }
+      if (data) setCategories(data as unknown as Category[]);
     };
     fetchCategories();
   }, []);
 
-  // 2. Xử lý chọn Ảnh Đại Diện (Thumbnail)
+  // Handle Thumbnail
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       const file = e.target.files[0];
       setThumbnailFile(file);
       setThumbnailPreview(URL.createObjectURL(file));
     }
   };
 
-  // 3. Xử lý chọn Ảnh Gallery (Nhiều ảnh)
-  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      const newPreviews = files.map(file => URL.createObjectURL(file));
-      
-      setGalleryFiles(prev => [...prev, ...files]);
-      setGalleryPreviews(prev => [...prev, ...newPreviews]);
-    }
-  };
-
-  // Xóa ảnh khỏi danh sách chờ upload
-  const removeGalleryImage = (index: number) => {
-    setGalleryFiles(prev => prev.filter((_, i) => i !== index));
-    setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // 4. Hàm Upload ảnh lên Supabase Storage
+  // Helper Upload
   const uploadImage = async (file: File, folder: string): Promise<string | null> => {
     try {
-      // Nén ảnh trước khi up
       const compressedBlob = await compressImage(file);
       const compressedFile = new File([compressedBlob], file.name, { type: 'image/webp' });
-
       const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
 
-      const { error } = await supabase.storage
-        .from('portfolio-images')
-        .upload(fileName, compressedFile);
-
+      const { error } = await supabase.storage.from('portfolio-images').upload(fileName, compressedFile);
       if (error) throw error;
 
-      const { data } = supabase.storage
-        .from('portfolio-images')
-        .getPublicUrl(fileName);
-        
+      const { data } = supabase.storage.from('portfolio-images').getPublicUrl(fileName);
       return data.publicUrl;
-    } catch (error: unknown) {
-      console.error('Upload error:', getErrorMessage(error));
+    } catch (error) {
+      console.error('Upload err:', error);
       return null;
     }
   };
 
-  // 5. Xử lý Submit Form (Lưu tất cả)
+  // --- SUBMIT FORM ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate cơ bản
-    if (!formData.title || !formData.category_id) {
-      toast.warning('Vui lòng nhập Tên dự án và chọn Danh mục');
-      return;
-    }
-    if (!thumbnailFile) {
-      toast.warning('Vui lòng chọn ảnh đại diện (Thumbnail)');
+    if (!formData.title || !formData.category_id || !thumbnailFile) {
+      toast.warning('Vui lòng điền đầy đủ thông tin bắt buộc (*)');
       return;
     }
 
     setIsLoading(true);
-    const toastId = toast.loading('Đang xử lý dữ liệu...');
+    const toastId = toast.loading('Đang xử lý...');
 
     try {
-      // --- BƯỚC 0: Lấy thông tin người dùng đang đăng nhập ---
-      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      // 1. Lấy User ID
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser?.email) throw new Error('Chưa đăng nhập');
       
-      if (authError || !authUser || !authUser.email) {
-        throw new Error('Bạn chưa đăng nhập hoặc phiên làm việc hết hạn.');
-      }
+      const { data: userProfile } = await supabase.from('users').select('user_id').eq('email', authUser.email).single();
+      const currentUserId = userProfile?.user_id;
 
-      // Tìm user_id trong bảng public.users dựa trên email
-      const { data: userProfile, error: profileError } = await supabase
-        .from('users')
-        .select('user_id')
-        .eq('email', authUser.email)
-        .single();
-
-      if (profileError || !userProfile) {
-        throw new Error('Không tìm thấy hồ sơ nhân viên liên kết với email này.');
-      }
-
-      const currentUserId = userProfile.user_id;
-
-      // --- BƯỚC A: Upload Thumbnail ---
+      // 2. Upload Thumbnail
       const thumbnailUrl = await uploadImage(thumbnailFile, 'thumbnails');
-      if (!thumbnailUrl) throw new Error('Lỗi upload thumbnail (Kiểm tra lại Storage Policy)');
+      if (!thumbnailUrl) throw new Error('Lỗi upload thumbnail');
 
-      // --- BƯỚC B: Tạo Dự án trong Database ---
-      const { data: projectData, error: projectError } = await supabase
-        .from('projects')
-        .insert({
-          title: formData.title,
-          // THÊM DÒNG NÀY: Tự động tạo slug từ tiêu đề
-          slug: generateSlug(formData.title), 
+      // 3. Xử lý Upload ảnh trong các Block Content
+      // Chúng ta cần biến đổi mảng `blocks` (chứa File) thành mảng JSON (chứa URL string)
+      const finalContent = await Promise.all(blocks.map(async (block) => {
+        if (block.type === 'imageRow' && block.images && block.images.length > 0) {
+          // Upload từng ảnh trong row này
+          const uploadPromises = block.images.map(file => uploadImage(file, 'gallery'));
+          const imageUrls = (await Promise.all(uploadPromises)).filter(url => url !== null);
           
-          client_name: formData.client_name,
-          description: formData.description,
-          category_id: parseInt(formData.category_id),
-          is_featured: formData.is_featured,
-          thumbnail_url: thumbnailUrl,
-          created_by: currentUserId 
-        })
-        .select()
-        .single();
-        
-      if (projectError) throw projectError;
-
-      // Ép kiểu để lấy ID an toàn
-      const newProject = projectData as { project_id: number };
-      const projectId = newProject.project_id;
-
-      // --- BƯỚC C: Upload Gallery (Nếu có) ---
-      if (galleryFiles.length > 0) {
-        toast.loading(`Đang upload ${galleryFiles.length} ảnh chi tiết...`, { id: toastId });
-        
-        const galleryPromises = galleryFiles.map(async (file, index) => {
-          const url = await uploadImage(file, 'gallery');
-          if (url) {
-            // Trả về object đúng kiểu ProjectImageInsert
-            return {
-              project_id: projectId,
-              image_url: url,
-              display_order: index
-            } as ProjectImageInsert;
-          }
-          return null;
-        });
-
-        // Lọc bỏ null và đảm bảo kiểu dữ liệu
-        const uploadedImages = (await Promise.all(galleryPromises)).filter((img): img is ProjectImageInsert => img !== null);
-
-        if (uploadedImages.length > 0) {
-          const { error: galleryError } = await supabase
-            .from('project_images')
-            .insert(uploadedImages);
-            
-          if (galleryError) throw galleryError;
+          return {
+            type: 'imageRow',
+            images: imageUrls // Lưu mảng URL
+          };
         }
-      }
+        // Các block text giữ nguyên
+        return {
+          type: block.type,
+          content: block.content
+        };
+      }));
+
+      // 4. Lưu vào Database
+      const { error } = await supabase.from('projects').insert({
+        title: formData.title,
+        slug: generateSlug(formData.title),
+        client_name: formData.client_name,
+        description: formData.description,
+        category_id: parseInt(formData.category_id),
+        is_featured: formData.is_featured,
+        thumbnail_url: thumbnailUrl,
+        created_by: currentUserId,
+        
+        // LƯU 2 TRƯỜNG MỚI DẠNG JSON
+        credits: credits.filter(c => c.label && c.value), // Lọc bỏ dòng trống
+        content: finalContent
+      });
+
+      if (error) throw error;
 
       toast.success('Thêm dự án thành công!', { id: toastId });
       router.push('/admin/projects');
 
-    } catch (error: unknown) {
-      const msg = getErrorMessage(error);
-      console.error('🔴 Chi tiết lỗi:', error);
-      toast.error(`Thất bại: ${msg}`, { id: toastId });
+    } catch (error: unknown) { // 1. Đổi any thành unknown
+      console.error('Lỗi chi tiết:', error);
+      
+      // 2. Helper trích xuất message an toàn
+      let errorMessage = 'Đã xảy ra lỗi không xác định';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        // Kiểm tra an toàn xem object có thuộc tính message không
+        if ('message' in error) {
+          errorMessage = String((error as { message: unknown }).message);
+        } else if ('error_description' in error) {
+          errorMessage = String((error as { error_description: unknown }).error_description);
+        }
+      }
+
+      toast.error(`Lỗi: ${errorMessage}`, { id: toastId });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
-      {/* Header */}
+    <div className="max-w-5xl mx-auto space-y-6 pb-20">
       <div className="flex items-center gap-4 mb-8">
-        <button 
-          onClick={() => router.back()}
-          className="p-2 rounded-lg hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] transition-colors"
-        >
+        <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-[var(--admin-hover)] text-[var(--admin-sub)]">
           <ArrowLeft size={24} />
         </button>
-        <h1 className="text-2xl font-bold text-[var(--admin-fg)]">Thêm Dự án Mới</h1>
+        <h1 className="text-2xl font-bold text-[var(--admin-fg)]">Thêm Dự án (Tạp chí)</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         
-        {/* Card 1: Thông tin chung */}
+        {/* --- CARD 1: THÔNG TIN CƠ BẢN --- */}
         <div className="p-6 bg-[var(--admin-card)] rounded-xl border border-[var(--admin-border)] shadow-sm space-y-6">
-          <h2 className="text-lg font-semibold text-[var(--admin-fg)] border-b border-[var(--admin-border)] pb-4">
-            Thông tin cơ bản
-          </h2>
+          <h2 className="text-lg font-semibold text-[var(--admin-fg)] border-b border-[var(--admin-border)] pb-4">Thông tin chung</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[var(--admin-fg)]">Tên Dự án <span className="text-red-500">*</span></label>
-              <input 
-                type="text" 
-                required
-                className="w-full p-3 bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-lg focus:ring-2 focus:ring-[var(--admin-primary)] outline-none transition-all"
-                placeholder="Ví dụ: Summer Collection 2024"
-                value={formData.title}
-                onChange={e => setFormData({...formData, title: e.target.value})}
-              />
+              <label className="text-sm font-medium text-[var(--admin-fg)]">Tên Dự án *</label>
+              <input required type="text" className="admin-input" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
             </div>
-
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[var(--admin-fg)]">Khách hàng / Brand</label>
-              <input 
-                type="text" 
-                className="w-full p-3 bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-lg focus:ring-2 focus:ring-[var(--admin-primary)] outline-none transition-all"
-                placeholder="Ví dụ: Dior, Cá nhân..."
-                value={formData.client_name}
-                onChange={e => setFormData({...formData, client_name: e.target.value})}
-              />
+              <label className="text-sm font-medium text-[var(--admin-fg)]">Khách hàng</label>
+              <input type="text" className="admin-input" value={formData.client_name} onChange={e => setFormData({...formData, client_name: e.target.value})} />
             </div>
-
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[var(--admin-fg)]">Danh mục <span className="text-red-500">*</span></label>
-              <select 
-                required
-                className="w-full p-3 bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-lg focus:ring-2 focus:ring-[var(--admin-primary)] outline-none transition-all"
-                value={formData.category_id}
-                onChange={e => setFormData({...formData, category_id: e.target.value})}
-              >
+              <label className="text-sm font-medium text-[var(--admin-fg)]">Danh mục *</label>
+              <select required className="admin-input" value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})}>
                 <option value="">-- Chọn danh mục --</option>
-                {categories.map(cat => (
-                  <option key={cat.category_id} value={cat.category_id}>{cat.name}</option>
-                ))}
+                {categories.map(cat => <option key={cat.category_id} value={cat.category_id}>{cat.name}</option>)}
               </select>
             </div>
-
             <div className="flex items-center space-x-3 mt-8">
-              <input 
-                type="checkbox" 
-                id="is_featured"
-                className="w-5 h-5 text-[var(--admin-primary)] rounded focus:ring-[var(--admin-primary)] cursor-pointer"
-                checked={formData.is_featured}
-                onChange={e => setFormData({...formData, is_featured: e.target.checked})}
-              />
-              <label htmlFor="is_featured" className="text-sm font-medium text-[var(--admin-fg)] cursor-pointer select-none">
-                Đánh dấu là <b>Nổi bật</b> (Hiện lên trang chủ)
-              </label>
+              <input type="checkbox" id="is_featured" className="w-5 h-5" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
+              <label htmlFor="is_featured" className="text-sm font-medium text-[var(--admin-fg)]">Đánh dấu Nổi bật</label>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[var(--admin-fg)]">Mô tả chi tiết</label>
-            <textarea 
-              rows={4}
-              className="w-full p-3 bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-lg focus:ring-2 focus:ring-[var(--admin-primary)] outline-none transition-all"
-              placeholder="Mô tả về concept, địa điểm, ekip..."
-              value={formData.description}
-              onChange={e => setFormData({...formData, description: e.target.value})}
-            />
+            <label className="text-sm font-medium text-[var(--admin-fg)]">Mô tả ngắn (Intro)</label>
+            <textarea rows={3} className="admin-input" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
           </div>
-        </div>
 
-        {/* Card 2: Hình ảnh */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Thumbnail Upload (1/3) */}
-          <div className="md:col-span-1 p-6 bg-[var(--admin-card)] rounded-xl border border-[var(--admin-border)] shadow-sm space-y-4">
-            <h2 className="text-lg font-semibold text-[var(--admin-fg)]">Ảnh đại diện <span className="text-red-500">*</span></h2>
-            <p className="text-xs text-[var(--admin-sub)]">Ảnh hiển thị ngoài danh sách (Tỉ lệ 3:4 hoặc 16:9).</p>
-            
-            <div className="relative aspect-[3/4] w-full bg-[var(--admin-bg)] border-2 border-dashed border-[var(--admin-border)] rounded-lg overflow-hidden hover:border-[var(--admin-primary)] transition-colors group cursor-pointer">
-              <input 
-                type="file" 
-                accept="image/*"
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                onChange={handleThumbnailChange}
-              />
+          {/* --- Thumbnail --- */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[var(--admin-fg)]">Ảnh đại diện (Thumbnail) *</label>
+            <div className="relative aspect-[16/9] w-full md:w-1/2 bg-[var(--admin-bg)] border-2 border-dashed border-[var(--admin-border)] rounded-lg overflow-hidden hover:border-[var(--admin-primary)] cursor-pointer group">
+              <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer" onChange={handleThumbnailChange} />
               {thumbnailPreview ? (
-                <Image src={thumbnailPreview} alt="Thumbnail Preview" fill className="object-cover" />
+                <Image src={thumbnailPreview} alt="Thumb" fill className="object-cover" />
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-[var(--admin-sub)]">
-                  <ImagePlus size={40} className="mb-2 opacity-50" />
-                  <span className="text-sm">Chọn ảnh</span>
-                </div>
-              )}
-              
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                <span className="text-white text-sm font-medium">Thay đổi</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Gallery Upload (2/3) */}
-          <div className="md:col-span-2 p-6 bg-[var(--admin-card)] rounded-xl border border-[var(--admin-border)] shadow-sm space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--admin-fg)]">Album ảnh chi tiết</h2>
-                <p className="text-xs text-[var(--admin-sub)]">Hiển thị trong trang chi tiết (Masonry Layout).</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => galleryInputRef.current?.click()}
-                className="flex items-center gap-2 px-3 py-1.5 bg-[var(--admin-bg)] border border-[var(--admin-border)] text-[var(--admin-fg)] rounded-lg hover:bg-[var(--admin-hover)] text-sm transition-colors"
-              >
-                <Upload size={16} /> Thêm ảnh
-              </button>
-              <input 
-                type="file" 
-                multiple 
-                accept="image/*"
-                className="hidden"
-                ref={galleryInputRef}
-                onChange={handleGalleryChange}
-              />
-            </div>
-
-            {/* Gallery Grid */}
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mt-4">
-              {galleryPreviews.map((src, index) => (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-[var(--admin-border)] group">
-                  <Image src={src} alt={`Gallery ${index}`} fill className="object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removeGalleryImage(index)}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-              
-              {/* Empty State */}
-              {galleryPreviews.length === 0 && (
-                <div className="col-span-full py-12 text-center border-2 border-dashed border-[var(--admin-border)] rounded-lg text-[var(--admin-sub)] bg-[var(--admin-bg)]/50">
-                  <ImagePlus size={32} className="mx-auto mb-2 opacity-50" />
-                  <p>Chưa có ảnh nào trong album</p>
-                </div>
+                <div className="flex flex-col items-center justify-center h-full text-[var(--admin-sub)]"><ImagePlus size={32} /><span>Chọn ảnh</span></div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-4 pt-4 border-t border-[var(--admin-border)]">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-6 py-2.5 text-[var(--admin-sub)] font-medium hover:text-[var(--admin-fg)] transition-colors"
-          >
-            Hủy bỏ
-          </button>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="flex items-center gap-2 px-8 py-2.5 bg-[var(--admin-primary)] text-white rounded-lg hover:opacity-90 transition-all shadow-lg shadow-indigo-500/30 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin" size={20} />
-                Đang lưu...
-              </>
-            ) : (
-              <>
-                <Save size={20} />
-                Lưu Dự Án
-              </>
-            )}
-          </button>
+        {/* --- CARD 2: CREDITS --- */}
+        <div className="p-6 bg-[var(--admin-card)] rounded-xl border border-[var(--admin-border)] shadow-sm space-y-4">
+          <div className="flex justify-between items-center border-b border-[var(--admin-border)] pb-4">
+            <h2 className="text-lg font-semibold text-[var(--admin-fg)]">Credits (Ekip)</h2>
+            <button type="button" onClick={addCredit} className="text-sm text-[var(--admin-primary)] flex items-center gap-1 hover:underline"><Plus size={16}/> Thêm dòng</button>
+          </div>
+          
+          <div className="space-y-3">
+            {credits.map((item, idx) => (
+              <div key={idx} className="flex gap-4">
+                <input placeholder="Vai trò (VD: Photo)" className="admin-input w-1/3" value={item.label} onChange={e => updateCredit(idx, 'label', e.target.value)} />
+                <input placeholder="Tên (VD: Evis Tran)" className="admin-input w-1/3" value={item.value} onChange={e => updateCredit(idx, 'value', e.target.value)} />
+                <button type="button" onClick={() => removeCredit(idx)} className="text-red-500 hover:bg-red-50 p-2 rounded"><Trash2 size={18} /></button>
+              </div>
+            ))}
+          </div>
         </div>
 
+        {/* --- CARD 3: BỘ DỰNG NỘI DUNG (ARTICLE BUILDER) --- */}
+        <div className="p-6 bg-[var(--admin-card)] rounded-xl border border-[var(--admin-border)] shadow-sm space-y-6">
+          <div className="flex justify-between items-center border-b border-[var(--admin-border)] pb-4">
+            <h2 className="text-lg font-semibold text-[var(--admin-fg)]">Nội dung chi tiết</h2>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => addBlock('heading')} className="btn-tool"><Type size={16}/> Tiêu đề</button>
+              <button type="button" onClick={() => addBlock('paragraph')} className="btn-tool"><AlignLeft size={16}/> Đoạn văn</button>
+              <button type="button" onClick={() => addBlock('imageRow')} className="btn-tool"><ImagePlus size={16}/> Hàng ảnh</button>
+            </div>
+          </div>
+
+          <div className="space-y-6 min-h-[200px] bg-[var(--admin-bg)] p-4 rounded-lg">
+            {blocks.length === 0 && <p className="text-center text-[var(--admin-sub)] italic py-10">Chưa có nội dung. Hãy thêm các block phía trên.</p>}
+            
+            {blocks.map((block, index) => (
+              <div key={block.id} className="relative group bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-lg p-4 shadow-sm">
+                <div className="absolute -left-3 -top-3 bg-[var(--admin-fg)] text-[var(--admin-bg)] text-xs font-bold px-2 py-1 rounded shadow">
+                  #{index + 1} {block.type === 'heading' ? 'Tiêu đề' : block.type === 'paragraph' ? 'Văn bản' : 'Ảnh'}
+                </div>
+                <button type="button" onClick={() => removeBlock(block.id)} className="absolute top-2 right-2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><X size={18}/></button>
+
+                {/* Render Input dựa theo Type */}
+                {block.type === 'heading' && (
+                  <input 
+                    type="text" 
+                    placeholder="Nhập tiêu đề phân đoạn..." 
+                    className="w-full text-xl font-bold bg-transparent border-b border-transparent focus:border-[var(--admin-primary)] outline-none p-2"
+                    value={block.content}
+                    onChange={e => updateBlockContent(block.id, e.target.value)}
+                  />
+                )}
+
+                {block.type === 'paragraph' && (
+                  <textarea 
+                    rows={3} 
+                    placeholder="Nhập nội dung đoạn văn..." 
+                    className="w-full bg-transparent resize-y outline-none p-2 text-[var(--admin-sub)]"
+                    value={block.content}
+                    onChange={e => updateBlockContent(block.id, e.target.value)}
+                  />
+                )}
+
+                {block.type === 'imageRow' && (
+                  <div>
+                    <div className="grid grid-cols-4 gap-4 mb-4">
+                      {block.previews?.map((src, i) => (
+                        <div key={i} className="relative aspect-square rounded overflow-hidden border border-[var(--admin-border)]">
+                          <Image src={src} alt="preview" fill className="object-cover" />
+                        </div>
+                      ))}
+                      <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-[var(--admin-border)] rounded hover:bg-[var(--admin-bg)] cursor-pointer">
+                        <Upload size={20} className="text-[var(--admin-sub)]"/>
+                        <span className="text-xs text-[var(--admin-sub)]">Thêm ảnh</span>
+                        <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleBlockImagesChange(block.id, e.target.files)} />
+                      </label>
+                    </div>
+                    <p className="text-xs text-[var(--admin-sub)]">Hệ thống sẽ tự động chia cột dựa trên số lượng ảnh (1-4 ảnh).</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex justify-end pt-4 border-t border-[var(--admin-border)]">
+          <button type="submit" disabled={isLoading} className="flex items-center gap-2 px-8 py-3 bg-[var(--admin-primary)] text-white rounded-lg hover:opacity-90 transition-all shadow-lg shadow-indigo-500/30 font-medium disabled:opacity-70">
+            {isLoading ? <Loader2 className="animate-spin" /> : <Save />} Lưu Dự Án
+          </button>
+        </div>
       </form>
+
+      <style jsx>{`
+        .admin-input {
+          width: 100%;
+          padding: 0.75rem;
+          background-color: var(--admin-bg);
+          border: 1px solid var(--admin-border);
+          border-radius: 0.5rem;
+          outline: none;
+          color: var(--admin-fg);
+        }
+        .admin-input:focus {
+          border-color: var(--admin-primary);
+          box-shadow: 0 0 0 2px var(--admin-primary-20);
+        }
+        .btn-tool {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          background-color: var(--admin-bg);
+          border: 1px solid var(--admin-border);
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          color: var(--admin-fg);
+          transition: all 0.2s;
+        }
+        .btn-tool:hover {
+          background-color: var(--admin-hover);
+          border-color: var(--admin-primary);
+          color: var(--admin-primary);
+        }
+      `}</style>
     </div>
   );
 }
+
+// Helper Slug
+const generateSlug = (str: string) => {
+  return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, 'd').replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-') + '-' + Date.now();
+};

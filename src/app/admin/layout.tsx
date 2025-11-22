@@ -227,7 +227,7 @@ export default function AdminLayout({
             <div className="flex items-center gap-3 pl-2">
               <div className="hidden md:block text-sm text-right">
                 <p className="font-medium text-[var(--admin-fg)] leading-tight">Admin</p>
-                <p className="text-[10px] text-[var(--admin-sub)] uppercase tracking-wider">Super User</p>
+                <p className="text-[10px] text-[var(--admin-sub)] uppercase tracking-wider">Super Admin</p>
               </div>
               <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--admin-primary)] to-purple-600 border-2 border-[var(--admin-card)] shadow-sm flex items-center justify-center text-white font-bold text-xs">
                 A
@@ -267,9 +267,9 @@ function NavLink({ href, icon, label, isActive, onClick }: NavLinkProps) {
 }
 
 function getPageTitle(pathname: string) {
-  if (pathname === '/admin') return 'Dashboard';
-  if (pathname.startsWith('/admin/projects')) return 'Portfolio Projects';
-  if (pathname.startsWith('/admin/staff')) return 'Human Resources';
-  if (pathname.startsWith('/admin/settings')) return 'System Settings';
-  return 'Admin Panel';
+  if (pathname === '/admin') return 'Bảng tổng quan';
+  if (pathname.startsWith('/admin/projects')) return 'Tất cả dự án';
+  if (pathname.startsWith('/admin/staff')) return 'Nhân sự';
+  if (pathname.startsWith('/admin/settings')) return 'Cài đặt hệ thống';
+  return 'Bảng điều khiển';
 }

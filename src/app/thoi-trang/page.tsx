@@ -1,60 +1,93 @@
-// src/app/thoi-trang/page.tsx
-import Container from '@/components/Container';
-import { allProjects } from '@/data/projects-master-data';
-import ProjectGrid from '../../components/project-grid'; // Đảm bảo import project-grid
-import type { Metadata } from 'next';
-import { 
-  IS_DEMO_MODE, 
-  DESIRED_PROJECT_COUNT, 
-  SLUG_CATE_FASHION 
-} from '@/lib/constants';
-import { seedProjectsByCategory } from '@/lib/seed-helpers';
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { getProjects } from '@/lib/actions';
+import { ArrowUpRight } from 'lucide-react';
+import { Metadata } from 'next';
 
+// Metadata cho SEO
 export const metadata: Metadata = {
   title: 'Dự án Thời Trang | Oni Studio',
   description: 'Các dự án editorial, lookbook và nhiếp ảnh thời trang.',
 };
-function getFashionProjects() {
-  // Lấy dự án thật trước
-  const realProjects = allProjects.filter(
-    (p) => p.cateSlug === SLUG_CATE_FASHION
-  );
 
-  // Nếu IS_DEMO_MODE = true, và chúng ta có dự án thật để làm mẫu...
-  if (IS_DEMO_MODE && realProjects.length > 0) {
-    // ...thì dùng hàm seed của bạn để nhân bản chúng
-    return seedProjectsByCategory(
-      realProjects, // Dùng mảng dự án thật làm "hạt giống"
-      'Thời trang', // Tên category
-      DESIRED_PROJECT_COUNT // Số lượng mong muốn
-    );
-  }
-
-  // Nếu IS_DEMO_MODE = false, chỉ trả về dự án thật
-  return realProjects;
-}
-
-export default function FashionPage() {
-  const projectsToDisplay = getFashionProjects();
+export default async function FashionPage() {
+  // 1. Gọi dữ liệu thật từ Supabase (hoặc Demo)
+  const projects = await getProjects('thoi-trang'); // <-- Slug của danh mục
 
   return (
-    <Container className="py-16 md:py-24">
-      <div className="text-center mb-12 md:mb-16">
-        <h1 className="text-4xl md:text-5xl font-light tracking-tighter">
-          Thời Trang
-        </h1>
-        <p className="text-lg md:text-xl text-[var(--sub-text)] mt-4">
-          Khám phá các dự án thời trang, lookbook và editorial.
-        </p>
-      </div>
+    <main className="min-h-screen bg-[var(--background)] pt-32 pb-20 px-4 md:px-8">
+      <div className="max-w-8xl mx-auto">
+        
+        {/* Header */}
+        <div className="mb-16">
+          <h1 className="text-4xl md:text-6xl font-bold text-[var(--foreground)] tracking-tighter mb-4">
+            Thời Trang
+          </h1>
+          <p className="text-[var(--sub-text)] text-lg max-w-xl">
+            Khám phá các dự án thời trang, lookbook và editorial.
+          </p>
+        </div>
 
-      {projectsToDisplay.length > 0 ? (
-        <ProjectGrid allProjects={projectsToDisplay} />
-      ) : (
-        <p className="text-center text-[var(--sub-text)]">
-          Chưa có dự án nào trong mục này.
-        </p>
-      )}
-    </Container>
+        {/* Empty State */}
+        {projects.length === 0 && (
+          <div className="py-20 text-center text-[var(--sub-text)] border-y border-[var(--foreground)]/10">
+            Chưa có dự án nào trong danh mục này.
+          </div>
+        )}
+
+        {/* Project Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-[300px] md:auto-rows-[400px]">
+          {projects.map((project) => (
+            <Link 
+              key={project.id}
+              href={`/du-an/${project.slug}`}
+              className={`relative group overflow-hidden bg-gray-100 dark:bg-neutral-900 rounded-lg transition-all duration-300
+                md:col-span-${project.colSpan} md:row-span-${project.rowSpan}
+                ${project.isFeatured ? 'ring-2 ring-offset-2 ring-[var(--foreground)] dark:ring-white shadow-xl z-10' : 'opacity-90 hover:opacity-100'}
+              `} // <-- Logic highlight ở đây
+              style={{
+                gridColumn: `span ${project.colSpan}`,
+                gridRow: `span ${project.rowSpan}`
+              }}
+            >
+              {/* Badge Nổi Bật (Chỉ hiện nếu là Featured) */}
+              {project.isFeatured && (
+                <div className="absolute top-3 right-3 z-20 bg-[var(--foreground)] text-[var(--background)] text-[10px] font-bold uppercase px-2 py-1 rounded shadow-sm">
+                  Nổi bật
+                </div>
+              )}
+
+              {/* Image */}
+              <Image
+                src={typeof project.image === 'string' ? project.image : project.image.src}
+                alt={project.title}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                  <span className="text-xs font-medium text-white/80 uppercase tracking-wider mb-2 block">
+                    {project.year}
+                  </span>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-2xl font-bold text-white">
+                      {project.title}
+                    </h3>
+                    <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
+                      <ArrowUpRight className="text-white w-5 h-5" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+      </div>
+    </main>
   );
 }

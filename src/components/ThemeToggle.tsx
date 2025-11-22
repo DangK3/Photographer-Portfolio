@@ -27,8 +27,8 @@ export default function ThemeToggle({ isAdmin = false }: ThemeToggleProps) {
 
   // Cấu hình màu sắc dựa trên isAdmin
   const buttonClass = isAdmin
-    ? "p-1 rounded-lg transition-all duration-200 bg-[var(--admin-primary)] hover:bg-[var(--admin-hover)] text-[var(--admin-primary-fg)] hover:text-[var(--admin-fg)] border border-transparent border-[var(--admin-border)]"
-    : "rounded-md transition-colors";
+    ? "p-1 cursor-pointer rounded-lg transition-all duration-200 bg-[var(--admin-primary)] hover:bg-[var(--admin-hover)] text-[var(--admin-primary-fg)] hover:text-[var(--admin-fg)] border border-transparent border-[var(--admin-border)]"
+    : "rounded-md transition-colors cursor-pointer";
 
   const iconClass = isAdmin
     ? "w-5 h-5" // Icon Admin nhỏ gọn hơn chút
