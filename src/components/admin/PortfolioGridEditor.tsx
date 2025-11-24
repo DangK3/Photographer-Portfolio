@@ -8,7 +8,8 @@ import { toast } from 'sonner';
 import { Save, RotateCcw, Edit3, Check, MousePointerClick, GripVertical } from 'lucide-react';
 import { ProjectData } from '@/data/projects-master-data';
 import { updatePortfolioLayout, ProjectGridUpdate } from '@/lib/actions';
-import { supabase } from '../../../lib/supabase';
+//import { supabase } from '../../../lib/supabase';
+import { createBrowserClient } from '@supabase/ssr';
 
 // --- IMPORT DND KIT ---
 import {
@@ -27,15 +28,20 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableProjectItem } from './SortableProjectItem'; // Component vừa tạo ở B1
 
+
+
 interface EditorProps {
   initialProjects: ProjectData[];
 }
 
 export default function PortfolioGridEditor({ initialProjects }: EditorProps) {
   const [projects, setProjects] = useState<ProjectData[]>(initialProjects);
+  const [supabase] = useState(() => createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    ));
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
   // Cấu hình cảm biến kéo thả
   // activationConstraint: distance 5px -> Phải kéo 5px mới tính là drag (tránh click nhầm nút resize)
   const sensors = useSensors(
@@ -86,11 +92,11 @@ export default function PortfolioGridEditor({ initialProjects }: EditorProps) {
     setIsSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
-        toast.error('Hết phiên đăng nhập.');
+        toast.error('Không tìm thấy phiên đăng nhập. Vui lòng F5.');
         return;
-      }
-
+      }      
       // Chuẩn bị dữ liệu (Bao gồm cả displayOrder mới dựa trên vị trí index)
       const updates: ProjectGridUpdate[] = projects.map((p, index) => ({
         id: p.id,
