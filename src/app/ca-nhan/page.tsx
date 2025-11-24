@@ -40,23 +40,23 @@ export default async function PersonalPage() {
         {/* Project Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-[300px] md:auto-rows-[400px]">
           {projects.map((project, index) => {
-            const isSecondColMD = index % 2 === 1;   // md = 2 cột
-            const isSecondColLG = index % 3 === 1;   // lg = 3 cột
+            const isSecondColMD = index % 2 !== 1;   // md = 2 cột
+            const isSecondColLG = index % 3 !== 1;   // lg = 3 cột
             return (
             <Link 
               key={project.id}
               href={`/du-an/${project.slug}`}
               className={`relative group overflow-hidden bg-gray-100 dark:bg-neutral-900 rounded-lg transition-all duration-300
-                md:col-span-${project.colSpan} md:row-span-${project.rowSpan}
+                md:col-span-1 md:row-span-1
                 ${project.isFeatured ? 'ring-2 ring-offset-2 ring-[var(--foreground)] shadow-xl z-10' : 'opacity-90 hover:opacity-100'}
                 ${isSecondColMD ? 'md:top-[36px]' : 'md:top-0'}
                 ${isSecondColLG ? 'lg:top-[36px]' : 'lg:top-0'}
 
               `} // <-- Logic highlight ở đây
-              style={{
-                gridColumn: `span ${project.colSpan}`,
-                gridRow: `span ${project.rowSpan}`
-              }}
+              // style={{
+              //   gridColumn: `span ${project.colSpan}`,
+              //   gridRow: `span ${project.rowSpan}`
+              // }}
             >
               {/* Badge Nổi Bật (Chỉ hiện nếu là Featured) */}
               {project.isFeatured && (

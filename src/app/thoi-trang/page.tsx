@@ -47,15 +47,15 @@ export default async function FashionPage() {
               key={project.id}
               href={`/du-an/${project.slug}`}
               className={`relative group overflow-hidden bg-gray-100 dark:bg-neutral-900 rounded-lg transition-all duration-300
-                md:col-span-${project.colSpan} md:row-span-${project.rowSpan}
+                md:col-span-1 md:row-span-1
                 ${project.isFeatured ? 'ring-2 ring-offset-2 ring-[var(--foreground)] shadow-xl z-10' : 'opacity-90 hover:opacity-100'}
                 ${isSecondColMD ? 'md:top-[36px]' : 'md:top-0'}
                 ${isSecondColLG ? 'lg:top-[36px]' : 'lg:top-0'}
               `} // <-- Logic highlight ở đây
-              style={{
-                gridColumn: `span ${project.colSpan}`,
-                gridRow: `span ${project.rowSpan}`
-              }}
+              // style={{
+              //   gridColumn: `span ${project.colSpan}`,
+              //   gridRow: `span ${project.rowSpan}`
+              // }}
             >
               {/* Badge Nổi Bật (Chỉ hiện nếu là Featured) */}
               {project.isFeatured && (
