@@ -221,3 +221,21 @@ body::-webkit-scrollbar-thumb:hover {
 @keyframes l15{ 
   100%{transform: rotate(1turn)}
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-row {
+  /* opacity ban đầu là 0 để tránh bị nháy */
+  opacity: 0; 
+  /* forwards giúp giữ trạng thái cuối cùng (opacity: 1) sau khi chạy xong */
+  animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

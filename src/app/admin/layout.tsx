@@ -4,7 +4,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { supabase } from '../../../lib/supabase';
+// 1. XÓA IMPORT CŨ: import { supabase } from '../../../lib/supabase';
+// 2. THÊM IMPORT MỚI:
+import { createBrowserClient } from '@supabase/ssr';
+
 import { toast } from 'sonner';
 import { 
   LayoutDashboard, 
@@ -16,10 +19,11 @@ import {
   X,
   Home,
   Clock,
-  LayoutTemplate
+  LayoutTemplate // Icon cho menu Grid
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import localFont from 'next/font/local'; 
+
 const logoFont = localFont({
   src: '../../fonts/cameliya-regular.ttf',
   display: 'swap',
@@ -34,10 +38,8 @@ interface NavLinkProps {
   onClick?: () => void;
 }
 
-// === CẤU HÌNH THỜI GIAN ===
 const SESSION_DURATION_HOURS = 3; 
 const SESSION_DURATION_MS = SESSION_DURATION_HOURS * 60 * 60 * 1000;
-//const SESSION_DURATION_MS = 10 * 1000; // 10 giây
 
 export default function AdminLayout({
   children,
@@ -47,44 +49,49 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   
+  // 3. KHỞI TẠO CLIENT SUPABASE HỖ TRỢ COOKIE
+  const [supabase] = useState(() => createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ));
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [timeLeft, setTimeLeft] = useState<string>('--:--:--'); // State lưu chuỗi giờ hiển thị
+  const [timeLeft, setTimeLeft] = useState<string>('--:--:--');
 
-  // --- 1. LOGIC CHECK AUTH & COUNTDOWN ---
+  // --- LOGIC CHECK AUTH ---
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
     const checkAuth = async () => {
       try {
+        // Lệnh này giờ sẽ đọc được Cookie do trang Login tạo ra
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
+          // Nếu không có session, đẩy về login
           router.replace('/login');
           return;
         }
 
-        // Tính toán thời gian hết hạn
+        // --- Logic đếm ngược ---
         if (session.user?.last_sign_in_at) {
           const lastSignIn = new Date(session.user.last_sign_in_at).getTime();
           const expiryTime = lastSignIn + SESSION_DURATION_MS;
 
-          // Hàm cập nhật đồng hồ
           const updateTimer = () => {
             const now = Date.now();
             const diff = expiryTime - now;
 
             if (diff <= 0) {
-              // Hết giờ -> Đăng xuất
               clearInterval(intervalId);
               supabase.auth.signOut().then(() => {
-                toast.warning('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
+                toast.warning('Phiên làm việc đã hết hạn.');
                 router.replace('/login');
               });
               return;
             }
 
-            // Format ra Giờ:Phút:Giây
             const h = Math.floor(diff / (1000 * 60 * 60));
             const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((diff % (1000 * 60)) / 1000);
@@ -92,12 +99,13 @@ export default function AdminLayout({
             setTimeLeft(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
           };
 
-          // Chạy ngay lập tức & lặp lại mỗi giây
           updateTimer();
           intervalId = setInterval(updateTimer, 1000);
-          
-          setIsCheckingAuth(false);
         }
+        
+        // QUAN TRỌNG: Phải set false để tắt Loading spinner
+        setIsCheckingAuth(false);
+
       } catch (error) {
         console.error("Auth error:", error);
         router.replace('/login');
@@ -106,25 +114,19 @@ export default function AdminLayout({
 
     checkAuth();
 
-    // Cleanup khi thoát trang
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [router]);
+  }, [router, supabase]); // Thêm supabase vào dependency
 
-  // --- 2. HÀM ĐĂNG XUẤT ---
   const handleLogout = async () => {
-    // 1. Hỏi xác nhận: Nếu người dùng bấm "Cancel" (!) thì dừng hàm luôn
-    if (!confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-      toast.info("Phiên làm việc sẽ kết thúc?");
-      return; // Dừng lại, không làm gì cả
-    }
+    if (!confirm("Bạn có chắc chắn muốn đăng xuất?")) return;
 
-    // 2. Nếu người dùng bấm "OK", code sẽ chạy tiếp xuống đây
     try {
-      await supabase.auth.signOut(); // Thực hiện đăng xuất với Supabase
-      toast.success("Đăng xuất thành công!!"); // Thông báo thành công
-      router.replace('/login'); // Chuyển hướng về trang login
+      await supabase.auth.signOut();
+      toast.success("Đăng xuất thành công!!");
+      router.replace('/login');
+      router.refresh(); // Refresh để xóa cache của Middleware
     } catch (error) {
       console.error('Logout error:', error);
       toast.error("Lỗi khi đăng xuất");
@@ -165,7 +167,7 @@ export default function AdminLayout({
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-[var(--admin-border)]">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[var(--admin-primary)] rounded-lg flex items-center justify-center text-white font-bold">
+            <div className={`w-8 h-8 bg-[var(--admin-primary)] rounded-lg flex items-center justify-center text-white font-bold ${logoFont.className}`}>
               O
             </div>
             <span className={`${logoFont.variable} text-xl font-bold tracking-widest text-[var(--admin-fg)] ${logoFont.className}`}>
@@ -181,15 +183,19 @@ export default function AdminLayout({
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mb-3 px-4 mt-2">Studio</div>
           <NavLink href="/admin" icon={<LayoutDashboard size={20} />} label="Tổng quan" isActive={pathname === '/admin'} onClick={handleLinkClick} />
-          <NavLink href="/admin/projects" icon={<ImageIcon size={20} />} label="Dự án" isActive={pathname.startsWith('/admin/projects')} onClick={handleLinkClick} />
-          <NavLink href="/admin/staff" icon={<Users size={20} />} label="Nhân sự" isActive={pathname.startsWith('/admin/staff')} onClick={handleLinkClick} />
+          <NavLink href="/admin/projects" icon={<ImageIcon size={20} />} label="Dự án" isActive={pathname === '/admin/projects' || pathname === '/admin/projects/new' || pathname.startsWith('/admin/projects/')} onClick={handleLinkClick} />
+          
+          {/* Menu Grid Editor */}
           <NavLink 
             href="/admin/grid" 
             icon={<LayoutTemplate size={20} />} 
-            label="Bố cục" 
+            label="Bố cục Portfolio" 
             isActive={pathname.startsWith('/admin/grid')} 
             onClick={handleLinkClick} 
           />
+
+          <NavLink href="/admin/staff" icon={<Users size={20} />} label="Nhân sự" isActive={pathname.startsWith('/admin/staff')} onClick={handleLinkClick} />
+          
           <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mt-8 mb-3 px-4">Hệ thống</div>
           <NavLink href="/admin/settings" icon={<Settings size={20} />} label="Cài đặt chung" isActive={pathname.startsWith('/admin/settings')} onClick={handleLinkClick} />
         </nav>
@@ -210,7 +216,6 @@ export default function AdminLayout({
         
         {/* Header */}
         <header className="h-16 bg-[var(--admin-card)]/80 backdrop-blur-md border-b border-[var(--admin-border)] flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
-          
           <div className="flex items-center gap-4">
             <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 -ml-2 text-[var(--admin-sub)] rounded-lg">
               <Menu size={24} />
@@ -221,16 +226,12 @@ export default function AdminLayout({
           </div>
 
           <div className="flex items-center gap-3 md:gap-4">
-            {/* --- BỘ ĐẾM NGƯỢC (MỚI) --- */}
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-full text-xs font-mono font-medium text-[var(--admin-sub)]" title="Thời gian còn lại của phiên làm việc">
               <Clock size={14} className="text-[var(--admin-primary)] animate-pulse" />
               <span>{timeLeft}</span>
             </div>
-
             <div className="h-6 w-px bg-[var(--admin-border)] hidden sm:block"></div>
-
             <ThemeToggle isAdmin={true}/>
-            
             <div className="flex items-center gap-3 pl-2">
               <div className="hidden md:block text-sm text-right">
                 <p className="font-medium text-[var(--admin-fg)] leading-tight">Admin</p>
@@ -275,7 +276,8 @@ function NavLink({ href, icon, label, isActive, onClick }: NavLinkProps) {
 
 function getPageTitle(pathname: string) {
   if (pathname === '/admin') return 'Bảng tổng quan';
-  if (pathname.startsWith('/admin/projects')) return 'Tất cả dự án';
+  if (pathname === '/admin/portfolio-grid') return 'Bố cục Grid';
+  if (pathname.startsWith('/admin/projects')) return 'Quản lý Dự án';
   if (pathname.startsWith('/admin/staff')) return 'Nhân sự';
   if (pathname.startsWith('/admin/settings')) return 'Cài đặt hệ thống';
   return 'Bảng điều khiển';

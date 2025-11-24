@@ -34,6 +34,7 @@ interface ProjectRow {
   }[];
 }
 
+// 2. Hàm lấy danh sách dự án, có thể lọc theo categorySlug
 export async function getProjects(categorySlug?: string): Promise<ProjectData[]> {
   try {
     // --- CHECK DEMO MODE ---
@@ -134,6 +135,7 @@ export async function getProjects(categorySlug?: string): Promise<ProjectData[]>
   }
 }
 
+// Định nghĩa kiểu cho cập nhật layout lưới dự án
 export interface ProjectGridUpdate {
   id: number;
   colSpan: number;
@@ -141,6 +143,7 @@ export interface ProjectGridUpdate {
   displayOrder: number;
 }
 
+// Cập nhật layout lưới dự án
 export async function updatePortfolioLayout(token: string, updates: ProjectGridUpdate[]) {
   try {
     // 1. Tạo Supabase Client với Token của người dùng đang đăng nhập
@@ -192,5 +195,115 @@ export async function updatePortfolioLayout(token: string, updates: ProjectGridU
     }
 
     return { success: false, error: message };
+  }
+}
+
+// Lấy chi tiết dự án theo ID
+export async function getProjectById(id: number) {
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('project_id', id)
+      .single();
+      
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching project:", error);
+    return null;
+  }
+}
+
+// Xóa dự án theo ID
+export async function deleteProject(token: string, projectId: number) {
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    );
+
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('project_id', projectId);
+
+    if (error) throw error;
+
+    // Xóa cache để danh sách cập nhật ngay
+    revalidatePath('/');
+    revalidatePath('/admin/projects');
+    revalidatePath('/admin/portfolio-grid');
+
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Delete error:", error);
+    return { success: false, error: 'Không thể xóa dự án này.' };
+  }
+}
+
+// --- QUẢN LÝ SETTINGS ---
+
+export interface SettingItem {
+  key: string;
+  value: string;
+  description?: string;
+}
+
+export async function getSettings() {
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('*')
+      .order('key'); // Sắp xếp để hiển thị ổn định
+
+    if (error) throw error;
+    return data as SettingItem[];
+  } catch (error) {
+    console.error("Error fetching settings:", error);
+    return [];
+  }
+}
+
+export async function updateSettings(token: string, updates: { key: string; value: string }[]) {
+  try {
+    const supabaseClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+      }
+    );
+
+    console.log("--> Updating settings:", updates);
+
+    // Chạy update song song
+    const promises = updates.map(item => 
+      supabaseClient
+        .from('settings')
+        .update({ 
+          value: item.value,
+          updated_at: new Date().toISOString()
+        })
+        .eq('key', item.key)
+    );
+
+    await Promise.all(promises);
+
+    // Revalidate toàn bộ trang web để setting mới áp dụng ngay
+    revalidatePath('/', 'layout'); 
+    
+    return { success: true };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Lỗi update settings';
+    console.error(msg);
+    return { success: false, error: msg };
   }
 }

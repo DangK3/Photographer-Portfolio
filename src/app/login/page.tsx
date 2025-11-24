@@ -1,41 +1,74 @@
 // src/app/login/page.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '../../../lib/supabase';
-import { toast } from 'sonner';
-import { Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+// 1. XÓA dòng import supabase cũ này đi
+// import { supabase } from '@/lib/supabase'; 
 
-export default function LoginPage() {
+// 2. THÊM import này để tạo client hỗ trợ Cookie
+import { createBrowserClient } from '@supabase/ssr';
+
+import { toast } from 'sonner';
+import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import localFont from 'next/font/local'; 
+
+const logoFont = localFont({
+  src: '../../fonts/cameliya-regular.ttf',
+  display: 'swap',
+  variable: '--font-logo',
+});
+function LoginFormContent() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  
+  // 3. Khởi tạo Supabase Client có khả năng ghi Cookie
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
+    password: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Check login
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // Refresh router để đảm bảo Server Component nhận được cookie mới
+        router.refresh();
+        router.replace('/admin');
+      }
+    };
+    checkUser();
+  }, [router, supabase]);
+
+  // Handle Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Gọi hàm đăng nhập của Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      if (data.session) {
-        toast.success('Đăng nhập thành công!');
-        // Chuyển hướng vào trang Admin
-        router.push('/admin');
-      }
-    } catch (error: unknown) {
+      toast.success('Đăng nhập thành công');
+      
+      const nextUrl = searchParams.get('next');
+      
+      // 4. QUAN TRỌNG: Refresh Router để Middleware nhận diện Cookie mới
+      router.refresh(); 
+      router.replace(nextUrl || '/admin');
+      
+     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Lỗi xác thực';
       toast.error('Đăng nhập thất bại: ' + msg);
     } finally {
@@ -43,13 +76,14 @@ export default function LoginPage() {
     }
   };
 
+  // ... (PHẦN GIAO DIỆN RETURN GIỮ NGUYÊN KHÔNG ĐỔI) ...
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--admin-bg)] p-4 transition-colors duration-300">
       <div className="w-full max-w-md bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-2xl shadow-xl p-8 animate-fade-in-up">
         
         {/* Logo / Header */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-[var(--admin-primary)] rounded-xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-lg shadow-indigo-500/30">
+          <div className={`w-12 h-12 bg-[var(--admin-primary)] rounded-xl flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-lg shadow-indigo-500/30 ${logoFont.className}`}>
             O
           </div>
           <h1 className="text-2xl font-bold text-[var(--admin-fg)]">Oni Studio Admin</h1>
@@ -117,5 +151,18 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// === COMPONENT CHÍNH (WRAPPER ĐỂ FIX LỖI BUILD) ===
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-neutral-950">
+        <Loader2 className="animate-spin text-indigo-600" size={32} />
+      </div>
+    }>
+      <LoginFormContent />
+    </Suspense>
   );
 }
