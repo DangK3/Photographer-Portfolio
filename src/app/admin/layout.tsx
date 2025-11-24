@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   Home,
-  Clock
+  Clock,
+  LayoutTemplate
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import localFont from 'next/font/local'; 
@@ -182,7 +183,13 @@ export default function AdminLayout({
           <NavLink href="/admin" icon={<LayoutDashboard size={20} />} label="Tổng quan" isActive={pathname === '/admin'} onClick={handleLinkClick} />
           <NavLink href="/admin/projects" icon={<ImageIcon size={20} />} label="Dự án" isActive={pathname.startsWith('/admin/projects')} onClick={handleLinkClick} />
           <NavLink href="/admin/staff" icon={<Users size={20} />} label="Nhân sự" isActive={pathname.startsWith('/admin/staff')} onClick={handleLinkClick} />
-          
+          <NavLink 
+            href="/admin/grid" 
+            icon={<LayoutTemplate size={20} />} 
+            label="Bố cục" 
+            isActive={pathname.startsWith('/admin/grid')} 
+            onClick={handleLinkClick} 
+          />
           <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mt-8 mb-3 px-4">Hệ thống</div>
           <NavLink href="/admin/settings" icon={<Settings size={20} />} label="Cài đặt chung" isActive={pathname.startsWith('/admin/settings')} onClick={handleLinkClick} />
         </nav>

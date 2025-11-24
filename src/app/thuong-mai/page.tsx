@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { getProjects } from '@/lib/actions';
 import { ArrowUpRight } from 'lucide-react';
 import { Metadata } from 'next';
+import Container from '@/components/Container';
 
 // Metadata cho SEO
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ export default async function CommercialPage() {
   const projects = await getProjects('thuong-mai'); // <-- Slug của danh mục
 
   return (
-    <main className="min-h-screen bg-[var(--background)] pt-32 pb-20 px-4 md:px-8">
+    <Container className="min-h-screen bg-[var(--background)] pt-32 pb-20 px-4 md:px-8">
       <div className="max-w-8xl mx-auto">
         
         {/* Header */}
@@ -44,7 +45,7 @@ export default async function CommercialPage() {
               href={`/du-an/${project.slug}`}
               className={`relative group overflow-hidden rounded-lg transition-all duration-300
                 md:col-span-${project.colSpan} md:row-span-${project.rowSpan}
-                ${project.isFeatured ? 'ring-2 ring-offset-2 ring-[var(--foreground)] shadow-xl z-10' : 'opacity-90 hover:opacity-100'}
+                ${project.isFeatured ? 'ring-2 ring-offset-2  shadow-xl z-10' : 'opacity-90 hover:opacity-100'}
               `} // <-- Logic highlight ở đây
               style={{
                 gridColumn: `span ${project.colSpan}`,
@@ -87,6 +88,6 @@ export default async function CommercialPage() {
             ))}
           </div>
       </div>
-    </main>
+    </Container>
   );
 }

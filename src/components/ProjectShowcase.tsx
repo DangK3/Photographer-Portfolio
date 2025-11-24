@@ -47,7 +47,7 @@ function ProjectItem({ project, index }: { project: ProjectData; index: number }
       {/* Text Side */}
       <div className="w-full md:w-2/5 text-center md:text-left space-y-6">
         <span className="inline-block text-xs font-bold tracking-[0.2em] text-[var(--sub-text)] uppercase border-b border-[var(--glow-color)] pb-1">
-          Dự án mới nhất
+          Dự án {project.categoryName} mới
         </span>
         
         <h3 className="text-3xl md:text-5xl font-bold text-[var(--foreground)] leading-tight">

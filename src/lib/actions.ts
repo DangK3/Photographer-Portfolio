@@ -1,7 +1,9 @@
 // src/lib/actions.ts
+'use server';
+import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import { PROJECTS_MASTER_DATA, ProjectData, ArticleBlock } from '@/data/projects-master-data';
-
+import { revalidatePath } from 'next/cache';
 // 1. Định nghĩa Interface CHÍNH XÁC khớp với Database
 interface ProjectRow {
   project_id: number;
@@ -129,5 +131,66 @@ export async function getProjects(categorySlug?: string): Promise<ProjectData[]>
   } catch (error) {
     console.error('Lỗi không xác định khi lấy dự án:', error);
     return [];
+  }
+}
+
+export interface ProjectGridUpdate {
+  id: number;
+  colSpan: number;
+  rowSpan: number;
+  displayOrder: number;
+}
+
+export async function updatePortfolioLayout(token: string, updates: ProjectGridUpdate[]) {
+  try {
+    // 1. Tạo Supabase Client với Token của người dùng đang đăng nhập
+    // Điều này giúp vượt qua RLS (Row Level Security) một cách hợp lệ
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    );
+
+    console.log(`--> Đang cập nhật layout cho ${updates.length} dự án...`);
+
+    // 2. Thực hiện Update từng dự án (Dùng Promise.all cho nhanh)
+    const promises = updates.map(async (project) => {
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          col_span: project.colSpan,
+          row_span: project.rowSpan,
+          display_order: project.displayOrder,
+        })
+        .eq('project_id', project.id);
+
+      if (error) throw error;
+    });
+
+    await Promise.all(promises);
+
+    // 3. Xóa Cache để Frontend cập nhật ngay lập tức
+    revalidatePath('/'); 
+    revalidatePath('/admin/portfolio-grid');
+
+    return { success: true };
+ } catch (error: unknown) { // Fix lỗi: đổi 'any' thành 'unknown'
+    console.error("Lỗi update layout:", error);
+    
+    // Xử lý thông báo lỗi an toàn
+    let message = 'Lỗi không xác định';
+    if (error instanceof Error) {
+        message = error.message;
+    } else if (typeof error === 'string') {
+        message = error;
+    }
+
+    return { success: false, error: message };
   }
 }

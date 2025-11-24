@@ -72,7 +72,7 @@ export default function PortfolioSection() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-2 rounded-full text-sm transition-all duration-300 border ${
+                className={`px-4 py-2 rounded-full text-sm transition-all duration-300 border cursor-pointer ${
                   activeCategory === cat.id
                     ? 'bg-[var(--foreground)] text-[var(--background)] border-[var(--foreground)]'
                     : 'bg-transparent text-[var(--sub-text)] border-[var(--sub-text)] hover:border-[var(--foreground)] hover:text-[var(--foreground)]'
