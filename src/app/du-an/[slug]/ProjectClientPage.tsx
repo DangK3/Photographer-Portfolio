@@ -199,8 +199,8 @@ export default function ProjectClientPage({
         {/* --- FOOTER CREDITS --- */}
         {project.credits && project.credits.length > 0 && (
           <div className="mt-24 pt-12 border-t border-[var(--foreground)]/10">
-            <h3 className="text-sm font-bold uppercase tracking-widest mb-8 text-center text-[var(--foreground)]">
-              Vinh danh
+            <h3 className="text-md text-center uppercase font-bold tracking-widest mb-8 text-[var(--foreground)]">
+              Credit
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 max-w-2xl mx-auto">
               {project.credits.map((credit, index) => (

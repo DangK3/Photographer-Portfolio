@@ -4,7 +4,7 @@ import ProjectForm, { ProjectInitialData, BlockDB } from '@/components/admin/Pro
 import { notFound } from 'next/navigation';
 
 interface PageProps {
-  params: Promise<{ id: string }>; // Next.js 15 params là Promise
+  params: Promise<{ id: string }>;
 }
 
 export default async function EditProjectPage({ params }: PageProps) {

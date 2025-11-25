@@ -115,7 +115,7 @@ export default function PortfolioSection() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.4 }}
                 key={project.id}
-                className="relative group overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-900 cursor-pointer"
+                className="relative group overflow-hidden bg-gray-100 dark:bg-neutral-900 cursor-pointer"
                 style={{
                   gridColumn: `span ${project.colSpan}`,
                   gridRow: `span ${project.rowSpan}`

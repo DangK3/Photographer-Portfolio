@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Edit, Eye, Trash2, Search, Loader2 } from 'lucide-react';
+import { Edit, Eye, Trash2, Search, Loader2, ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-react';
 import { useInView } from 'react-intersection-observer'; // Cần cài: npm install react-intersection-observer
 import { toast } from 'sonner';
 import { deleteProject } from '@/lib/actions';
@@ -16,11 +16,21 @@ interface ProjectTableProps {
   initialProjects: ProjectData[];
   itemsPerPage: number; // <--- THÊM CÁI NÀY
 }
+// Định nghĩa các kiểu sort
+type SortKey = 'id' | 'title' | 'categoryName' | 'isFeatured';
+type SortDirection = 'asc' | 'desc';
+
+interface SortConfig {
+  key: SortKey;
+  direction: SortDirection;
+}
+
 export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectTableProps) {
   // State Data
   const [projects, setProjects] = useState<ProjectData[]>(initialProjects);
   const [searchQuery, setSearchQuery] = useState('');
-  
+  // State Sort
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'id', direction: 'desc' });
   // State Pagination
   const [visibleCount, setVisibleCount] = useState(itemsPerPage);
   const { ref, inView } = useInView(); // Ref để gắn vào element đáy trang
@@ -35,28 +45,57 @@ export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectT
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // 1. Xử lý Lọc & Tìm kiếm
-  const filteredProjects = useMemo(() => {
-    return projects.filter(p => 
+  // Hàm xử lý sắp xếp
+  const handleSort = (key: SortKey) => {
+    setSortConfig((current) => {
+      if (current.key === key) {
+        // Nếu đang click cột hiện tại -> Đảo chiều
+        return { key, direction: current.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      // Nếu click cột mới -> Mặc định tăng dần (A-Z)
+      return { key, direction: 'asc' };
+    });
+  };
+  // 3. LOGIC LỌC & SẮP XẾP (Dùng useMemo để tối ưu)
+  const processedProjects = useMemo(() => {
+    // A. Lọc theo Search
+    const result = projects.filter(p => 
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.client_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.categoryName?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [projects, searchQuery]);
+
+    // B. Sắp xếp
+    result.sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      // Xử lý trường hợp null/undefined
+      if (aValue === undefined || aValue === null) return 1;
+      if (bValue === undefined || bValue === null) return -1;
+
+      // So sánh
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [projects, searchQuery, sortConfig]);
 
   // 2. Cắt danh sách để hiển thị (Infinite Scroll)
-  const visibleProjects = filteredProjects.slice(0, visibleCount);
+  const visibleProjects = processedProjects.slice(0, visibleCount);
 
   // 3. Tự động load thêm khi cuộn xuống đáy
   useEffect(() => {
-    if (inView && visibleCount < filteredProjects.length) {
+    if (inView && visibleCount < processedProjects.length) {
       // Delay nhẹ để tạo cảm giác đang load (optional)
       const timer = setTimeout(() => {
         setVisibleCount(prev => prev + itemsPerPage);
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [inView, visibleCount, filteredProjects.length, itemsPerPage]);
+  }, [inView, visibleCount, processedProjects.length, itemsPerPage]);
 
   // Reset pagination khi search thay đổi
   useEffect(() => {
@@ -95,7 +134,27 @@ export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectT
       setIsDeleting(false);
     }
   };
-
+  // Component Header nhỏ để tái sử dụng
+  const SortableHeader = ({ label, colKey, className = "" }: { label: string, colKey: SortKey, className?: string }) => {
+    const isActive = sortConfig.key === colKey;
+    return (
+      <th 
+        className={`p-4 cursor-pointer hover:bg-[var(--admin-hover)] transition-colors group select-none ${className}`}
+        onClick={() => handleSort(colKey)}
+      >
+        <div className={`flex items-center gap-2 ${className.includes('text-center') ? 'justify-center' : ''}`}>
+          {label}
+          <span className={`text-[var(--admin-sub)] transition-opacity ${isActive ? 'opacity-100 text-[var(--admin-primary)]' : 'opacity-0 group-hover:opacity-50'}`}>
+            {isActive ? (
+              sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+            ) : (
+              <ArrowUpDown size={14} />
+            )}
+          </span>
+        </div>
+      </th>
+    );
+  };
   return (
     <div className="space-y-6">
       
@@ -112,7 +171,7 @@ export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectT
             />
         </div>
         <div className="text-sm text-[var(--admin-sub)] flex items-center px-3 bg-[var(--admin-bg)] rounded-lg border border-[var(--admin-border)]">
-            {filteredProjects.length} kết quả
+            {processedProjects.length} kết quả
         </div>
       </div>
 
@@ -122,11 +181,12 @@ export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectT
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[var(--admin-bg)] border-b border-[var(--admin-border)] text-[var(--admin-sub)] text-xs uppercase tracking-wider">
-                <th className="p-4 w-16">#ID</th>
+                {/* 4. ÁP DỤNG SORTABLE HEADER */}
+                <SortableHeader label="#ID" colKey="id" className="w-20 font-mono" />
                 <th className="p-4 w-24">Ảnh</th>
-                <th className="p-4">Thông tin</th>
-                <th className="p-4">Danh mục</th>
-                <th className="p-4 text-center">Trạng thái</th>
+                <SortableHeader label="Tên Dự Án" colKey="title" />
+                <SortableHeader label="Danh Mục" colKey="categoryName" />
+                <SortableHeader label="Trạng Thái" colKey="isFeatured" className="text-center" />
                 <th className="p-4 text-right">Hành động</th>
               </tr>
             </thead>
@@ -182,7 +242,7 @@ export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectT
                         <Link 
                           href={`/du-an/${project.slug}`} 
                           target="_blank"
-                          className="p-2 text-[var(--admin-sub)] hover:text-[var(--admin-fg)] hover:bg-[var(--admin-bg)] rounded-lg"
+                          className="p-2 text-[var(--admin-sub)] hover:text-[var(--admin-fg)] hover:bg-[var(--admin-card)] rounded-lg"
                           title="Xem trang web"
                         >
                           <Eye size={18} />
@@ -190,7 +250,7 @@ export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectT
                         
                         <Link 
                           href={`/admin/projects/${project.id}`} 
-                          className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                          className="p-2 text-blue-500 hover:bg-[var(--admin-edit)] rounded-lg"
                           title="Chỉnh sửa"
                         >
                           <Edit size={18} />
@@ -198,7 +258,7 @@ export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectT
 
                         <button 
                           onClick={() => openDeleteModal(Number(project.id), project.title)}
-                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                          className="p-2 text-red-500 hover:bg-[var(--admin-delete)] rounded-lg cursor-pointer"
                           title="Xóa"
                         >
                           <Trash2 size={18} />
@@ -212,7 +272,7 @@ export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectT
           </table>
           
           {/* LOADER DƯỚI CÙNG ĐỂ KÍCH HOẠT LOAD MORE */}
-          {visibleProjects.length < filteredProjects.length && (
+          {visibleProjects.length < processedProjects.length && (
              <div ref={ref} className="p-4 flex justify-center">
                 <Loader2 className="animate-spin text-[var(--admin-sub)]" />
              </div>

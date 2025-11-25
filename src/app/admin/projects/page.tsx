@@ -5,8 +5,6 @@ import { Plus } from 'lucide-react';
 import ProjectTable from '@/components/admin/ProjectTable';
 import { createClient } from '@supabase/supabase-js'; 
 
-// Force dynamic để luôn thấy dữ liệu mới nhất khi vào trang
-export const dynamic = 'force-dynamic';
 
 export default async function ProjectsListPage() {
   // 1. Lấy TOÀN BỘ danh sách dự án (Server Side)
@@ -31,14 +29,14 @@ export default async function ProjectsListPage() {
         <div>
           <h1 className="text-3xl font-bold text-[var(--admin-fg)]">Quản lý Dự án</h1>
           <p className="text-[var(--admin-sub)] mt-1">
-            Quản lý danh mục đầu tư và nội dung hiển thị.
+            Quản lý danh mục dự án và chi tiết nội dung.
           </p>
         </div>
         <Link 
           href="/admin/projects/new" 
           className="flex items-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] text-white rounded-lg font-medium hover:opacity-90 transition-all shadow-lg shadow-indigo-500/30"
         >
-          <Plus size={20} /> Thêm dự án mới
+          <Plus size={20} /> Dự án mới
         </Link>
       </div>
 

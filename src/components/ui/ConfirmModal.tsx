@@ -51,7 +51,7 @@ export default function ConfirmModal({
       
       {/* 2. Backdrop (Nền tối) */}
       <div 
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" 
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity" 
         onClick={isLoading ? undefined : onClose} 
       />
 

@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
   };
 }
-
+export const revalidate = 3600; // 1 hour
 // 4. Component Chính (Server Component)
 export default async function ProjectDetailPage({ params }: PageProps) {
   const { slug } = await params;

@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Container from '@/components/Container'; // Tái sử dụng Container
 import type { Metadata } from 'next';
 
-// Metadata (SEO) riêng cho trang 404
 export const metadata: Metadata = {
   title: '404 - Không tìm thấy | Oni Studio',
   description: 'Trang bạn đang tìm kiếm không tồn tại.',
@@ -30,10 +29,6 @@ export default function NotFound() {
           Rất tiếc, chúng tôi không thể tìm thấy trang bạn yêu cầu.
         </p>
 
-        {/* Nút bấm quay về trang chủ.
-          Styling được sao chép từ nút "Gửi Lời Nhắn"
-          trong ContactSection để đảm bảo nhất quán.
-        */}
         <Link
           href="/"
           className="mt-10 py-3 px-8 bg-transparent 

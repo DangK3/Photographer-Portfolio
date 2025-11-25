@@ -1,10 +1,9 @@
 // src/app/admin/grid/page.tsx
 import { getProjects } from '@/lib/actions';
-import PortfolioGridEditor from '@/components/admin/PortfolioGridEditor'; // Import component vừa tạo
+import PortfolioGridEditor from '@/components/admin/PortfolioGridEditor';
 import { LayoutTemplate, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
-// Bắt buộc dòng này để Next.js không cache kết quả cũ
 export const dynamic = 'force-dynamic';
 
 export default async function PortfolioGridPage() {

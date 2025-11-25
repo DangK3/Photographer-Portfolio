@@ -1,17 +1,15 @@
 import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import { getProjects } from '@/lib/actions';
-import { ArrowUpRight } from 'lucide-react';
 import { Metadata } from 'next';
 import Container from '@/components/Container';
+import ProjectMasonryGrid from '@/components/ProjectMasonryGrid';
 
 // Metadata cho SEO
 export const metadata: Metadata = {
   title: 'Dự án Cá nhân | Oni Studio',
   description: 'Những dự án thể hiện cái tôi cá nhân và thử nghiệm sáng tạo.',
 };
-
+export const revalidate = 3600; // 1 hour
 export default async function PersonalPage() {
   // 1. Gọi dữ liệu thật từ Supabase (hoặc Demo)
   const projects = await getProjects('ca-nhan'); // <-- Slug của danh mục
@@ -38,62 +36,8 @@ export default async function PersonalPage() {
         )}
 
         {/* Project Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-[300px] md:auto-rows-[400px]">
-          {projects.map((project, index) => {
-            const isSecondColMD = index % 2 !== 1;   // md = 2 cột
-            const isSecondColLG = index % 3 !== 1;   // lg = 3 cột
-            return (
-            <Link 
-              key={project.id}
-              href={`/du-an/${project.slug}`}
-              className={`relative group overflow-hidden bg-gray-100 dark:bg-neutral-900 rounded-lg transition-all duration-300
-                md:col-span-1 md:row-span-1
-                ${project.isFeatured ? 'ring-2 ring-offset-2 ring-[var(--foreground)] shadow-xl z-10' : 'opacity-90 hover:opacity-100'}
-                ${isSecondColMD ? 'md:top-[36px]' : 'md:top-0'}
-                ${isSecondColLG ? 'lg:top-[36px]' : 'lg:top-0'}
-
-              `} // <-- Logic highlight ở đây
-              // style={{
-              //   gridColumn: `span ${project.colSpan}`,
-              //   gridRow: `span ${project.rowSpan}`
-              // }}
-            >
-              {/* Badge Nổi Bật (Chỉ hiện nếu là Featured) */}
-              {project.isFeatured && (
-                <div className="absolute top-3 right-3 z-20 bg-[var(--foreground)] text-[var(--background)] text-[10px] font-bold uppercase px-2 py-1 rounded shadow-sm">
-                  Nổi bật
-                </div>
-              )}
-
-              {/* Image */}
-              <Image
-                src={typeof project.image === 'string' ? project.image : project.image.src}
-                alt={project.title}
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
-
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-                <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                  <span className="text-xs font-medium text-white/80 uppercase tracking-wider mb-2 block">
-                    {project.year}
-                  </span>
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-2xl font-bold text-white">
-                      {project.title}
-                    </h3>
-                    <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
-                      <ArrowUpRight className="text-white w-5 h-5" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-            )})}
-          </div>
-        </div>
+        <ProjectMasonryGrid projects={projects} variant="cascade" />
+      </div>
     </Container>
   );
 }

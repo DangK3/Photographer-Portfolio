@@ -1,26 +1,17 @@
 // src/app/error.tsx
+'use client';
 
-'use client'; // File này BẮT BUỘC phải là Client Component
-
-import { useEffect } from 'react';
-import Container from '@/components/Container'; // Tái sử dụng Container
+import Container from '@/components/Container';
 import Link from 'next/link';
 export default function Error({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    // Log lỗi ra console để debug
-    // (Bạn cũng có thể gửi lỗi này đến các dịch vụ như Sentry)
-    console.error(error);
-  }, [error]);
 
   return (
     <Container>
-      {/* Layout tương tự trang 404 */}
       <div className="flex flex-col items-center justify-center text-center py-24 md:py-32 min-h-[calc(100vh_-_250px)]">
         
         {/* Mã lỗi */}
@@ -43,7 +34,7 @@ export default function Error({
         */}
         <div className="mt-10 flex flex-col md:flex-row justify-center gap-4">
           
-          {/* Nút 1: Thử Lại (Đã xóa mt-10) */}
+          {/* Nút 1: Thử Lại */}
           <button
             onClick={() => reset()}
             className="py-3 px-8 bg-transparent 
@@ -55,7 +46,7 @@ export default function Error({
             Thử Lại
           </button>
           
-          {/* Nút 2: Trang chủ (Đã xóa mt-10) */}
+          {/* Nút 2: Trang chủ*/}
           <Link
             href="/"
             className="py-3 px-8 bg-transparent 
@@ -66,10 +57,7 @@ export default function Error({
           >
             Quay về Trang chủ
           </Link>
-
         </div>
-        {/* ============================================== */}
-        
       </div>
     </Container>
   );

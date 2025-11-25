@@ -17,11 +17,11 @@ export default function HeroSection() {
       <div className="absolute inset-0 z-0">
         <Image
           src={Background}
-          fill               
-          quality={90}
+          fill={true}
+          quality={80}
           alt="Background"
           style={{ objectFit: 'cover' }}
-          priority 
+          sizes="100vw"   // Báo cho browser biết nó chiếm full màn hình
         />
         <div className="absolute inset-0 bg-black/40"></div>
       </div>

@@ -25,6 +25,8 @@
   --admin-primary: #4f46e5;     /* Indigo-600: Màu chủ đạo (Button/Active) */
   --admin-primary-fg: #ffffff;  /* Chữ trên nền chủ đạo */
   --admin-hover: #f1f5f9;       /* Slate-100: Màu khi hover */
+  --admin-edit: #EBF6FF;        /* bg-blue-50: Màu nền ô edit */
+  --admin-delete: #FFE5E5;      /* bg-red-50: Màu nền ô xóa */
 }
 
 html.dark { 
@@ -46,6 +48,8 @@ html.dark {
     --admin-primary: #6366f1;     /* Indigo-500: Màu chủ đạo sáng hơn chút */
     --admin-primary-fg: #ffffff;  
     --admin-hover: #1e293b;       /* Slate-800: Hover tối */
+    --admin-edit: #1E3A8A;        /* bg-blue-900/20: Màu nền ô edit tối */
+    --admin-delete: #7F1D1D;      /* bg-red-900/20: Màu nền ô xóa tối */
 }
 
 html, body {

@@ -82,7 +82,23 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
 
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [credits, setCredits] = useState<CreditItem[]>([{ label: 'Location', value: 'Oni Studio' }]);
+  const fillSampleCredits = () => {
+    setCredits([
+      { label: 'Producer', value: 'Thanh Hang - Choo Production' },
+      { label: 'Art Director', value: 'Thien Nguyen' },
+      { label: 'Photographer', value: 'Evis Tran' },
+      { label: 'Model', value: 'Mai Phuoc Tri, Nguyễn Văn Long, Huế Hương, Fuka' },
+      { label: 'Stylist', value: 'Bao Ngan' },
+      { label: 'Stylist Assistant', value: 'Js Chucin' },
+      { label: 'Lighting', value: 'An Pham, Huy Tran, Dat Ho Thanh' },
+      { label: 'MUA', value: 'Hai Ngoc Nguyen, Tu Anh, Tu Linh' },
+      { label: 'Set Designer', value: 'Harry Le, Long Tran' },
+      { label: 'Accessories', value: 'Dat Duong' },
+      { label: 'Support', value: 'Ngoc Ha' },
+      { label: 'Location', value: 'Oni Studio' },
+      ]);
+  };
+  const [credits, setCredits] = useState<CreditItem[]>([{ label: 'Photographer', value: '' }]);
   const [blocks, setBlocks] = useState<ContentBlockState[]>([]);
 
   // --- 3. KHỞI TẠO DỮ LIỆU ---
@@ -340,27 +356,56 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
             <label className="text-sm font-medium text-[var(--admin-fg)]">Mô tả ngắn</label>
             <textarea rows={3} className="admin-input" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Giới thiệu sơ lược về dự án..."/>
           </div>
-
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[var(--admin-fg)]">Ảnh đại diện (Thumbnail) <span className="text-red-500">*</span></label>
-            <div className="relative aspect-video w-full md:w-1/2 bg-[var(--admin-bg)] border-2 border-dashed border-[var(--admin-border)] rounded-lg overflow-hidden group hover:border-[var(--admin-primary)] transition-colors">
-              <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer" onChange={(e) => {
-                 if(e.target.files?.[0]) {
+            <label className="text-sm font-medium text-[var(--admin-fg)]">Ảnh đại diện (Thumbnail) 
+              <span className="text-red-500">*</span>
+              </label>
+            
+            {/* CONTAINER CHÍNH */}
+            {/* Logic: Nếu có thumbnailPreview thì dùng 'h-auto' (cao tự do), ngược lại dùng 'aspect-video' (cố định) */}
+            <div className={`
+              relative w-full md:w-1/2 bg-[var(--admin-bg)] border-2 border-dashed border-[var(--admin-border)] rounded-lg overflow-hidden group hover:border-[var(--admin-primary)] transition-all duration-300
+              ${thumbnailPreview ? 'h-auto' : 'aspect-video'}
+            `}>
+              
+              {/* INPUT FILE (Luôn phủ lên trên cùng z-20 để click được ở mọi chỗ) */}
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer" 
+                onChange={(e) => {
+                  if(e.target.files?.[0]) {
                     setThumbnailFile(e.target.files[0]);
                     setThumbnailPreview(URL.createObjectURL(e.target.files[0]));
-                 }
-              }} />
+                  }
+                }} 
+              />
+
               {thumbnailPreview ? (
-                <>
-                    <Image src={thumbnailPreview} alt="Thumb" fill className="object-cover" />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <p className="text-white text-sm font-medium flex items-center gap-2"><Upload size={16}/> Thay ảnh khác</p>
-                    </div>
-                </>
+                <div className="relative w-full">
+                  {/* Dùng thẻ <img> thường với w-full h-auto để container tự giãn theo ảnh */}
+                  <Image 
+                    src={thumbnailPreview} 
+                    alt="Thumb" 
+                    width={0} 
+                    height={0} 
+                    sizes="100vw"
+                    className="w-full h-auto block" // Giữ nguyên class này để nó co giãn
+                    unoptimized // QUAN TRỌNG: Bắt buộc có dòng này
+                  />
+                  
+                  {/* Overlay hiển thị khi hover */}
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <p className="text-white text-sm font-medium flex items-center gap-2">
+                      <Upload size={16}/> Thay ảnh khác
+                    </p>
+                  </div>
+                </div>
               ) : (
+                /* Giao diện khi chưa có ảnh (Căn giữa trong khung aspect-video) */
                 <div className="flex flex-col items-center justify-center h-full text-[var(--admin-sub)] group-hover:text-[var(--admin-primary)] transition-colors">
-                    <ImagePlus size={32} className="mb-2" />
-                    <span className="text-sm">Bấm để chọn ảnh</span>
+                  <ImagePlus size={32} className="mb-2" />
+                  <span className="text-sm">Bấm để chọn ảnh</span>
                 </div>
               )}
             </div>
@@ -370,17 +415,25 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
         {/* CREDITS CARD */}
         <div className="p-6 bg-[var(--admin-card)] rounded-xl border border-[var(--admin-border)] shadow-sm space-y-4">
           <div className="flex justify-between items-center border-b border-[var(--admin-border)] pb-4">
-            <h2 className="text-lg font-semibold text-[var(--admin-fg)]">Credits</h2>
-            <button type="button" onClick={addCredit} className="text-sm text-[var(--admin-primary)] hover:bg-[var(--admin-hover)] px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
-                <Plus size={16}/> Thêm dòng
-            </button>
+          <h2 className="text-lg font-semibold text-[var(--admin-fg)]">Credits</h2>
+          <div className="flex gap-2">
+              {/* Nút điền mẫu */}
+              <button type="button" onClick={fillSampleCredits} className="cursor-pointer text-sm text-[var(--admin-sub)] hover:text-white px-3 py-1.5 rounded-lg border border-[var(--admin-border)] hover:bg-[var(--admin-hover)] transition-colors">
+                Điền mẫu
+              </button>
+
+              {/* Nút thêm dòng cũ */}
+              <button type="button" onClick={addCredit} className="cursor-pointer text-sm text-[var(--admin-primary)] hover:bg-[var(--admin-hover)] px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
+                  <Plus size={16}/> Thêm dòng
+              </button>
           </div>
+        </div>
           <div className="space-y-3">
             {credits.map((item, idx) => (
               <div key={idx} className="flex gap-4 items-center">
                 <input placeholder="Vai trò (VD: Photo)" className="admin-input w-1/3" value={item.label} onChange={e => updateCredit(idx, 'label', e.target.value)} />
                 <input placeholder="Tên (VD: Dang Tran)" className="admin-input w-1/2" value={item.value} onChange={e => updateCredit(idx, 'value', e.target.value)} />
-                <button type="button" onClick={() => removeCredit(idx)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18} /></button>
+                <button type="button" onClick={() => removeCredit(idx)} className="text-red-400 cursor-pointer hover:text-red-600 p-2 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={18} /></button>
               </div>
             ))}
           </div>

@@ -76,6 +76,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
 
       if (res.success) {
         toast.success('Lưu thành công! Đã áp dụng cho toàn trang.', { id: toastId });
+        window.dispatchEvent(new Event('settings:updated'));
       } else {
         toast.error(`Lỗi: ${res.error}`, { id: toastId });
       }
@@ -162,7 +163,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
       </div>
 
       {/* CARD 3: HỆ THỐNG */}
-      <div className="bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl p-6 shadow-sm opacity-90">
+      <div className="bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl p-6 shadow-sm opacity-90 space-y-4">
         <div className="flex items-center gap-3 mb-6 border-b border-[var(--admin-border)] pb-4">
           <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
             <Database size={20} />
@@ -188,6 +189,34 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[var(--admin-primary)]"></div>
           </label>
         </div>
+        <div className="flex items-center justify-between p-4 bg-[var(--admin-bg)] rounded-lg border border-[var(--admin-border)]">
+            <div>
+              <span className="font-medium text-[var(--admin-fg)] block">Tự động Đăng xuất</span>
+              <span className="text-xs text-[var(--admin-sub)]">Hệ thống sẽ khóa phiên làm việc nếu không có hoạt động chuột/phím.</span>
+            </div>
+            
+            <div className="flex items-center border border-[var(--admin-border)] rounded-lg bg-[var(--admin-card)]">
+              <button 
+                onClick={() => handleNumberChange('idle_timeout_minutes', 'decrease')}
+                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] border-r border-[var(--admin-border)] disabled:opacity-50"
+                // Giới hạn thấp nhất là 5 phút
+                disabled={parseInt(getValue('idle_timeout_minutes')) <= 5}
+              >
+                <Minus size={16} />
+              </button>
+              
+              <div className="w-20 text-center font-mono font-bold text-[var(--admin-fg)] flex items-center justify-center gap-1">
+                 {getValue('idle_timeout_minutes') || '60'} <span className="text-[10px] font-normal text-[var(--admin-sub)]">phút</span>
+              </div>
+              
+              <button 
+                onClick={() => handleNumberChange('idle_timeout_minutes', 'increase')}
+                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] border-l border-[var(--admin-border)]"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
       </div>
 
       {/* ACTION BAR */}

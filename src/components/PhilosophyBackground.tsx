@@ -1,5 +1,5 @@
 // src/components/PhilosophyBackground.tsx
-'use client'; // Chỉ component này cần 'use client'
+'use client';
 
 import ScrollBaseAnimation from '@/components/scroll-text-marque';
 

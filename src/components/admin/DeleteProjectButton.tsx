@@ -56,7 +56,7 @@ export default function DeleteProjectButton({ projectId, projectTitle }: { proje
   };
 
   return (
-  <>
+  <main>
       {/* Nút thùng rác (Chỉ mở Modal) */}
       <button 
         onClick={() => setShowModal(true)}
@@ -78,6 +78,6 @@ export default function DeleteProjectButton({ projectId, projectTitle }: { proje
         variant="danger"
         isLoading={isDeleting}
       />
-    </>
+    </main>
   );
 }
