@@ -11,7 +11,8 @@ import { toast } from 'sonner';
 import { 
   ArrowLeft, Upload, X, Save, Loader2, ImagePlus, Plus, Type, AlignLeft, Trash2 
 } from 'lucide-react';
-
+import SelectBox from '@/components/ui/SelectBox';
+import { Layers } from 'lucide-react'; // Icon cho đẹp
 // --- 1. ĐỊNH NGHĨA TYPES ---
 
 export type FormMode = 'create' | 'edit';
@@ -339,13 +340,20 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
               <label className="text-sm font-medium text-[var(--admin-fg)]">Khách hàng</label>
               <input type="text" className="admin-input" value={formData.client_name} onChange={e => setFormData({...formData, client_name: e.target.value})} placeholder="VD: Vogue Vietnam"/>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-[var(--admin-fg)]">Danh mục <span className="text-red-500">*</span></label>
-              <select required className="admin-input" value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})}>
-                <option value="">-- Chọn danh mục --</option>
-                {categories.map(cat => <option key={cat.category_id} value={cat.category_id}>{cat.name}</option>)}
-              </select>
-            </div>
+            {/* THAY THẾ ĐOẠN SELECT CŨ BẰNG ĐOẠN NÀY */}
+            <SelectBox
+              label="Danh mục"
+              required
+              placeholder="-- Chọn danh mục dự án --"
+              value={formData.category_id}
+              onChange={(val) => setFormData({ ...formData, category_id: val })}
+              icon={<Layers size={18} className="text-[var(--admin-sub)]" />}
+              // Chuyển đổi mảng categories thành format chuẩn {label, value}
+              options={categories.map(cat => ({
+                label: cat.name,
+                value: cat.category_id
+              }))}
+            />
             <div className="flex items-center space-x-3 mt-8">
               <input type="checkbox" id="is_featured" className="w-5 h-5 accent-[var(--admin-primary)]" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
               <label htmlFor="is_featured" className="text-sm font-medium text-[var(--admin-fg)] cursor-pointer">Đánh dấu là <strong>Nổi bật</strong></label>

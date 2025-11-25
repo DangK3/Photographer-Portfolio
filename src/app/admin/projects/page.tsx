@@ -1,16 +1,16 @@
 // src/app/admin/projects/page.tsx
 import Link from 'next/link';
-import { getProjects } from '@/lib/actions';
+import { getProjects, getCurrentUserProfile } from '@/lib/actions';
 import { Plus } from 'lucide-react';
 import ProjectTable from '@/components/admin/ProjectTable';
 import { createClient } from '@supabase/supabase-js'; 
 
 
 export default async function ProjectsListPage() {
-  // 1. Lấy TOÀN BỘ danh sách dự án (Server Side)
-  // Việc lấy hết 1 lần là OK nếu số lượng < 1000 records.
-  // Nếu nhiều hơn, ta sẽ cần Pagination từ Server (Advanced).
-  const projects = await getProjects('all');
+  const [projects, userProfile] = await Promise.all([
+    getProjects('all'),
+    getCurrentUserProfile(), // 2. Lấy thông tin user
+  ]);
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -32,16 +32,18 @@ export default async function ProjectsListPage() {
             Quản lý danh mục dự án và chi tiết nội dung.
           </p>
         </div>
-        <Link 
-          href="/admin/projects/new" 
-          className="flex items-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] text-white rounded-lg font-medium hover:opacity-90 transition-all shadow-lg shadow-indigo-500/30"
-        >
-          <Plus size={20} /> Dự án mới
-        </Link>
+        {userProfile?.role === 'Admin' && (
+          <Link 
+            href="/admin/projects/new" 
+            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] text-white rounded-lg font-medium hover:opacity-90 transition-all shadow-lg shadow-indigo-500/30"
+          >
+            <Plus size={20} /> Thêm dự án mới
+          </Link>
+        )}
       </div>
 
       {/* Client Table Component (Xử lý Search & Infinite Scroll) */}
-      <ProjectTable initialProjects={projects} itemsPerPage={itemsLimit}/>
+      <ProjectTable initialProjects={projects} itemsPerPage={itemsLimit} userProfile={userProfile} />
       
     </div>
   );

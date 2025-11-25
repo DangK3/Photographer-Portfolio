@@ -21,6 +21,7 @@ import {
 import ThemeToggle from '@/components/ThemeToggle';
 import localFont from 'next/font/local'; 
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import { getCurrentUserProfile } from '@/lib/actions';
 
 const logoFont = localFont({
   src: '../../fonts/cameliya-regular.ttf',
@@ -155,24 +156,18 @@ export default function AdminLayout({
 
         // 2. (MỚI) Lấy thông tin chi tiết từ bảng public.users
         // Dùng auth_id (uid) để đối chiếu
-        const { data: profile } = await supabase
-          .from('users')
-          .select('full_name, role, email')
-          .eq('auth_id', session.user.id)
-          .single();
+        const profile = await getCurrentUserProfile();
 
-        // Cập nhật state profile
         if (profile) {
-          setUserProfile(profile as UserProfile);
+          setUserProfile(profile);
         } else {
-          // Fallback nếu chưa có trong bảng users (dùng email từ session)
+          // Fallback chỉ khi không tìm thấy profile trong DB
           setUserProfile({
             full_name: session.user.email?.split('@')[0] || 'Admin',
-            role: 'Unknown',
+            role: 'Staff', // Mặc định an toàn là Staff nếu lỗi
             email: session.user.email || ''
           });
         }
-
         // 3. Khởi động Timer
         setupActivityListeners();
         setIsCheckingAuth(false);
@@ -213,7 +208,7 @@ export default function AdminLayout({
       if (intervalId) clearInterval(intervalId);
       cleanupActivityListeners();
     };
-  }, [router, supabase, resetTimer]); // Không cần idleTimeoutMinutes ở dependency để tránh reset interval
+  }, [router, supabase, resetTimer]);
 
   const handleLogout = async () => {
     try {
@@ -260,10 +255,15 @@ export default function AdminLayout({
           <NavLink href="/admin" icon={<LayoutDashboard size={20} />} label="Tổng quan" isActive={pathname === '/admin'} onClick={handleLinkClick} />
           <NavLink href="/admin/projects" icon={<ImageIcon size={20} />} label="Dự án" isActive={pathname === '/admin/projects' || pathname === '/admin/projects/new' || pathname.startsWith('/admin/projects/')} onClick={handleLinkClick} />
           <NavLink href="/admin/grid" icon={<LayoutTemplate size={20} />} label="Bố cục Portfolio" isActive={pathname.startsWith('/admin/grid')} onClick={handleLinkClick} />
-          <NavLink href="/admin/staff" icon={<Users size={20} />} label="Nhân sự" isActive={pathname.startsWith('/admin/staff')} onClick={handleLinkClick} />
-          
-          <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mt-8 mb-3 px-4">Hệ thống</div>
-          <NavLink href="/admin/settings" icon={<Settings size={20} />} label="Cài đặt chung" isActive={pathname.startsWith('/admin/settings')} onClick={handleLinkClick} />
+          {/* CHỈ ADMIN MỚI THẤY */}
+          {userProfile?.role === 'Admin' && (
+            <>
+              <NavLink href="/admin/staff" icon={<Users size={20} />} label="Nhân sự" isActive={pathname.startsWith('/admin/staff')} onClick={handleLinkClick} />
+              
+              <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mt-8 mb-3 px-4">Hệ thống</div>
+              <NavLink href="/admin/settings" icon={<Settings size={20} />} label="Cài đặt chung" isActive={pathname.startsWith('/admin/settings')} onClick={handleLinkClick} />
+            </>
+          )}
         </nav>
 
         <div className="p-4 border-t border-[var(--admin-border)] space-y-2">

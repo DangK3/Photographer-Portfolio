@@ -47,30 +47,61 @@ function LoginFormContent() {
     checkUser();
   }, [router, supabase]);
 
-  // Handle Login
-  const handleLogin = async (e: React.FormEvent) => {
+const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // 1. Đăng nhập với Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
       if (error) throw error;
+      if (!data.user) throw new Error("Không tìm thấy thông tin người dùng.");
 
-      toast.success('Đăng nhập thành công');
+      // 2. KIỂM TRA TRẠNG THÁI 'IS_ACTIVE'
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('is_active, role')
+        .eq('auth_id', data.user.id)
+        .single();
+
+      // Nếu không tìm thấy profile hoặc bị khóa
+      if (profileError || (userProfile && !userProfile.is_active)) {
+        await supabase.auth.signOut();
+        throw new Error("Tài khoản của bạn đã bị KHÓA. Vui lòng liên hệ Admin.");
+      }
+
+      // 3. Nếu mọi thứ OK -> Cho vào
+      toast.success(`Chào mừng trở lại, ${userProfile?.role === 'Admin' ? 'Sếp' : 'bạn'}!`);
       
       const nextUrl = searchParams.get('next');
-      
-      // 4. QUAN TRỌNG: Refresh Router để Middleware nhận diện Cookie mới
       router.refresh(); 
       router.replace(nextUrl || '/admin');
       
-     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Lỗi xác thực';
-      toast.error('Đăng nhập thất bại: ' + msg);
+    } catch (error: unknown) { // Dùng 'any' để dễ truy cập .message
+      console.error("Login error:", error);
+      
+      // --- XỬ LÝ DỊCH LỖI TẠI ĐÂY ---
+      let msg = (error as Error).message || 'Đăng nhập thất bại';
+
+      // 1. Lỗi sai mật khẩu hoặc email không tồn tại
+      if (msg === 'Invalid login credentials') {
+        msg = 'Email hoặc mật khẩu không chính xác.';
+      } 
+      // 2. Lỗi chưa xác thực email (nếu có bật confirm)
+      else if (msg.includes('Email not confirmed')) {
+        msg = 'Email chưa được xác thực. Vui lòng kiểm tra hộp thư.';
+      }
+      // 3. Lỗi quá nhiều lần thử (Rate limit)
+      else if (msg.includes('Too many requests') || msg.includes('rate limit')) {
+        msg = 'Bạn đã thử quá nhiều lần. Vui lòng đợi giây lát.';
+      }
+      
+      // Nếu là lỗi do mình tự throw ở trên ("Tài khoản bị khóa...") thì nó sẽ giữ nguyên tiếng Việt
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }

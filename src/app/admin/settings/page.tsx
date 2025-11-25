@@ -2,9 +2,38 @@
 import { getSettings } from '@/lib/actions';
 import SettingsForm from '@/components/admin/SettingsForm';
 import { Settings } from 'lucide-react';
-
+import { createServerClient } from '@supabase/ssr'; 
+import { cookies } from 'next/headers'; 
+import { redirect } from 'next/navigation'; 
 
 export default async function AdminSettingsPage() {
+  // 1. Check quyền ngay tại Server Page
+  const cookieStore = await cookies(); // Await cookies() (Next.js 15)
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll() {} // Server Component không set cookie
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('auth_id', user.id)
+    .single();
+
+  // Nếu không phải Admin -> Đá về trang chủ Admin
+  if (profile?.role !== 'Admin') {
+    redirect('/admin');
+  }
   const settings = await getSettings();
 
   return (

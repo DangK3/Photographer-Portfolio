@@ -7,14 +7,15 @@ import Link from 'next/link';
 import { Edit, Eye, Trash2, Search, Loader2, ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-react';
 import { useInView } from 'react-intersection-observer'; // Cần cài: npm install react-intersection-observer
 import { toast } from 'sonner';
-import { deleteProject } from '@/lib/actions';
+import { deleteProject, UserProfile } from '@/lib/actions';
 import { createBrowserClient } from '@supabase/ssr';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { ProjectData } from '@/data/projects-master-data';
 
 interface ProjectTableProps {
   initialProjects: ProjectData[];
-  itemsPerPage: number; // <--- THÊM CÁI NÀY
+  itemsPerPage: number;
+  userProfile: UserProfile | null;
 }
 // Định nghĩa các kiểu sort
 type SortKey = 'id' | 'title' | 'categoryName' | 'isFeatured';
@@ -25,7 +26,7 @@ interface SortConfig {
   direction: SortDirection;
 }
 
-export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectTableProps) {
+export default function ProjectTable({ initialProjects, itemsPerPage, userProfile }: ProjectTableProps) {
   // State Data
   const [projects, setProjects] = useState<ProjectData[]>(initialProjects);
   const [searchQuery, setSearchQuery] = useState('');
@@ -255,14 +256,19 @@ export default function ProjectTable({ initialProjects, itemsPerPage }: ProjectT
                         >
                           <Edit size={18} />
                         </Link>
-
-                        <button 
-                          onClick={() => openDeleteModal(Number(project.id), project.title)}
-                          className="p-2 text-red-500 hover:bg-[var(--admin-delete)] rounded-lg cursor-pointer"
-                          title="Xóa"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        {/* CHỈ ADMIN MỚI THẤY */}
+                        {userProfile?.role === 'Admin' && (
+                          <>
+                            <button 
+                              onClick={() => openDeleteModal(Number(project.id), project.title)}
+                              className="p-2 text-red-500 hover:bg-[var(--admin-delete)] rounded-lg cursor-pointer"
+                              title="Xóa"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                           </>
+                        )}
+                        
                       </div>
                     </td>
                   </tr>

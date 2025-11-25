@@ -4,6 +4,11 @@ import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 import { PROJECTS_MASTER_DATA, ProjectData, ArticleBlock } from '@/data/projects-master-data';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
+import { toast } from 'sonner';
+
+
 // 1. Định nghĩa Interface CHÍNH XÁC khớp với Database
 interface ProjectRow {
   project_id: number;
@@ -33,7 +38,26 @@ interface ProjectRow {
     display_order: number;
   }[];
 }
+async function requireAdmin(token: string) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  );
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('auth_id', user.id)
+    .single();
+
+  if (profile?.role !== 'Admin') {
+    throw new Error("Forbidden: Chỉ Admin mới có quyền này.");
+  }
+}
 // 2. Hàm lấy danh sách dự án, có thể lọc theo categorySlug
 export async function getProjects(categorySlug?: string): Promise<ProjectData[]> {
   try {
@@ -130,7 +154,8 @@ export async function getProjects(categorySlug?: string): Promise<ProjectData[]>
     });
 
   } catch (error) {
-    console.error('Lỗi không xác định khi lấy dự án:', error);
+    const msg = error instanceof Error ? error.message : 'Lỗi không xác định khi lấy dự án';
+    toast.error(msg);
     return [];
   }
 }
@@ -244,8 +269,9 @@ export async function deleteProject(token: string, projectId: number) {
 
     return { success: true };
   } catch (error: unknown) {
-    console.error("Delete error:", error);
-    return { success: false, error: 'Không thể xóa dự án này.' };
+    const msg = error instanceof Error ? error.message : 'Không thể xóa dự án này.';
+    toast.error(msg);
+    return { success: false, error: msg };
   }
 }
 
@@ -267,13 +293,15 @@ export async function getSettings() {
     if (error) throw error;
     return data as SettingItem[];
   } catch (error) {
-    console.error("Error fetching settings:", error);
+    const msg = error instanceof Error ? error.message : 'Lỗi lấy dữ liệu cấu hình';
+    toast.error(msg);
     return [];
   }
 }
 
 export async function updateSettings(token: string, updates: { key: string; value: string }[]) {
   try {
+    await requireAdmin(token);
     const supabaseClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -303,7 +331,7 @@ export async function updateSettings(token: string, updates: { key: string; valu
     return { success: true };
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Lỗi update settings';
-    console.error(msg);
+    toast.error(msg);
     return { success: false, error: msg };
   }
 }
@@ -332,7 +360,8 @@ export async function getStaffList() {
     if (error) throw error;
     return data as StaffUser[];
   } catch (error) {
-    console.error("Error fetching staff:", error);
+    const msg = error instanceof Error ? error.message : 'Lỗi lấy danh sách nhân viên';
+    toast.error(msg);
     return [];
   }
 }
@@ -340,6 +369,7 @@ export async function getStaffList() {
 // 2. Đổi trạng thái (Khóa/Mở khóa)
 export async function toggleStaffStatus(token: string, userId: number, currentStatus: boolean) {
   try {
+    await requireAdmin(token);
     // Cần token của Admin đang đăng nhập để xác thực quyền
     const supabaseClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -358,7 +388,7 @@ export async function toggleStaffStatus(token: string, userId: number, currentSt
     return { success: true };
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Lỗi update settings';
-    console.error(msg);
+    toast.error(msg);
     return { success: false, error: msg };
   }
 }
@@ -420,7 +450,192 @@ export async function createStaffAccount(data: { email: string; password: string
 
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Lỗi tạo nhân viên';
-    console.error("Create staff error:", msg);
+    toast.error(msg);
     return { success: false, error: msg };
+  }
+}
+
+// Định nghĩa kiểu dữ liệu UserProfile
+export interface UserProfile {
+  user_id: number;
+  email: string;
+  full_name: string;
+  role: 'Admin' | 'Staff';
+}
+
+// Hàm lấy thông tin người dùng hiện tại (Server-side)
+export async function getCurrentUserProfile(): Promise<UserProfile | null> {
+  const cookieStore = await cookies();
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll() {} 
+      },
+    }
+  );
+
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data: profile } = await supabase
+      .from('users')
+      .select('user_id, email, full_name, role')
+      .eq('auth_id', user.id)
+      .single();
+
+    return profile as UserProfile;
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Lỗi lấy thông tin người dùng';
+    toast.error(msg);
+    return null;
+  }
+}
+
+// --- DASHBOARD STATS ---
+// Hàm lấy thống kê Dashboard
+// Trả về tổng số dự án, dự án mới trong tháng này, và tổng số nhân sự
+// Dùng để hiển thị trên trang Admin Dashboard
+export async function getDashboardStats(range: string = '30d') {
+  try {
+    const startDate = getStartDate(range).toISOString();
+
+    // 1. Tổng dự án (Toàn thời gian - Không đổi theo filter)
+    const { count: totalProjects } = await supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true });
+
+    // 2. Dự án MỚI (Thay đổi theo filter)
+    const { count: newProjects } = await supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', startDate);
+
+    // 3. Tổng nhân sự
+    const { count: totalStaff } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true });
+
+    return {
+      totalProjects: totalProjects || 0,
+      newProjects: newProjects || 0, // Số lượng tăng thêm trong khoảng thời gian này
+      totalStaff: totalStaff || 0
+    };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Lỗi lấy dữ liệu thống kê';
+    toast.error(msg);
+    return { totalProjects: 0, newProjects: 0, totalStaff: 0 };
+  }
+}
+
+export interface MonthlyStat {
+  name: string; // VD: "Tháng 10"
+  total: number;
+}
+
+export async function getMonthlyProjectStats() {
+  try {
+    // 1. Lấy tất cả dự án (Chỉ cần cột created_at)
+    // Lưu ý: Nếu data quá lớn (>10k), nên dùng SQL function (RPC). 
+    // Với Portfolio < 1000 bài, xử lý JS vẫn siêu nhanh.
+    const { data, error } = await supabase
+      .from('projects')
+      .select('created_at')
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    // 2. Xử lý dữ liệu: Nhóm theo tháng
+    // Tạo mảng 6 tháng gần nhất mặc định là 0
+    const statsMap = new Map<string, number>();
+    const today = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      // Format tên tháng tiếng Việt (VD: T1, T2...)
+      const monthName = `T${d.getMonth() + 1}`;
+      statsMap.set(monthName, 0);
+    }
+
+    // Đếm số lượng
+    data?.forEach((p) => {
+      const date = new Date(p.created_at);
+      const monthName = `T${date.getMonth() + 1}`;
+      // Chỉ đếm nếu tháng đó nằm trong danh sách 6 tháng gần nhất
+      if (statsMap.has(monthName)) {
+        statsMap.set(monthName, (statsMap.get(monthName) || 0) + 1);
+      }
+    });
+
+    // Chuyển Map thành Array cho Recharts
+    const result: MonthlyStat[] = Array.from(statsMap, ([name, total]) => ({ name, total }));
+    
+    return result;
+
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Lỗi lấy dữ liệu biểu đồ';
+    toast.error(msg);
+    return [];
+  }
+}
+
+// Hàm tính ngày bắt đầu dựa trên range (VD: '7d', '30d')
+function getStartDate(range: string) {
+  const now = new Date();
+  if (range === '7d') return new Date(now.setDate(now.getDate() - 7));
+  if (range === '30d') return new Date(now.setDate(now.getDate() - 30));
+  if (range === '90d') return new Date(now.setDate(now.getDate() - 90));
+  if (range === '12m') return new Date(now.setFullYear(now.getFullYear() - 1));
+  return new Date(0); // 'all' -> Từ năm 1970
+}
+// Logic Biểu đồ linh hoạt (Ngày/Tháng)
+export async function getGrowthChartData(range: string = '30d') {
+  try {
+    const startDate = getStartDate(range);
+    
+    // Lấy dữ liệu trong khoảng thời gian
+    const { data } = await supabase
+      .from('projects')
+      .select('created_at')
+      .gte('created_at', startDate.toISOString())
+      .order('created_at', { ascending: true });
+
+    if (!data) return [];
+
+    // Xử lý nhóm dữ liệu
+    // Nếu range ngắn (7d, 30d) -> Nhóm theo NGÀY
+    // Nếu range dài (90d, 12m) -> Nhóm theo THÁNG
+    const isDaily = range === '7d' || range === '30d';
+    const statsMap = new Map<string, number>();
+
+    // Khởi tạo trục X cho đẹp (tránh bị đứt đoạn)
+    // (Logic này hơi dài dòng để viết ở đây, nên ta làm đơn giản: Nhóm theo data thực có)
+    
+    data.forEach((p) => {
+      const date = new Date(p.created_at);
+      let key = '';
+      
+      if (isDaily) {
+        // Format: "DD/MM" (VD: 05/10)
+        key = `${date.getDate()}/${date.getMonth() + 1}`;
+      } else {
+        // Format: "Tháng MM" (VD: T10)
+        key = `T${date.getMonth() + 1}`;
+      }
+
+      statsMap.set(key, (statsMap.get(key) || 0) + 1);
+    });
+
+    // Chuyển về mảng
+    return Array.from(statsMap, ([name, total]) => ({ name, total }));
+
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Lỗi lấy dữ liệu biểu đồ';
+    toast.error(msg);
+    return [];
   }
 }
