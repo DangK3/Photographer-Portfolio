@@ -307,3 +307,120 @@ export async function updateSettings(token: string, updates: { key: string; valu
     return { success: false, error: msg };
   }
 }
+
+
+export interface StaffUser {
+  user_id: number;
+  email: string;
+  full_name: string;
+  role: 'Admin' | 'Staff';
+  is_active: boolean;
+  created_at: string;
+  auth_id: string;
+}
+
+// 1. Lấy danh sách nhân viên
+export async function getStaffList() {
+  try {
+    // Dùng client thường (anon) cũng được nếu đã set Policy Public Read
+    // Hoặc dùng Service Role để chắc chắn lấy được hết
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as StaffUser[];
+  } catch (error) {
+    console.error("Error fetching staff:", error);
+    return [];
+  }
+}
+
+// 2. Đổi trạng thái (Khóa/Mở khóa)
+export async function toggleStaffStatus(token: string, userId: number, currentStatus: boolean) {
+  try {
+    // Cần token của Admin đang đăng nhập để xác thực quyền
+    const supabaseClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
+    );
+
+    const { error } = await supabaseClient
+      .from('users')
+      .update({ is_active: !currentStatus })
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    
+    revalidatePath('/admin/staff');
+    return { success: true };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Lỗi update settings';
+    console.error(msg);
+    return { success: false, error: msg };
+  }
+}
+
+// 3. Tạo nhân viên mới (Dùng quyền tối cao Service Role)
+export async function createStaffAccount(data: { email: string; password: string; fullName: string; role: string }) {
+  try {
+    // A. Kiểm tra Key
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) {
+      return { success: false, error: "Server chưa cấu hình Service Role Key (Kiểm tra .env.local)" };
+    }
+
+    // B. Tạo Client Admin (Bypass mọi RLS)
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceKey,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+
+    // C. Tạo User bên hệ thống Auth (Tự động Confirm email)
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email,
+      password: data.password,
+      email_confirm: true, // Quan trọng: User đăng nhập được ngay không cần check mail
+      user_metadata: { full_name: data.fullName }
+    });
+
+    if (authError) throw authError;
+    if (!authData.user) throw new Error("Không tạo được Auth User");
+
+    // D. Lưu thông tin vào bảng public.users
+    const { error: dbError } = await supabaseAdmin
+      .from('users')
+      .insert({
+        email: data.email,
+        username: data.email, // Tạm dùng email làm username (unique)
+        full_name: data.fullName,
+        role: data.role,
+        auth_id: authData.user.id, // Link với Auth ID vừa tạo
+        is_active: true
+      });
+
+    if (dbError) {
+      // Nếu lưu DB thất bại -> Xóa luôn user bên Auth để tránh rác data
+      console.error("Lỗi lưu DB, đang rollback xóa Auth User...");
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      throw dbError;
+    }
+
+    // Refresh lại trang danh sách
+    revalidatePath('/admin/staff');
+    return { success: true };
+
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Lỗi tạo nhân viên';
+    console.error("Create staff error:", msg);
+    return { success: false, error: msg };
+  }
+}

@@ -35,7 +35,12 @@ interface NavLinkProps {
   isActive?: boolean;
   onClick?: () => void;
 }
-
+// Type cho thông tin user hiển thị
+interface UserProfile {
+  full_name: string;
+  role: string;
+  email: string;
+}
 // Giá trị mặc định nếu chưa cấu hình trong DB
 const DEFAULT_TIMEOUT = 60; 
 
@@ -47,12 +52,12 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [showModal, setShowModal] = useState(false); 
-  
+  // Supabase Client
   const [supabase] = useState(() => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   ));
-  
+  // State quản lý menu mobile
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [timeLeft, setTimeLeft] = useState<string>('--:--:--');
@@ -66,6 +71,8 @@ export default function AdminLayout({
   // Ref lưu giá trị timeout để dùng trong setInterval mà không cần restart interval
   const timeoutRef = useRef(idleTimeoutMinutes);
 
+  // State lưu thông tin user
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   // --- 1. ĐỒNG BỘ REF VỚI STATE ---
   useEffect(() => {
     timeoutRef.current = idleTimeoutMinutes;
@@ -138,16 +145,41 @@ export default function AdminLayout({
 
     const checkAuthAndStartTimer = async () => {
       try {
+        // 1. Lấy Session Auth
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { router.replace('/login'); return; }
+        
+        if (!session) {
+          router.replace('/login');
+          return;
+        }
 
+        // 2. (MỚI) Lấy thông tin chi tiết từ bảng public.users
+        // Dùng auth_id (uid) để đối chiếu
+        const { data: profile } = await supabase
+          .from('users')
+          .select('full_name, role, email')
+          .eq('auth_id', session.user.id)
+          .single();
+
+        // Cập nhật state profile
+        if (profile) {
+          setUserProfile(profile as UserProfile);
+        } else {
+          // Fallback nếu chưa có trong bảng users (dùng email từ session)
+          setUserProfile({
+            full_name: session.user.email?.split('@')[0] || 'Admin',
+            role: 'Unknown',
+            email: session.user.email || ''
+          });
+        }
+
+        // 3. Khởi động Timer
         setupActivityListeners();
         setIsCheckingAuth(false);
 
         intervalId = setInterval(() => {
           const now = Date.now();
           const timeSinceLastActivity = now - lastActivityRef.current;
-          
           const currentTimeoutMs = timeoutRef.current * 60 * 1000; 
           const timeRemaining = currentTimeoutMs - timeSinceLastActivity;
 
@@ -164,6 +196,7 @@ export default function AdminLayout({
           const h = Math.floor(timeRemaining / (1000 * 60 * 60));
           const m = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
           const s = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+          
           setTimeLeft(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
           
         }, 1000);
@@ -195,7 +228,10 @@ export default function AdminLayout({
   };
 
   const handleLinkClick = () => setIsMobileMenuOpen(false);
-
+  // Helper lấy chữ cái đầu
+  const getInitials = (name?: string) => {
+    return name ? name.charAt(0).toUpperCase() : 'A';
+  };
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--admin-bg)]">
@@ -251,9 +287,18 @@ export default function AdminLayout({
             <div className="h-6 w-px bg-[var(--admin-border)] hidden sm:block"></div>
             <ThemeToggle isAdmin={true}/>
             <div className="flex items-center gap-3 pl-2">
-              <div className="hidden md:block text-sm text-right"><p className="font-medium text-[var(--admin-fg)] leading-tight">Admin</p><p className="text-[10px] text-[var(--admin-sub)] uppercase tracking-wider">Super Admin</p></div>
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--admin-primary)] to-purple-600 border-2 border-[var(--admin-card)] shadow-sm flex items-center justify-center text-white font-bold text-xs">A</div>
-            </div>
+                <div className="hidden md:block text-sm text-right">
+                  <p className="font-medium text-[var(--admin-fg)] leading-tight">
+                    {userProfile?.full_name || 'Đang tải...'}
+                  </p>
+                  <p className="text-[10px] text-[var(--admin-sub)] uppercase tracking-wider">
+                    {userProfile?.role || '...'}
+                  </p>
+                </div>
+                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--admin-primary)] to-purple-600 border-2 border-[var(--admin-card)] shadow-sm flex items-center justify-center text-white font-bold text-xs">
+                  {getInitials(userProfile?.full_name)}
+                </div>
+              </div>
           </div>
         </header>
 
