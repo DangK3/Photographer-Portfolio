@@ -45,7 +45,7 @@ export default async function StaffPage() {
     <div className="max-w-7xl mx-auto pb-20 space-y-6">
       {/* Truyền role xuống nếu muốn ẩn hiện nút (tuy nhiên ta đã chặn cả trang rồi) */}
       <StaffPageHeader total={staffList.length} />
-      <StaffTable initialStaff={staffList} />
+      <StaffTable initialStaff={staffList} currentUserRole={currentRole}/>
     </div>
   );
 }

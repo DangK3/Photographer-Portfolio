@@ -6,7 +6,6 @@ import { PROJECTS_MASTER_DATA, ProjectData, ArticleBlock } from '@/data/projects
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
-import { toast } from 'sonner';
 
 
 // 1. Định nghĩa Interface CHÍNH XÁC khớp với Database
@@ -154,8 +153,7 @@ export async function getProjects(categorySlug?: string): Promise<ProjectData[]>
     });
 
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Lỗi không xác định khi lấy dự án';
-    toast.error(msg);
+    console.error("Get projects error:", error);
     return [];
   }
 }
@@ -208,18 +206,11 @@ export async function updatePortfolioLayout(token: string, updates: ProjectGridU
     revalidatePath('/admin/portfolio-grid');
 
     return { success: true };
- } catch (error: unknown) { // Fix lỗi: đổi 'any' thành 'unknown'
-    console.error("Lỗi update layout:", error);
-    
-    // Xử lý thông báo lỗi an toàn
-    let message = 'Lỗi không xác định';
-    if (error instanceof Error) {
-        message = error.message;
-    } else if (typeof error === 'string') {
-        message = error;
-    }
-
-    return { success: false, error: message };
+ } catch (error: unknown) {
+    // Đảm bảo có dòng này hoặc tương tự
+    const msg = error instanceof Error ? error.message : 'Lỗi update layout';
+    console.error("Layout update error:", error);
+    return { success: false, error: msg };
   }
 }
 
@@ -269,9 +260,8 @@ export async function deleteProject(token: string, projectId: number) {
 
     return { success: true };
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : 'Không thể xóa dự án này.';
-    toast.error(msg);
-    return { success: false, error: msg };
+    console.error("Delete error:", error); 
+    return { success: false, error: 'Không thể xóa dự án này.' };
   }
 }
 
@@ -292,9 +282,8 @@ export async function getSettings() {
 
     if (error) throw error;
     return data as SettingItem[];
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Lỗi lấy dữ liệu cấu hình';
-    toast.error(msg);
+  } catch (error: unknown) {
+    console.error("Error fetching settings:", error);
     return [];
   }
 }
@@ -309,8 +298,6 @@ export async function updateSettings(token: string, updates: { key: string; valu
         global: { headers: { Authorization: `Bearer ${token}` } },
       }
     );
-
-    console.log("--> Updating settings:", updates);
 
     // Chạy update song song
     const promises = updates.map(item => 
@@ -330,9 +317,18 @@ export async function updateSettings(token: string, updates: { key: string; valu
     
     return { success: true };
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : 'Lỗi update settings';
-    toast.error(msg);
-    return { success: false, error: msg };
+    
+    // Xử lý type safe
+    let message = 'Lỗi không xác định';
+    
+    if (error instanceof Error) {
+      message = error.message; // Lấy message từ Error object
+    } else if (typeof error === 'string') {
+      message = error; // Nếu throw "chuỗi"
+    }
+
+    // Trả về string cho Client hiển thị
+    return { success: false, error: message };
   }
 }
 
@@ -360,8 +356,7 @@ export async function getStaffList() {
     if (error) throw error;
     return data as StaffUser[];
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Lỗi lấy danh sách nhân viên';
-    toast.error(msg);
+    console.error("Error fetching staff:", error);
     return [];
   }
 }
@@ -387,9 +382,8 @@ export async function toggleStaffStatus(token: string, userId: number, currentSt
     revalidatePath('/admin/staff');
     return { success: true };
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : 'Lỗi update settings';
-    toast.error(msg);
-    return { success: false, error: msg };
+    console.error("Toggle staff error:", error);
+    return { success: false, error: 'Không thể thay đổi trạng thái tài khoản này. Chỉ Admin mới có quyền này.' };
   }
 }
 
@@ -449,9 +443,18 @@ export async function createStaffAccount(data: { email: string; password: string
     return { success: true };
 
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : 'Lỗi tạo nhân viên';
-    toast.error(msg);
-    return { success: false, error: msg };
+    
+    // Xử lý type safe
+    let message = 'Lỗi không xác định';
+    
+    if (error instanceof Error) {
+      message = error.message; // Lấy message từ Error object
+    } else if (typeof error === 'string') {
+      message = error; // Nếu throw "chuỗi"
+    }
+
+    // Trả về string cho Client hiển thị
+    return { success: false, error: message };
   }
 }
 
@@ -490,8 +493,7 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
 
     return profile as UserProfile;
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Lỗi lấy thông tin người dùng';
-    toast.error(msg);
+    console.error("Lỗi thông tin người dùng hiện tại:", error);
     return null;
   }
 }
@@ -526,8 +528,7 @@ export async function getDashboardStats(range: string = '30d') {
       totalStaff: totalStaff || 0
     };
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Lỗi lấy dữ liệu thống kê';
-    toast.error(msg);
+    console.error("Lỗi lấy thống kê Dashboard:", error);
     return { totalProjects: 0, newProjects: 0, totalStaff: 0 };
   }
 }
@@ -577,8 +578,7 @@ export async function getMonthlyProjectStats() {
     return result;
 
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Lỗi lấy dữ liệu biểu đồ';
-    toast.error(msg);
+    console.error("Lỗi lấy thống kê tháng:", error);
     return [];
   }
 }
@@ -630,12 +630,10 @@ export async function getGrowthChartData(range: string = '30d') {
       statsMap.set(key, (statsMap.get(key) || 0) + 1);
     });
 
-    // Chuyển về mảng
     return Array.from(statsMap, ([name, total]) => ({ name, total }));
 
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Lỗi lấy dữ liệu biểu đồ';
-    toast.error(msg);
+    console.error("Lỗi lấy dữ liệu biểu đồ tăng trưởng:", error);
     return [];
   }
 }

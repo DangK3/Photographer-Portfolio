@@ -12,11 +12,12 @@ import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface StaffTableProps {
   initialStaff: StaffUser[];
+  currentUserRole: string;
 }
 
 type SortKey = 'full_name' | 'role' | 'email' | 'is_active';
 
-export default function StaffTable({ initialStaff }: StaffTableProps) {
+export default function StaffTable({ initialStaff, currentUserRole }: StaffTableProps) {
   const [staffList, setStaffList] = useState(initialStaff);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' }>({ key: 'full_name', direction: 'asc' });
@@ -74,8 +75,6 @@ export default function StaffTable({ initialStaff }: StaffTableProps) {
     if (!selectedStaff) return;
 
     setIsLoading(true);
-    // const toastId = toast.loading('Đang cập nhật trạng thái...'); 
-    // (Có thể bỏ toast loading vì Modal đã có spinner rồi, hoặc giữ tùy bạn)
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -183,21 +182,20 @@ export default function StaffTable({ initialStaff }: StaffTableProps) {
                         {staff.is_active ? 'Đang hoạt động' : 'Đã khóa'}
                       </span>
                     </td>
-                    
                     {/* CỘT HÀNH ĐỘNG */}
-                    <td className="px-6 py-4 text-right whitespace-nowrap">
-                      <button 
-                        onClick={() => openConfirmModal(staff)} // <-- SỬ DỤNG HÀM MỚI
-                        className={`p-2 rounded-lg transition-colors group cursor-pointer ${
-                            staff.is_active 
-                            ? 'text-red-500 hover:bg-red-50' 
-                            : 'text-green-500 hover:bg-green-50'
-                        }`}
-                        title={staff.is_active ? "Khóa tài khoản" : "Mở khóa tài khoản"}
-                      >
-                        {staff.is_active ? <UserX size={18} /> : <UserCheck size={18} />}
-                      </button>
-                    </td>
+                      {currentUserRole === 'Admin' && (
+                        <button 
+                          onClick={() => openConfirmModal(staff)} 
+                          className={`p-2 rounded-lg transition-colors group cursor-pointer ${
+                              staff.is_active 
+                              ? 'text-red-500 hover:bg-red-50' 
+                              : 'text-green-500 hover:bg-green-50'
+                          }`}
+                          title={staff.is_active ? "Khóa tài khoản" : "Mở khóa tài khoản"}
+                        >
+                          {staff.is_active ? <UserX size={18} /> : <UserCheck size={18} />}
+                        </button>
+                      )}
                   </tr>
                 ))
               )}
