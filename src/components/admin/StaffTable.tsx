@@ -182,7 +182,8 @@ export default function StaffTable({ initialStaff, currentUserRole }: StaffTable
                         {staff.is_active ? 'Đang hoạt động' : 'Đã khóa'}
                       </span>
                     </td>
-                    {/* CỘT HÀNH ĐỘNG */}
+                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                      {/* CỘT HÀNH ĐỘNG */}
                       {currentUserRole === 'Admin' && (
                         <button 
                           onClick={() => openConfirmModal(staff)} 
@@ -196,6 +197,7 @@ export default function StaffTable({ initialStaff, currentUserRole }: StaffTable
                           {staff.is_active ? <UserX size={18} /> : <UserCheck size={18} />}
                         </button>
                       )}
+                    </td>
                   </tr>
                 ))
               )}
