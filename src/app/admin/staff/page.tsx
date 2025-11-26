@@ -27,11 +27,12 @@ export default async function StaffPage() {
   // Lấy Role
   const { data: profile } = await supabase
     .from('users')
-    .select('role')
+    .select('role, user_id')
     .eq('auth_id', user.id)
     .single();
 
   const currentRole = profile?.role || 'Staff';
+  const currentUserId = profile?.user_id || 0; 
 
   // Nếu là Staff -> Đá về Dashboard (Chặn truy cập trang này luôn)
   if (currentRole !== 'Admin') {
@@ -45,7 +46,8 @@ export default async function StaffPage() {
     <div className="max-w-7xl mx-auto pb-20 space-y-6">
       {/* Truyền role xuống nếu muốn ẩn hiện nút (tuy nhiên ta đã chặn cả trang rồi) */}
       <StaffPageHeader total={staffList.length} />
-      <StaffTable initialStaff={staffList} currentUserRole={currentRole}/>
+      <StaffTable initialStaff={staffList} 
+      currentUserRole={currentRole} currentUserId={currentUserId} />
     </div>
   );
 }

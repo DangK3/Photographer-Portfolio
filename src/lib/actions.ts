@@ -371,7 +371,20 @@ export async function toggleStaffStatus(token: string, userId: number, currentSt
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       { global: { headers: { Authorization: `Bearer ${token}` } } }
     );
+    // 1. Lấy thông tin người đang đăng nhập
+    const { data: { user: currentUser } } = await supabaseClient.auth.getUser();
+    
+    // 2. Lấy thông tin người bị khóa (Target)
+    const { data: targetUser } = await supabaseClient
+      .from('users')
+      .select('auth_id')
+      .eq('user_id', userId)
+      .single();
 
+    // 3. So sánh: Nếu trùng nhau -> Chặn ngay
+    if (currentUser && targetUser && currentUser.id === targetUser.auth_id) {
+      throw new Error("Bạn không thể tự khóa tài khoản của chính mình.");
+    }
     const { error } = await supabaseClient
       .from('users')
       .update({ is_active: !currentStatus })
