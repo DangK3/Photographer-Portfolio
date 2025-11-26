@@ -13,11 +13,12 @@ import ConfirmModal from '@/components/ui/ConfirmModal';
 interface StaffTableProps {
   initialStaff: StaffUser[];
   currentUserRole: string;
+  currentUserId: number;
 }
 
 type SortKey = 'full_name' | 'role' | 'email' | 'is_active';
 
-export default function StaffTable({ initialStaff, currentUserRole }: StaffTableProps) {
+export default function StaffTable({ initialStaff, currentUserRole, currentUserId }: StaffTableProps) {
   const [staffList, setStaffList] = useState(initialStaff);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' }>({ key: 'full_name', direction: 'asc' });
@@ -184,7 +185,7 @@ export default function StaffTable({ initialStaff, currentUserRole }: StaffTable
                     </td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       {/* CỘT HÀNH ĐỘNG */}
-                      {currentUserRole === 'Admin' && (
+                     {currentUserRole === 'Admin' && staff.user_id !== currentUserId && (
                         <button 
                           onClick={() => openConfirmModal(staff)} 
                           className={`p-2 rounded-lg transition-colors group cursor-pointer ${
@@ -196,6 +197,9 @@ export default function StaffTable({ initialStaff, currentUserRole }: StaffTable
                         >
                           {staff.is_active ? <UserX size={18} /> : <UserCheck size={18} />}
                         </button>
+                      )}
+                      {staff.user_id === currentUserId && (
+                        <span className="text-xs text-[var(--admin-sub)] italic px-2">Bạn</span>
                       )}
                     </td>
                   </tr>
