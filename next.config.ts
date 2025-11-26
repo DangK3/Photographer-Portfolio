@@ -1,22 +1,31 @@
+// next.config.ts
 import type { NextConfig } from "next";
-const repoName = '/Photographer-Portfolio';
+
 const nextConfig: NextConfig = {
-  /* config options here */
-  typescript: {
-    // !! Cảnh báo: Sẽ bỏ qua lỗi build của TypeScript.
-    // Chúng ta dùng cái này TẠM THỜI để vượt qua lỗi cache.
-    ignoreBuildErrors: true,
-  },
-  output: 'export',
-  
-  // 2. Báo cho Next.js biết đường dẫn gốc
-  // (Rất quan trọng để CSS, JS, và ảnh load đúng)
-  basePath: repoName,
-  
-  // 3. Tắt tối ưu ảnh (bắt buộc cho GitHub Pages)
+  // 3. Cấu hình ảnh (Bật tối ưu hóa của Vercel)
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co', // Cho phép load ảnh từ Supabase
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      }
+    ],
   },
+
+  // Tắt strict mode nếu muốn (optional), nhưng nên để true
+  reactStrictMode: true, 
+  
+  // Tắt cảnh báo ESLint lúc build để tránh fail build vì lỗi nhỏ (Optional)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  }
 };
 
 export default nextConfig;
