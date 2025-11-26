@@ -15,6 +15,18 @@
   --gradient-color-3: #f9fafb; /* gray-50 */
   --to-linear: #dadada;
   --from-linear: #ebebeb;
+
+  /* === ADMIN THEME (LIGHT MODE - Modern Slate) === */
+  --admin-bg: #f8fafc;          /* Slate-50: Nền tổng thể sáng, hơi xanh nhẹ */
+  --admin-card: #ffffff;        /* White: Nền thẻ */
+  --admin-fg: #0f172a;          /* Slate-900: Chữ chính đậm */
+  --admin-sub: #64748b;         /* Slate-500: Chữ phụ */
+  --admin-border: #e2e8f0;      /* Slate-200: Viền nhạt */
+  --admin-primary: #4f46e5;     /* Indigo-600: Màu chủ đạo (Button/Active) */
+  --admin-primary-fg: #ffffff;  /* Chữ trên nền chủ đạo */
+  --admin-hover: #f1f5f9;       /* Slate-100: Màu khi hover */
+  --admin-edit: #EBF6FF;        /* bg-blue-50: Màu nền ô edit */
+  --admin-delete: #FFE5E5;      /* bg-red-50: Màu nền ô xóa */
 }
 
 html.dark { 
@@ -27,6 +39,17 @@ html.dark {
     --gradient-color-3: #1f2937; /* gray-800 */
     --to-linear: #030a20;
     --from-linear: #030a20;
+
+    --admin-bg: #020617;          /* Slate-950: Nền cực tối */
+    --admin-card: #0f172a;        /* Slate-900: Nền thẻ nổi bật hơn nền chính */
+    --admin-fg: #f8fafc;          /* Slate-50: Chữ trắng sáng */
+    --admin-sub: #94a3b8;         /* Slate-400: Chữ phụ dịu mắt */
+    --admin-border: #1e293b;      /* Slate-800: Viền tối */
+    --admin-primary: #6366f1;     /* Indigo-500: Màu chủ đạo sáng hơn chút */
+    --admin-primary-fg: #ffffff;  
+    --admin-hover: #1e293b;       /* Slate-800: Hover tối */
+    --admin-edit: #1E3A8A;        /* bg-blue-900/20: Màu nền ô edit tối */
+    --admin-delete: #7F1D1D;      /* bg-red-900/20: Màu nền ô xóa tối */
 }
 
 html, body {
@@ -201,4 +224,22 @@ body::-webkit-scrollbar-thumb:hover {
 }
 @keyframes l15{ 
   100%{transform: rotate(1turn)}
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-row {
+  /* opacity ban đầu là 0 để tránh bị nháy */
+  opacity: 0; 
+  /* forwards giúp giữ trạng thái cuối cùng (opacity: 1) sau khi chạy xong */
+  animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }

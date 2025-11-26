@@ -22,7 +22,6 @@ export default function ProjectGrid({ allProjects }: ProjectGridProps) {
   const [displayedProjects, setDisplayedProjects] = useState<Project[]>(
     allProjects.slice(0, INITIAL_LOAD_COUNT)
   );
-  // ... (các state khác giữ nguyên) ...
   const [currentIndex, setCurrentIndex] = useState(INITIAL_LOAD_COUNT);
   const [hasMore, setHasMore] = useState(
     allProjects.length > INITIAL_LOAD_COUNT
@@ -30,7 +29,6 @@ export default function ProjectGrid({ allProjects }: ProjectGridProps) {
   const [isLoading, setIsLoading] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
 
-  // ... (hàm loadMoreProjects giữ nguyên) ...
   const loadMoreProjects = useCallback(() => {
     if (isLoading || !hasMore) return;
     setIsLoading(true);
@@ -133,7 +131,7 @@ export default function ProjectGrid({ allProjects }: ProjectGridProps) {
           return (
           <Link
             key={project.id}
-            href={`/du-an/${project.cateSlug}/${project.originalSlug || project.slug}`}
+            href={`/du-an/${project.slug}`}
             // (CẬP NHẬT) Dùng class item động
             className={getLinkClassName(project, index)}
           >

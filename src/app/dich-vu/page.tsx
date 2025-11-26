@@ -60,12 +60,6 @@ useEffect(() => {
       },
       {
         rootMargin: '-50% 0px 0% 0px',
-
-        /*
-          - threshold: 0
-            Chỉ cần 1 pixel (bất kỳ phần nào) của section
-            chạm vào vùng đệm trên là sẽ kích hoạt.
-        */
         threshold: 0,
       }
     );
@@ -80,7 +74,6 @@ useEffect(() => {
     </div>
   );
 };
-
 // 3. COMPONENT TRANG CHÍNH
 export default function DichVuPage() {
   const [activeId, setActiveId] = useState(sections[0].id);
@@ -245,7 +238,7 @@ export default function DichVuPage() {
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"
                       className="object-cover"
-                      priority
+                      priority={true}
                       placeholder="blur" 
                     />
                   </div>

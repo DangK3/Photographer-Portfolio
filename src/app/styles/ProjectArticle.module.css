@@ -2,7 +2,7 @@
 
 /* 1. Container chính (Giống Gucci, max-width 3xl) */
 .articleContainer {
-    max-width: 768px; /* max-w-3xl */
+    max-width: 860px; /* max-w-3xl */
     margin: 0 auto;
     padding: 0 1rem; /* px-4 */
     padding-top: 4rem; /* py-16 */

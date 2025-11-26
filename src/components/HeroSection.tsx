@@ -17,25 +17,15 @@ export default function HeroSection() {
       <div className="absolute inset-0 z-0">
         <Image
           src={Background}
-          alt="Ảnh nền nghệ thuật của nhiếp ảnh gia"
-          layout="fill"
-          objectFit="cover"
-          quality={90}
-          priority
-          className="ken-burns-effect"
+          fill={true}
+          quality={80}
+          alt="Background"
+          style={{ objectFit: 'cover' }}
+          sizes="100vw"   // Báo cho browser biết nó chiếm full màn hình
         />
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
-      {/* Dải màu vàng trong suốt (ĐÃ THÊM MỚI) */}
-      {/* <div
-        className="absolute inset-0 z-10" // Đảm bảo nằm trên ảnh nền nhưng dưới slogan
-      >
-      <div
-        className="absolute top-0 right-0 w-full h-full transform -rotate-30
-                    bg-yellow-400 opacity-20
-                    origin-top-right" // Tạo dải chéo từ trên phải xuống dưới trái
-      ></div>
-      </div> */}
+      
       {/* Lớp chứa nội dung văn bản */}
       <Container className="relative z-10 text-center">
         {/* 3. Thay thế <h1> cũ bằng TypeAnimation */}

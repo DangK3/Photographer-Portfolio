@@ -9,10 +9,10 @@ import {
   SliderContent,
   SliderWrapper,
 } from '@/components/progressive-carousel'; // Đảm bảo đường dẫn này chính xác
-import carousel_01_2020 from '../assets/about/carousel_01_2020.jpg';
-import carousel_02_2022 from '../assets/about/carousel_02_2022.jpg';
-import carousel_03_2024 from '../assets/about/carousel_03_2024.jpg';
-import carousel_04_2025 from '../assets/about/carousel_04_2025.jpg';    
+import carousel_01_2020 from '../assets/about/carousel_01_2020.webp';
+import carousel_02_2022 from '../assets/about/carousel_02_2022.webp';
+import carousel_03_2024 from '../assets/about/carousel_03_2024.webp';
+import carousel_04_2025 from '../assets/about/carousel_04_2025.webp';    
 import Container from '@/components/Container';
 
 
@@ -80,6 +80,7 @@ export default function AboutMilestonesSection() {
                     height={1080} // Giữ chiều cao lớn
                     alt={item.title} // Dùng title cho alt text
                     priority={index === 0} // Ưu tiên tải ảnh đầu tiên
+                    sizes="(max-width: 768px) 100vw, 100vw"
                 />
                 </SliderWrapper>
             ))}

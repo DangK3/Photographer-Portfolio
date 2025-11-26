@@ -1,62 +1,39 @@
-// app/thuong-mai/page.tsx
-import type { Metadata } from 'next';
+import React from 'react';
+import { getProjects } from '@/lib/actions';
+import { Metadata } from 'next';
 import Container from '@/components/Container';
-import { allProjects } from '@/data/projects-master-data';
-// Sửa import để khớp với kiểu dữ liệu mới trong seed-helpers
-import ProjectGrid from '../../components/project-grid';
- import { 
-  IS_DEMO_MODE, 
-  DESIRED_PROJECT_COUNT, 
-  SLUG_CATE_COMMERCIAL 
-} from '@/lib/constants';
-import { seedProjectsByCategory } from '@/lib/seed-helpers';
+import ProjectMasonryGrid from '@/components/ProjectMasonryGrid';
 
 export const metadata: Metadata = {
-  title: 'Dự án Thương Mại | Oni Studio',
-  description: 'Các dự án nhiếp ảnh thương mại, sản phẩm và quảng cáo.',
+  title: 'Dự án Thương mại | Oni Studio',
+  description: 'Các dự án Commercial, Editorial và Lookbook thực hiện bởi Oni Studio.',
 };
-
-function getCommercialProjects() {
-  // Lấy dự án thật trước
-  const realProjects = allProjects.filter(
-    (p) => p.cateSlug === SLUG_CATE_COMMERCIAL
-  );
-
-  // Nếu IS_DEMO_MODE = true, và chúng ta có dự án thật để làm mẫu...
-  if (IS_DEMO_MODE && realProjects.length > 0) {
-    // ...thì dùng hàm seed của bạn để nhân bản chúng
-    return seedProjectsByCategory(
-      realProjects, // Dùng mảng dự án thật làm "hạt giống"
-      'Thương mại', // Tên category
-      DESIRED_PROJECT_COUNT // Số lượng mong muốn
-    );
-  }
-
-  // Nếu IS_DEMO_MODE = false, chỉ trả về dự án thật
-  return realProjects;
-}
-
-export default function ThuongMaiPage() {
-  const projectsToDisplay = getCommercialProjects();
+export const revalidate = 3600; // 1 hour
+export default async function CommercialPage() {
+  const projects = await getProjects('thuong-mai'); // <-- Slug của danh mục
 
   return (
-    <Container className="py-16 md:py-24">
-      <div className="text-center mb-12 md:mb-16">
-        <h1 className="text-4xl md:text-5xl font-light tracking-tighter text-[var(--foreground)]">
-          Thương Mại
-        </h1>
-        <p className="text-lg mt-4 text-[var(--glow-color)]">
-          Dự án quảng cáo, sản phẩm và sự kiện cho thương hiệu.
-        </p>
-      </div>
+    <Container className="min-h-screen bg-[var(--background)] pt-32 pb-20 px-4 md:px-8">
+      <div className="max-w-8xl mx-auto">
+        
+        <div className="mb-16">
+          <h1 className="text-4xl md:text-6xl font-bold text-[var(--foreground)] tracking-tighter mb-4">
+            Thương mại
+          </h1>
+          <p className="text-[var(--sub-text)] text-lg max-w-xl">
+            Những chiến dịch quảng cáo và bộ ảnh thương mại được thực hiện với sự chỉn chu và sáng tạo.
+          </p>
+        </div>
 
-      {projectsToDisplay.length > 0 ? (
-              <ProjectGrid allProjects={projectsToDisplay} />
-            ) : (
-              <p className="text-center text-[var(--sub-text)]">
-                Chưa có dự án nào trong mục này.
-              </p>
-            )}
+        {projects.length === 0 && (
+          <div className="py-20 text-center text-[var(--sub-text)] border-y border-[var(--foreground)]/10">
+            Chưa có dự án nào trong danh mục này.
+          </div>
+        )}
+
+        {/* Project Grid */}
+        <ProjectMasonryGrid projects={projects} variant="flat" />
+      </div>
     </Container>
   );
 }

@@ -1,188 +1,138 @@
 // src/components/ProjectShowcase.tsx
-'use client'; 
+'use client';
 
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Container from './Container';
-import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { allProjects, Project } from '@/data/projects-master-data';
+import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
+import { getProjects } from '@/lib/actions';
+import { ProjectData } from '@/data/projects-master-data';
 
-const featuredProjects = allProjects.filter(project => project.featured === true);
-// Component ProjectItem (Mục con)
-function ProjectItem({ project }: { project: Project }) {
-  const isImageLeft = project.align === 'right';
-  const itemRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    // ... (logic IntersectionObserver giữ nguyên)
-    const item = itemRef.current;
-    if (!item) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      },
-      {
-        threshold: 0.2, 
-      }
-    );
-
-    observer.observe(item);
-    return () => observer.disconnect();
-  }, []);
+// --- Component Con: ProjectItem ---
+function ProjectItem({ project, index }: { project: ProjectData; index: number }) {
+  const isImageRight = index % 2 !== 0;
 
   return (
-    <div
-      ref={itemRef}
-      // ... (animation class giữ nguyên)
-      className={`grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center
-                  transition-opacity duration-[2000ms] ease-out
-                  ${isVisible ? 'opacity-100' : 'opacity-0'}
-                `}
+    <motion.div 
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      viewport={{ once: true, margin: "-100px" }}
+      className={`flex flex-col md:flex-row items-center gap-8 md:gap-16 mb-24 md:mb-32 ${
+        isImageRight ? 'md:flex-row-reverse' : ''
+      }`}
     >
-      <div
-        className={`w-full h-96 md:h-[500px] relative overflow-hidden shadow-lg
-                    ${isImageLeft ? 'md:order-1' : 'md:order-2'}
-                    transition-transform duration-[2000ms] ease-out
-                    ${
-                      isVisible
-                        ? 'translate-x-0'
-                        : isImageLeft
-                        ? '-translate-x-40' 
-                        : 'translate-x-40' 
-                    }
-                  `}
-      >
-        <Image
-          src={project.src}
-          alt={project.title}
-          layout="fill"
-          objectFit="cover"
-          quality={85}
-          className="transition-transform duration-500 ease-in-out hover:scale-105"
-        />
-      </div>
-
-      <div
-        className={`flex flex-col justify-center
-                    ${isImageLeft ? 'md:order-2' : 'md:order-1'}
-                    transition-transform duration-[2000ms] ease-out
-                    ${
-                      isVisible
-                        ? 'translate-x-0'
-                        : isImageLeft
-                        ? 'translate-x-40' 
-                        : '-translate-x-40' 
-                    }
-                  `}
-      >
-        <span className="text-sm uppercase tracking-widest text-[var(--glow-color)]">
-          {project.category}
-        </span>
-
-        <h3 className="text-2xl md:text-3xl font-light mt-2 text-[var(--foreground)]">
-          {project.title}
-        </h3>
-
-        <p className="mt-4 text-[var(--glow-color)]">
-          {project.description}
-        </p>
-        
-        <ul className="mt-5 space-y-2 text-sm text-[var(--glow-color)] border-l border-gray-200 dark:border-gray-700 pl-4">
-          {project.credits?.slice(0, 3).map((credit) => (
-            <li key={credit.label}>
-              <strong /* ... */>{credit.label}:</strong> {credit.value}
-            </li>
-          ))}
-        </ul>
-
-        <Link
-          href={`/du-an/${project.cateSlug}/${project.slug}`}
-          className="mt-6 inline-block font-medium text-[var(--foreground)] group"
-        >
-          Xem chi tiết dự án
-          <span className="inline-block transition-transform duration-300 group-hover:translate-x-2">
-            &rarr;
-          </span>
+      {/* Image Side */}
+      <div className="w-full md:w-3/5 relative group cursor-pointer overflow-hidden rounded-lg shadow-2xl">
+        <Link href={`/du-an/${project.slug}`}>
+          <div className="relative aspect-[16/9] w-full overflow-hidden">
+            <Image
+              src={typeof project.image === 'string' ? project.image : project.image.src}
+              alt={project.title}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, 60vw"
+            />
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+            
+            {/* Badge Danh mục nổi bật */}
+            <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur px-3 py-1 text-xs font-bold uppercase tracking-wider text-[var(--foreground)] rounded">
+              {project.categoryName}
+            </div>
+          </div>
         </Link>
       </div>
-    </div>
+
+      {/* Text Side */}
+      <div className="w-full md:w-2/5 text-center md:text-left space-y-6">
+        <span className="inline-block text-xs font-bold tracking-[0.2em] text-[var(--sub-text)] uppercase border-b border-[var(--glow-color)] pb-1">
+          Dự án {project.categoryName} mới
+        </span>
+        
+        <h3 className="text-3xl md:text-5xl font-bold text-[var(--foreground)] leading-tight">
+          <Link href={`/du-an/${project.slug}`} className="hover:text-[var(--sub-text)] transition-colors">
+            {project.title}
+          </Link>
+        </h3>
+
+        {project.description && (
+          <p className="text-[var(--sub-text)] text-lg font-light leading-relaxed line-clamp-3">
+            {project.description}
+          </p>
+        )}
+        {project.credits && project.credits.length > 0 && (
+          <ul className="mt-5 space-y-2 text-sm text-[var(--sub-text)] border-l border-[var(--foreground)]/20 pl-4 text-left">
+            {project.credits.slice(0, 3).map((credit, idx) => (
+              <li key={idx}>
+                <strong className="font-semibold text-[var(--foreground)]">
+                  {credit.label}:
+                </strong> {credit.value}
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="pt-4">
+          <Link 
+            href={`/du-an/${project.slug}`}
+            className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-[var(--foreground)] hover:gap-4 transition-all duration-300 group/link"
+          >
+            Xem dự án <ArrowRight size={16} className="transition-transform group-hover/link:translate-x-1" />
+          </Link>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
-// Component Section chính
+// --- Component Chính ---
 export default function ProjectShowcase() {
-  const titleRef = useRef<HTMLDivElement>(null);
-  const [titleVisible, setTitleVisible] = useState(false);
+  const [showcaseProjects, setShowcaseProjects] = useState<ProjectData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // ... (logic IntersectionObserver giữ nguyên)
-    const title = titleRef.current;
-    if (!title) return;
+    const fetchAndFilter = async () => {
+      try {
+        const all = await getProjects();
+        
+        // 1. Lấy tất cả dự án Featured
+        const allFeatured = all.filter(p => p.isFeatured);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
-          setTitleVisible(true);
-          observer.unobserve(entry.target);
-        }
-      },
-      {
-        threshold: 0.5, 
+        // 2. Lọc: Mỗi danh mục chỉ lấy 1 đại diện MỚI NHẤT
+        // Danh sách các category slug cần lấy
+        const targetCategories = ['thoi-trang', 'thuong-mai', 'ca-nhan'];
+        
+        const uniqueFeatured: ProjectData[] = [];
+
+        targetCategories.forEach(catSlug => {
+          // Tìm dự án Featured mới nhất của danh mục này
+          const bestProject = allFeatured.find(p => p.category === catSlug);
+          if (bestProject) {
+            uniqueFeatured.push(bestProject);
+          }
+        });
+
+        // Nếu thiếu (ví dụ chưa có dự án Cá nhân nào Featured), có thể lấy bù từ danh sách chung
+        // (Ở đây mình giữ logic chặt: Không có thì không hiện)
+        
+        setShowcaseProjects(uniqueFeatured);
+      } catch (error) {
+        console.error("Lỗi tải showcase:", error);
+      } finally {
+        setIsLoading(false);
       }
-    );
+    };
 
-    observer.observe(title);
-    return () => observer.disconnect();
+    fetchAndFilter();
   }, []);
 
+  if (isLoading || showcaseProjects.length === 0) return null;
+
   return (
-    <section
-      id="projects"
-      className={`
-        py-16 md:py-24 
-        animated-gradient 
-        overflow-hidden 
-      `} // Nền gradient tự đổi màu (Đã đúng)
-      style={{ minHeight: 0, fontSize: 'initial' }}
-    >
-      <Container>
-        <div
-          ref={titleRef}
-          // ... (animation class giữ nguyên)
-          className={`text-center mb-12 md:mb-20
-                      transition-all duration-[2000ms] ease-out
-                      ${
-                        titleVisible
-                          ? 'opacity-100 translate-y-0'
-                          : 'opacity-0 translate-y-20'
-                      }
-                    `}
-        >
-          {/* SỬA 6: Dùng biến CSS cho tiêu đề section */}
-          <h2 className="text-3xl md:text-5xl font-light tracking-tighter text-[var(--foreground)]">
-            Dự Án Tiêu Biểu
-          </h2>
-
-          {/* SỬA 7: Dùng biến CSS cho phụ đề section */}
-          <p className="text-lg md:text-xl text-[var(--glow-color)] mt-2">
-            Câu chuyện và bối cảnh đằng sau <span className='text-nowrap'>những tác phẩm.</span>
-          </p>
-        </div>
-
-        {/* Danh sách các dự án */}
-        <div className="space-y-16 md:space-y-24">
-          {featuredProjects.map((project) => (
-            <ProjectItem key={project.id} project={project} />
-          ))}
-        </div>
-      </Container>
-    </section>
+    <div className="max-w-8xl mx-auto px-4 md:px-8 py-20 border-t border-[var(--foreground)]/10">
+      {showcaseProjects.map((project, index) => (
+        <ProjectItem key={project.id} project={project} index={index} />
+      ))}
+    </div>
   );
 }

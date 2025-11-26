@@ -2,12 +2,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // 3. Cấu hình ảnh (Bật tối ưu hóa của Vercel)
+
+
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**.supabase.co', // Cho phép load ảnh từ Supabase
+
+        hostname: '**.supabase.co',
+
       },
       {
         protocol: 'https',

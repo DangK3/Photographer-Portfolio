@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Container from '@/components/Container';
-import ProfileImage from '../assets/about/avatar.jpg'; 
+import ProfileImage from '../assets/about/avatar.webp'; 
 import PhilosophyBackground from './PhilosophyBackground';
 import AnimatedProfileImage from './AnimatedProfileImage';
 export default function AboutPhilosophySection() {
