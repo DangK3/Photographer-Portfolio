@@ -27,7 +27,7 @@ import img_devices from '../../assets/service/section_02/devices.webp';
 import img_QR_p60t from '../../assets/service/section_02/GODOX-QR-P60T.webp';
 import img_QR_p90 from '../../assets/service/section_02/GODOX-QR-P90.webp';
 import img_QR_P120 from '../../assets/service/section_02/GODOX-QR-P120.webp';
-import img_QR_P150t from '../../assets/service/section_02/GODOX-QR-P150t.webp';
+import img_QR_P150t from '../../assets/service/section_02/GODOX-QR-P150T.webp';
 
 // 1. ĐỊNH NGHĨA CÁC MỤC (Sections) - (Giữ nguyên, đã đúng)
 const sections = [
