@@ -111,7 +111,8 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
               <div className="flex items-center border border-[var(--admin-border)] rounded-lg bg-[var(--admin-bg)]">
                 <button 
                   onClick={() => handleNumberChange('items_per_page', 'decrease')}
-                  className="p-3 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] hover:text-[var(--admin-fg)] border-r border-[var(--admin-border)]"
+                  className="p-3 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)]
+                   hover:text-[var(--admin-fg)] border-r border-[var(--admin-border)] cursor-pointer"
                 >
                   <Minus size={16} />
                 </button>
@@ -123,7 +124,8 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
                 />
                 <button 
                   onClick={() => handleNumberChange('items_per_page', 'increase')}
-                  className="p-3 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] hover:text-[var(--admin-fg)] border-l border-[var(--admin-border)]"
+                  className="p-3 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] 
+                  hover:text-[var(--admin-fg)] border-l border-[var(--admin-border)] cursor-pointer"
                 >
                   <Plus size={16} />
                 </button>
@@ -198,7 +200,8 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
             <div className="flex items-center border border-[var(--admin-border)] rounded-lg bg-[var(--admin-card)]">
               <button 
                 onClick={() => handleNumberChange('idle_timeout_minutes', 'decrease')}
-                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] border-r border-[var(--admin-border)] disabled:opacity-50"
+                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] 
+                border-r border-[var(--admin-border)] disabled:opacity-50 cursor-pointer"
                 // Giới hạn thấp nhất là 5 phút
                 disabled={parseInt(getValue('idle_timeout_minutes')) <= 5}
               >
@@ -211,7 +214,8 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
               
               <button 
                 onClick={() => handleNumberChange('idle_timeout_minutes', 'increase')}
-                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] border-l border-[var(--admin-border)]"
+                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] 
+                border-l border-[var(--admin-border)] cursor-pointer"
               >
                 <Plus size={16} />
               </button>
@@ -223,14 +227,16 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
       <div className="flex justify-end gap-4 sticky bottom-4 pt-4">
         <button 
           onClick={() => setSettings(initialSettings)}
-          className="px-4 py-2 rounded-lg bg-[var(--admin-card)] border border-[var(--admin-border)] text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] flex items-center gap-2 shadow-sm"
+          className="px-4 py-2 rounded-lg bg-[var(--admin-card)] border border-[var(--admin-border)] 
+          text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] flex items-center gap-2 shadow-sm cursor-pointer"
         >
           <RotateCcw size={18} /> Khôi phục
         </button>
         <button 
           onClick={handleSave}
           disabled={isSaving}
-          className="px-6 py-2 rounded-lg bg-[var(--admin-primary)] text-white font-medium hover:opacity-90 flex items-center gap-2 shadow-lg shadow-indigo-500/30 disabled:opacity-70"
+          className="px-6 py-2 rounded-lg bg-[var(--admin-primary)] text-white font-medium 
+          hover:opacity-90 flex items-center gap-2 shadow-lg shadow-indigo-500/30 disabled:opacity-70 cursor-pointer"
         >
           {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
           Lưu cấu hình
