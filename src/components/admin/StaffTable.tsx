@@ -141,7 +141,7 @@ export default function StaffTable({ initialStaff, currentUserRole, currentUserI
 
       {/* Table */}
       <div className="bg-[var(--admin-card)] rounded-xl border border-[var(--admin-border)] shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto table-scrollbar">
           <table className="w-full text-sm text-left min-w-[800px]">
             <thead className="bg-[var(--admin-bg)] text-[var(--admin-sub)] uppercase text-xs font-semibold border-b border-[var(--admin-border)]">
               <tr>

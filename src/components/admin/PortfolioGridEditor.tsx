@@ -147,15 +147,16 @@ export default function PortfolioGridEditor({ initialProjects }: EditorProps) {
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-6 py-2 bg-[var(--admin-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 flex items-center gap-2 shadow-md"
+              className="px-6 py-2 bg-[var(--admin-primary)] text-white 
+              rounded-lg text-sm font-medium hover:opacity-90 flex items-center gap-2 shadow-md cursor-pointer"
             >
               <MousePointerClick size={18} /> Bắt đầu sửa
             </button>
           ) : (
             <>
-              <button onClick={handleReset} className="px-3 py-2 text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] rounded-lg border border-transparent hover:border-[var(--admin-border)]"><RotateCcw size={18} /></button>
-              <button onClick={() => setIsEditing(false)} className="px-4 py-2 border border-[var(--admin-border)] text-[var(--admin-fg)] rounded-lg text-sm">Hủy</button>
-              <button onClick={handleSave} disabled={isSaving} className="px-6 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 shadow-md flex items-center gap-2">
+              <button onClick={handleReset} className="px-3 py-2 text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] rounded-lg border border-transparent hover:border-[var(--admin-border)] cursor-pointer"><RotateCcw size={18} /></button>
+              <button onClick={() => setIsEditing(false)} className="px-4 py-2 border border-[var(--admin-border)] text-[var(--admin-fg)] rounded-lg text-sm cursor-pointer">Hủy</button>
+              <button onClick={handleSave} disabled={isSaving} className="px-6 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 shadow-md flex items-center gap-2 cursor-pointer">
                 {isSaving ? '...' : <><Save size={18} /> Lưu thay đổi</>}
               </button>
             </>

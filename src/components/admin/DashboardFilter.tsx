@@ -17,32 +17,22 @@ export default function DashboardFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
-  
-  // Thêm useTransition để quản lý trạng thái Loading khi chuyển đổi
   const [isPending, startTransition] = useTransition();
-  
   const containerRef = useRef<HTMLDivElement>(null);
   
   const currentRange = searchParams.get('range') || '30d';
   const activeLabel = OPTIONS.find(opt => opt.value === currentRange)?.label || 'Chọn thời gian';
 
   const handleSelect = (value: string) => {
-    setIsOpen(false); // Đóng menu ngay lập tức
-
-    // Bắt đầu chuyển đổi dữ liệu
+    setIsOpen(false);
     startTransition(() => {
       const params = new URLSearchParams(searchParams);
       params.set('range', value);
-      
-      // 1. Đẩy URL mới (scroll: false để không bị nhảy trang)
       router.push(`?${params.toString()}`, { scroll: false });
-      
-      // 2. QUAN TRỌNG: Bắt buộc Server Component nạp lại dữ liệu mới
       router.refresh(); 
     });
   };
 
-  // Đóng khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -54,15 +44,20 @@ export default function DashboardFilter() {
   }, []);
 
   return (
-    <div className="relative" ref={containerRef}>
+    // [1] Container: w-full trên mobile, w-auto trên desktop
+    <div className="relative w-full md:w-auto" ref={containerRef}>
       
       {/* TRIGGER BUTTON */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        disabled={isPending} // Khóa nút khi đang load
+        disabled={isPending}
         className={`
-          flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all duration-200
+          flex items-center justify-between gap-2 px-4 py-2 rounded-lg border transition-all duration-200 whitespace-nowrap
           text-sm font-medium bg-[var(--admin-card)] hover:bg-[var(--admin-hover)]
+          
+          /* [2] Button Width: Full mobile, Auto desktop */
+          w-full md:w-auto
+
           ${isOpen 
             ? 'border-[var(--admin-primary)] ring-2 ring-[var(--admin-primary)]/10 text-[var(--admin-fg)]' 
             : 'border-[var(--admin-border)] text-[var(--admin-sub)] hover:text-[var(--admin-fg)]'
@@ -70,26 +65,37 @@ export default function DashboardFilter() {
           ${isPending ? 'opacity-70 cursor-wait' : ''}
         `}
       >
-        {/* Hiển thị Spinner xoay khi đang tải dữ liệu mới */}
-        {isPending ? (
-          <Loader2 size={16} className="animate-spin text-[var(--admin-primary)]" />
-        ) : (
-          <CalendarDays size={16} className={isOpen ? 'text-[var(--admin-primary)]' : 'text-[var(--admin-sub)]'} />
-        )}
+        {/* Nhóm Icon + Text nằm bên trái */}
+        <div className="flex items-center gap-2">
+            {isPending ? (
+            <Loader2 size={16} className="animate-spin text-[var(--admin-primary)]" />
+            ) : (
+            <CalendarDays size={16} className={isOpen ? 'text-[var(--admin-primary)]' : 'text-[var(--admin-sub)]'} />
+            )}
+            
+            <span className="text-left">
+            {isPending ? 'Đang tải...' : activeLabel}
+            </span>
+        </div>
         
-        <span className="min-w-[90px] text-left">
-          {isPending ? 'Đang tải...' : activeLabel}
-        </span>
-        
+        {/* Mũi tên luôn nằm bên phải cùng */}
         <ChevronDown 
           size={16} 
-          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+          className={`transition-transform duration-200 ml-2 ${isOpen ? 'rotate-180' : ''}`} 
         />
       </button>
 
       {/* DROPDOWN MENU */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100 origin-top-right overflow-hidden">
+        <div className="
+            absolute right-0 mt-2 
+            bg-[var(--admin-card)] border border-[var(--admin-border)] 
+            rounded-xl shadow-xl z-50 
+            animate-in fade-in zoom-in-95 duration-100 origin-top-right overflow-hidden
+            
+            /* [3] Dropdown Width: Full mobile (để khớp với nút), w-56 trên desktop */
+            w-full md:w-56
+        ">
           <div className="p-1.5">
             <div className="px-3 py-2 text-[10px] font-bold text-[var(--admin-sub)] uppercase tracking-wider">
               Khoảng thời gian
