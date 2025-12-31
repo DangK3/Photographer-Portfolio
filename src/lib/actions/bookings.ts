@@ -35,6 +35,7 @@ export interface CalendarBookingItem {
     code: string | null; 
   } | null;
   bookings: {
+    booking_id: number;
     status: string | null;
     customer_id: number | null;
     customers: { 

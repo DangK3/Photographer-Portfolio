@@ -264,7 +264,7 @@ export default function AdminLayout({
         <aside className={`fixed top-0 left-0 z-50 h-full w-64 bg-[var(--admin-card)] border-r border-[var(--admin-border)] transform transition-transform duration-300 ease-in-out shadow-xl md:shadow-none ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:flex md:flex-col`}>
           <div className="h-16 flex items-center justify-between px-6 border-b border-[var(--admin-border)]">
             <div className="flex items-center gap-2">
-              <div className={`w-8 h-8 bg-[var(--admin-primary)] rounded-lg flex items-center justify-center text-white font-bold ${logoFont.className}`}>O</div>
+              <div className={`w-8 h-8 bg-[var(--admin-primary)] rounded-lg flex items-center justify-center text-[var(--admin-primary-fg)] font-bold ${logoFont.className}`}>O</div>
               <span className={`${logoFont.variable} text-xl font-bold tracking-widest text-[var(--admin-fg)] ${logoFont.className}`}>Oni Admin</span>
             </div>
             <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-[var(--admin-sub)]"><X size={24} /></button>
@@ -290,7 +290,7 @@ export default function AdminLayout({
                 <NavLink href="/admin/settings" title="Cài đặt chung" icon={<Settings size={20} />} label="Cài đặt chung" isActive={pathname.startsWith('/admin/settings')} onClick={handleLinkClick} />
               </>
             )}
-            <Link href="/" className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] hover:text-[var(--admin-fg)] rounded-lg transition-colors"><Home size={20} /> Xem Website</Link>
+            <Link href="/" className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium text-[var(--admin-sub)] hover:bg-[var(--admin-bg)] hover:text-[var(--admin-fg)] rounded-lg transition-colors"><Home size={20} /> Xem Website</Link>
             <button onClick={() => setShowModal(true)} className="flex cursor-pointer items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><LogOut size={20} /> Đăng xuất</button>
           </div>
         </aside>
@@ -337,7 +337,7 @@ export default function AdminLayout({
 
 function NavLink({ href, icon, label, isActive, onClick, title }: NavLinkProps & { title?: string }) {
   return (
-    <Link href={href} onClick={onClick} title={title} className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 mb-1 ${isActive ? 'bg-[var(--admin-primary)] text-[var(--admin-primary-fg)] shadow-md shadow-indigo-500/20' : 'text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] hover:text-[var(--admin-fg)]'}`}>{icon}{label}</Link>
+    <Link href={href} onClick={onClick} title={title} className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 mb-1 ${isActive ? 'bg-[var(--admin-bg)] text-[var(--admin-primary)] shadow-md shadow-gray-500/20' : 'text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] hover:text-[var(--admin-fg)]'}`}>{icon}{label}</Link>
   );
 }
 

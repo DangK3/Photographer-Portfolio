@@ -10,7 +10,17 @@ export type RoomWithBranch = Database['public']['Tables']['rooms']['Row'] & {
   branches: { name: string; branch_code: string } | null
 }
 
-export type ServiceItem = Database['public']['Tables']['services']['Row']
+export interface ServiceItem {
+  service_id: number;
+  name: string;
+  price: number;
+  unit: string | null;
+  is_active: boolean | null;
+  type: 'service' | 'surcharge' | 'compensation';
+  // --- THÊM DÒNG NÀY ---
+  // Định nghĩa category khớp với các Tab bạn đang dùng
+  category?: 'equipment' | 'fnb' | 'surcharge' | string; 
+}
 
 // ==============================================================================
 // 1. CHI NHÁNH (BRANCHES)

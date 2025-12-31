@@ -147,7 +147,7 @@ export default function PortfolioGridEditor({ initialProjects }: EditorProps) {
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-6 py-2 bg-[var(--admin-primary)] text-white 
+              className="px-6 py-2 bg-[var(--admin-primary)] text-[var(--admin-bg)] 
               rounded-lg text-sm font-medium hover:opacity-90 flex items-center gap-2 shadow-md cursor-pointer"
             >
               <MousePointerClick size={18} /> Bắt đầu sửa

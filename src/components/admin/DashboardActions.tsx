@@ -15,6 +15,7 @@ export default function DashboardActions() {
         bg-[var(--admin-card)] border border-[var(--admin-border)] 
         text-[var(--admin-fg)] hover:bg-[var(--admin-hover)] 
         px-4 py-2 rounded-md text-sm font-medium transition-colors
+        whitespace-nowrap truncate
       ">
         <Printer size={16} />          {/* 2. Icon Máy in */}
         <span>Xuất báo cáo</span>
@@ -24,8 +25,8 @@ export default function DashboardActions() {
         className="flex-1 md:flex-none
         inline-flex items-center justify-center gap-2 
         bg-[var(--admin-primary)] text-[var(--admin-primary-fg)] 
-        hover:opacity-90 
-        px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
+        hover:opacity-90 px-4 py-2 rounded-md text-sm font-medium transition-colors 
+        shadow-sm whitespace-nowrap truncate"
       >
         <Plus size={16} />
         <span>Tạo dự án mới</span>

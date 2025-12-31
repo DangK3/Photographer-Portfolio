@@ -4,21 +4,18 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { RoomWithBranch, ServiceItem } from '@/lib/actions/studio';
-import { CustomerRow } from '@/lib/actions/customers';
 import { EventInteractionArgs } from 'react-big-calendar/lib/addons/dragAndDrop';
 import { useCalendar } from '@/context/CalendarContext'; 
 import moment from 'moment';
-
+import BookingDetailModal from './calendar/BookingDetailModal';
 import BookingCalendar, { BookingItem, CalendarEvent } from './calendar/BookingCalendar'; 
 import BookingCreateModal from './calendar/BookingCreateModal';
 import { updateBookingTime } from '@/lib/actions/bookings';
-// KHÔNG import getCleanupMinutes ở đây vì là Client Component
 
 interface DashboardCalendarProps {
   rooms: RoomWithBranch[];
   bookings: BookingItem[]; 
   services: ServiceItem[];
-  customers: CustomerRow[];
   currentUserId: number;
   cleanupMinutes: number; 
 }
@@ -27,9 +24,8 @@ export default function DashboardCalendar({
   rooms,
   bookings: initialBookings,
   services,
-  customers,
   currentUserId,
-  cleanupMinutes // 2. NHẬN PROP
+  cleanupMinutes
 }: DashboardCalendarProps) {
   
 
@@ -142,7 +138,20 @@ export default function DashboardCalendar({
     };
   }, [selectedSlot, rooms, defaultStartTime]);
 
-  // XÓA DÒNG getCleanupMinutes await Ở ĐÂY
+  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  // Handler khi click vào event
+  const handleSelectEvent = (event: CalendarEvent) => {
+      if (event.type === 'cleanup') return;
+      
+      // Lấy booking_id từ field resource ta đã thêm ở BookingCalendar
+      const bId = event.resource?.bookingId;
+      if (bId) {
+          setSelectedBookingId(bId);
+          setIsDetailOpen(true);
+      }
+  };
 
   return (
     <div className="h-full border border-[var(--admin-border)] rounded-2xl overflow-hidden shadow-sm bg-[var(--admin-card)] flex flex-col">
@@ -160,16 +169,21 @@ export default function DashboardCalendar({
             onSelectSlot={handleSlotSelect} 
             onEventDrop={(args) => handleEventChange(args)}   
             onEventResize={(args) => handleEventChange(args)}
+            onSelectEvent={handleSelectEvent}
         />
       </div>
-
+      <BookingDetailModal 
+            isOpen={isDetailOpen}
+            onClose={() => setIsDetailOpen(false)}
+            bookingId={selectedBookingId}
+            servicesList={services} // Truyền list dịch vụ để chọn OT/Phí
+        />
       <BookingCreateModal
         isOpen={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
         initialData={modalInitialData}
         rooms={rooms}
         services={services}
-        customers={customers}
         currentUserId={currentUserId}
       />
     </div>

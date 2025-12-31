@@ -257,7 +257,7 @@ export default function SettingsForm({ initialSettings, initialCleanupMinutes }:
         <button 
           onClick={handleSave}
           disabled={isSaving}
-          className="px-6 py-2 rounded-lg bg-[var(--admin-primary)] text-white font-medium 
+          className="px-6 py-2 rounded-lg bg-[var(--admin-primary)] text-[var(--admin-bg)] font-medium 
           hover:opacity-90 flex items-center gap-2 shadow-lg shadow-indigo-500/30 disabled:opacity-70 cursor-pointer"
         >
           {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}

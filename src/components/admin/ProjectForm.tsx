@@ -4,7 +4,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-// 1. THAY ĐỔI QUAN TRỌNG: Dùng createBrowserClient thay vì client cũ
 import { createBrowserClient } from '@supabase/ssr'; 
 import { compressImage } from '@/lib/image-utils';
 import { toast } from 'sonner';
@@ -13,7 +12,6 @@ import {
 } from 'lucide-react';
 import SelectBox from '@/components/ui/SelectBox';
 import { Layers } from 'lucide-react'; // Icon cho đẹp
-// --- 1. ĐỊNH NGHĨA TYPES ---
 
 export type FormMode = 'create' | 'edit';
 
@@ -85,19 +83,19 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const fillSampleCredits = () => {
     setCredits([
-      { label: 'Producer', value: 'Thanh Hang - Choo Production' },
-      { label: 'Art Director', value: 'Thien Nguyen' },
-      { label: 'Photographer', value: 'Evis Tran' },
-      { label: 'Model', value: 'Mai Phuoc Tri, Nguyễn Văn Long, Huế Hương, Fuka' },
-      { label: 'Stylist', value: 'Bao Ngan' },
-      { label: 'Stylist Assistant', value: 'Js Chucin' },
-      { label: 'Lighting', value: 'An Pham, Huy Tran, Dat Ho Thanh' },
-      { label: 'MUA', value: 'Hai Ngoc Nguyen, Tu Anh, Tu Linh' },
-      { label: 'Set Designer', value: 'Harry Le, Long Tran' },
-      { label: 'Accessories', value: 'Dat Duong' },
-      { label: 'Support', value: 'Ngoc Ha' },
+      { label: 'Producer', value: 'Victoria Nguyen' },
+      { label: 'Art Director', value: 'Marcus O’Neil' },
+      { label: 'Photographer', value: 'Lucas Graham' },
+      { label: 'Model', value: 'Sophia Miller, Tran Tung Anh, Jessica Liu, Kenji' },
+      { label: 'Stylist', value: 'Chloe Anderson' },
+      { label: 'Stylist Assistant', value: 'Jamie Le' },
+      { label: 'Lighting', value: 'Mike Wilson, Dat Ho, Alex Chen' },
+      { label: 'MUA', value: 'Samantha Fox, Tu Anh' },
+      { label: 'Set Designer', value: 'Jordan Smith, Harry Le' },
+      { label: 'Accessories', value: 'Olivia Brown' },
+      { label: 'Support', value: 'Kevin Vo' },
       { label: 'Location', value: 'Oni Studio' },
-      ]);
+    ]);
   };
   const [credits, setCredits] = useState<CreditItem[]>([{ label: 'Photographer', value: '' }]);
   const [blocks, setBlocks] = useState<ContentBlockState[]>([]);
@@ -340,7 +338,6 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
               <label className="text-sm font-medium text-[var(--admin-fg)]">Khách hàng</label>
               <input type="text" className="admin-input" value={formData.client_name} onChange={e => setFormData({...formData, client_name: e.target.value})} placeholder="VD: Vogue Vietnam"/>
             </div>
-            {/* THAY THẾ ĐOẠN SELECT CŨ BẰNG ĐOẠN NÀY */}
             <SelectBox
               label="Danh mục"
               required
@@ -348,14 +345,13 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
               value={formData.category_id}
               onChange={(val) => setFormData({ ...formData, category_id: val })}
               icon={<Layers size={18} className="text-[var(--admin-sub)]" />}
-              // Chuyển đổi mảng categories thành format chuẩn {label, value}
               options={categories.map(cat => ({
                 label: cat.name,
                 value: cat.category_id
               }))}
             />
             <div className="flex items-center space-x-3 mt-8">
-              <input type="checkbox" id="is_featured" className="w-5 h-5 accent-[var(--admin-primary)]" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
+              <input type="checkbox" id="is_featured" className="w-5 h-5 cursor-pointer accent-[var(--admin-primary)]" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
               <label htmlFor="is_featured" className="text-sm font-medium text-[var(--admin-fg)] cursor-pointer">Đánh dấu là <strong>Nổi bật</strong></label>
             </div>
           </div>
@@ -452,9 +448,9 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[var(--admin-border)] pb-4 gap-4">
             <h2 className="text-lg font-semibold text-[var(--admin-fg)]">Nội dung bài viết</h2>
             <div className="flex gap-2">
-              <button type="button" onClick={() => addBlock('heading')} className="btn-tool"><Type size={16}/> Tiêu đề</button>
-              <button type="button" onClick={() => addBlock('paragraph')} className="btn-tool"><AlignLeft size={16}/> Đoạn văn</button>
-              <button type="button" onClick={() => addBlock('imageRow')} className="btn-tool"><ImagePlus size={16}/> Hàng ảnh</button>
+              <button type="button" onClick={() => addBlock('heading')} className="btn-tool cursor-pointer"><Type size={16}/> Tiêu đề</button>
+              <button type="button" onClick={() => addBlock('paragraph')} className="btn-tool cursor-pointer"><AlignLeft size={16}/> Đoạn văn</button>
+              <button type="button" onClick={() => addBlock('imageRow')} className="btn-tool cursor-pointer"><ImagePlus size={16}/> Hàng ảnh</button>
             </div>
           </div>
 
@@ -523,7 +519,7 @@ export default function ProjectForm({ mode, initialData }: ProjectFormProps) {
         </div>
 
         <div className="flex justify-end pt-6 border-t border-[var(--admin-border)] sticky bottom-0 bg-[var(--admin-bg)] py-4 z-20">
-          <button type="submit" disabled={isLoading} className="flex items-center gap-2 px-8 py-3 bg-[var(--admin-primary)] text-white rounded-lg hover:opacity-90 shadow-lg shadow-indigo-500/30 font-medium disabled:opacity-70 transition-all transform hover:-translate-y-0.5">
+          <button type="submit" disabled={isLoading} className="flex items-center gap-2 px-8 py-3 bg-[var(--admin-primary)] text-[var(--admin-primary-fg)] rounded-lg hover:opacity-90 shadow-lg shadow-indigo-500/30 font-medium disabled:opacity-70 transition-all transform hover:-translate-y-0.5 cursor-pointer">
             {isLoading ? <Loader2 className="animate-spin" /> : <Save size={20}/>} 
             {mode === 'create' ? 'Lưu & Tạo mới' : 'Cập nhật thay đổi'}
           </button>

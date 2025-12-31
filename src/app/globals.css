@@ -27,29 +27,74 @@
   --admin-hover: #f1f5f9;       /* Slate-100: Màu khi hover */
   --admin-edit: #EBF6FF;        /* bg-blue-50: Màu nền ô edit */
   --admin-delete: #FFE5E5;      /* bg-red-50: Màu nền ô xóa */
+  --admin-ot: #f97316;       /* Orange-500 */
+  --admin-ot-bg: #fff7ed;    /* Orange-50 */
+  --admin-ot-border: #fdba74;/* Orange-300 */
+  --status-checked-in: #22c55e; /* Green-500 */
+  --status-completed: #64748b
 }
 
 html.dark { 
-    --background: #1c1c1c;
-    --foreground: #ededed;
-    --sub-text: #aaaaaa;
-    --glow-color: #6d6d6d;
-    --gradient-color-1: #111827; /* gray-900 */
-    --gradient-color-2: #1c1c1c; /* bg */
-    --gradient-color-3: #1f2937; /* gray-800 */
-    --to-linear: #030a20;
-    --from-linear: #030a20;
+    /* --- MÀU CƠ BẢN --- */
+    --background: #1E201E; /* Màu nền chính (Màu 1) */
+    --foreground: #f4f4f4; /* Màu chữ chính (Màu 4) - Tương phản tốt trên nền tối */
+    --sub-text: #9CA3AF;   /* Màu chữ phụ: Pha giữa Sage và Beige để dễ đọc hơn màu #697565 gốc */
+    
+    /* Hiệu ứng Glow/Shadow: Dùng màu Sage Green nhưng tối hơn */
+    --glow-color: #697565; 
 
-    --admin-bg: #020617;          /* Slate-950: Nền cực tối */
-    --admin-card: #0f172a;        /* Slate-900: Nền thẻ nổi bật hơn nền chính */
-    --admin-fg: #f8fafc;          /* Slate-50: Chữ trắng sáng */
-    --admin-sub: #94a3b8;         /* Slate-400: Chữ phụ dịu mắt */
-    --admin-border: #1e293b;      /* Slate-800: Viền tối */
-    --admin-primary: #6366f1;     /* Indigo-500: Màu chủ đạo sáng hơn chút */
-    --admin-primary-fg: #ffffff;  
-    --admin-hover: #1e293b;       /* Slate-800: Hover tối */
-    --admin-edit: #1E3A8A;        /* bg-blue-900/20: Màu nền ô edit tối */
-    --admin-delete: #7F1D1D;      /* bg-red-900/20: Màu nền ô xóa tối */
+    /* Gradient: Chuyển từ nền chính sang nền thẻ */
+    --gradient-color-1: #1E201E; 
+    --gradient-color-2: #2D2E2B; /* Màu trung gian pha giữa Màu 1 và 2 */
+    --gradient-color-3: #3C3D37; 
+    
+    --to-linear: #1E201E;
+    --from-linear: #3C3D37;
+
+    /* --- ADMIN DASHBOARD --- */
+
+    /* Nền tổng thể của trang Admin */
+    --admin-bg: #1E201E; 
+
+    /* Nền của các khối/thẻ (Card) */
+    --admin-card: #3C3D37; /* (Màu 2) */
+
+    /* Màu chữ chính trong Admin */
+    --admin-fg: #f4f4f4; /* (Màu 4) */
+
+    /* Màu chữ phụ/Label/Icon ít quan trọng */
+    --admin-sub: #AAB3A6; /* Phiên bản sáng hơn của #697565 để đảm bảo đọc được trên nền #3C3D37 */
+
+    /* Viền ngăn cách: Dùng màu Sage Green gốc */
+    --admin-border: #697565; /* (Màu 3) */
+
+    /* Hiệu ứng Hover: Sáng hơn nền thẻ một chút */
+    --admin-hover: #4B4C46; 
+
+    /* --- NÚT BẤM CHÍNH (PRIMARY) --- */
+    /* Dùng màu Beige sáng nhất để làm nút nổi bật trên nền tối */
+    --admin-primary: #f4f4f4; 
+    --admin-primary-fg: #1E201E; /* Chữ trên nút phải là màu tối nhất để dễ đọc */
+
+    /* --- CÁC TRẠNG THÁI (STATUS / ACTIONS) --- */
+    /* Điều chỉnh các màu này trầm xuống (desaturated) để hợp với theme Earth Tone */
+
+    /* Nút Edit: Màu xanh đá (Slate/Teal) trầm */
+    --admin-edit: #3A4A45;  
+
+    /* Nút Delete: Màu đỏ gạch/đỏ đất (Brick Red) thay vì đỏ tươi */
+    --admin-delete: #5C2B2B;  
+
+    /* OT / Warning: Màu cam đất (Ochre/Burnt Orange) */
+    --admin-ot: #D98E53;       /* Màu chữ/icon OT */
+    --admin-ot-bg: #2C2520;    /* Nền thẻ OT (pha cam vào nền đen) */
+    --admin-ot-border: #8C5E35; /* Viền thẻ OT */
+
+    /* Status Checked-in: Dùng chính màu Sage Green của palette nhưng tươi hơn xíu */
+    --status-checked-in: #84A98C; 
+
+    /* Status Completed: Màu xám ấm */
+    --status-completed: #8E8E86; 
 }
 
 html, body {
@@ -311,7 +356,7 @@ body::-webkit-scrollbar-thumb:hover {
   background-color: var(--admin-bg); /* Highlight nhẹ khi rê chuột vào cột phòng */
 }
 .rbc-events-container:hover {
-  background-color: var(--admin-bg)/80; /* Đồng bộ với phần khung giờ */
+  background-color: var(--admin-bg)/20; /* Đồng bộ với phần khung giờ */
 }
 
 /* 2. Grid & Lines */
@@ -368,6 +413,8 @@ body::-webkit-scrollbar-thumb:hover {
 .rbc-today {
   background-color: var(--admin-card) !important;
 }
+
+
 
 .rbc-time-view{
   border: none !important;

@@ -125,13 +125,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 pb-10">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--admin-fg)]">Dashboard</h1>
-          <p className="text-[var(--admin-sub)]">Chào mừng trở lại, quản trị viên.</p>
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+        <div className="min-w-0 flex-1"> 
+          <h1 className="text-3xl font-bold text-[var(--admin-fg)] truncate">
+            Dashboard
+          </h1>
+          <p className="text-[var(--admin-sub)] truncate max-w-[500px] md:max-w-none">
+            Chào mừng trở lại, quản trị viên.
+          </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+
+        <div className="flex flex-col lg:flex-row gap-3 w-full lg:w-auto shrink-0">
             <DashboardFilter />
             <DashboardActions />
         </div>

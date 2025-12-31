@@ -24,6 +24,7 @@ const localizer = momentLocalizer(moment)
 
 // --- TYPE DEFINITIONS ---
 interface BookingInfo {
+  booking_id: number; // Đảm bảo field này tồn tại nếu bạn dùng nested
   status: string | null;
   customers: {
     full_name: string | null;
@@ -32,19 +33,19 @@ interface BookingInfo {
 
 export interface BookingItem {
   booking_item_id: number;
+  // QUAN TRỌNG: Thêm booking_id vào đây (FK từ bảng booking_items)
+  booking_id: number; 
   start_dt: string;
   end_dt: string;
   room_id: number;
   bookings: BookingInfo | null;
 }
 
-// Định nghĩa Resource (Cột Phòng)
 export interface CalendarResource {
   id: number;
   title: string;
 }
 
-// Định nghĩa Room thô từ DB
 interface Room {
   room_id: number;
   name: string | null;
@@ -53,7 +54,6 @@ interface Room {
   is_equipment_room?: boolean;
 }
 
-// Interface cho Sự kiện trên lịch
 export interface CalendarEvent {
   id: string | number;
   title: string;       
@@ -63,6 +63,9 @@ export interface CalendarEvent {
   type: 'booking' | 'cleanup';
   status?: string;
   allDay?: boolean;
+  resource?: { 
+    bookingId?: number; 
+  };
 }
 
 interface BookingCalendarProps {
@@ -72,11 +75,12 @@ interface BookingCalendarProps {
   cleanupMinutes?: number;
   onNavigate: (newDate: Date) => void;
   onSelectSlot?: (info: { start: Date; end: Date; resourceId: number }) => void;
+  // Prop quan trọng để nhận sự kiện click
+  onSelectEvent?: (event: CalendarEvent) => void; 
   onEventDrop?: (args: EventInteractionArgs<CalendarEvent>) => void;
   onEventResize?: (args: EventInteractionArgs<CalendarEvent>) => void;
 }
 
-// --- KHỞI TẠO COMPONENT DND VỚI GENERICS ---
 const DnDCalendar = withDragAndDrop<CalendarEvent, CalendarResource>(Calendar)
 
 // --- CUSTOM EVENT COMPONENT ---
@@ -111,6 +115,7 @@ export default function BookingCalendar({
   cleanupMinutes = 60,
   onNavigate,
   onSelectSlot,
+  onSelectEvent, // 1. Nhận prop này từ cha
   onEventDrop, 
   onEventResize 
 }: BookingCalendarProps) {
@@ -121,6 +126,10 @@ export default function BookingCalendar({
   const events: CalendarEvent[] = useMemo(() => {
     const list: CalendarEvent[] = []
     bookings.forEach((b) => {
+      // 2. SỬA LOGIC LẤY BOOKING ID
+      // Lấy trực tiếp b.booking_id (FK) thay vì b.bookings?.booking_id (Nested) để chắc chắn có dữ liệu
+      const bookingId = b.booking_id || b.bookings?.booking_id;
+
       list.push({
         id: b.booking_item_id,
         title: b.bookings?.customers?.full_name || 'Khách vãng lai', 
@@ -129,16 +138,18 @@ export default function BookingCalendar({
         resourceId: b.room_id, 
         type: 'booking',
         status: b.bookings?.status || 'unknown',
-        allDay: false
+        allDay: false,
+        // Lưu bookingId vào đây
+        resource: { bookingId: bookingId } 
       })
-      // --- LOGIC MỚI CHO CLEANUP ---
+
+      // Logic Cleanup
       const cleanupStart = new Date(b.end_dt);
-      // Thay số cứng 30 bằng biến cleanupMinutes
       const cleanupEnd = moment(b.end_dt).add(cleanupMinutes, 'minutes').toDate();
 
       list.push({
         id: `cleanup-${b.booking_item_id}`,
-        title: `Dọn dẹp (${cleanupMinutes}p)`, // Hiển thị số phút cho rõ
+        title: `Dọn dẹp (${cleanupMinutes}p)`,
         start: cleanupStart,
         end: cleanupEnd,
         resourceId: b.room_id,
@@ -147,47 +158,43 @@ export default function BookingCalendar({
       })
     })
     return list
-  }, [bookings,cleanupMinutes])
-
-
+  }, [bookings, cleanupMinutes])
 
   const resources: CalendarResource[] = useMemo(() => {
     return rooms
-    .filter(r => 
-        r.status === 'available' &&  
-        !r.is_equipment_room        
-    )
-    .map(r => ({ 
-        id: r.room_id, 
-        title: r.name || `Room ${r.code}` 
-    }))
+    .filter(r => r.status === 'available' && !r.is_equipment_room)
+    .map(r => ({ id: r.room_id, title: r.name || `Room ${r.code}` }))
   }, [rooms])
 
-  // Styling: ÁP DỤNG MÀU CHÍNH XÁC THEO INDEX PHÒNG
+  // Styling logic
   const eventStyleGetter: EventPropGetter<CalendarEvent> = useCallback((event) => {
-    // Tìm index của phòng trong danh sách resources hiện tại
     const resourceIndex = resources.findIndex(r => r.id === event.resourceId);
-    // Lấy màu từ mảng constants, dùng toán tử % để lặp lại nếu hết màu
-    const color = resourceIndex >= 0 ? ROOM_COLORS[resourceIndex % ROOM_COLORS.length] : '#6b7280';
-    // --- Style cho Cleanup ---
+    let color = resourceIndex >= 0 ? ROOM_COLORS[resourceIndex % ROOM_COLORS.length] : '#6b7280';
+
+    // Logic màu OT
+    const now = new Date();
+    if (event.status === 'checked_in' && now > event.end) {
+        color = 'var(--admin-ot)'; 
+    } else if (event.status === 'completed') {
+        color = 'var(--status-completed)';
+    }
+
     if (event.type === 'cleanup') {
       return {
         style: {
-          backgroundColor: 'var(--admin-bg)', // Màu nền trùng màu web
-          // Tạo hiệu ứng gạch chéo
+          backgroundColor: 'var(--admin-bg)',
           backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.05) 5px, rgba(0,0,0,0.05) 10px)',
           color: 'var(--admin-sub)',
-          border: '1px dashed var(--admin-border)', // Viền nét đứt
+          border: '1px dashed var(--admin-border)',
           fontSize: '10px',
-          pointerEvents: 'none', // QUAN TRỌNG: Không cho click vào cleanup
+          pointerEvents: 'none',
           cursor: 'default',
           borderRadius: '4px',
-          zIndex: 1 // Nằm dưới booking nếu đè nhau
+          zIndex: 1
         }
       }
     }
 
-    // --- Style cho Booking ---
     return {
       style: {
         backgroundColor: color,
@@ -196,7 +203,8 @@ export default function BookingCalendar({
         borderRadius: '4px',
         opacity: event.status === 'cancelled' ? 0.5 : 1, 
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        zIndex: 10
+        zIndex: 10,
+        cursor: 'pointer' // Thêm cursor pointer để biết click được
       }
     }
   }, [resources])
@@ -234,6 +242,7 @@ export default function BookingCalendar({
         eventPropGetter={eventStyleGetter}
         selectable
         onSelectSlot={handleSelectSlotInternal}
+        onSelectEvent={onSelectEvent} 
         draggableAccessor={() => true} 
         resizable 
         onEventDrop={onEventDrop}     

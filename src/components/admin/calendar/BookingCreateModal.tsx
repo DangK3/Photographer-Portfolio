@@ -9,7 +9,7 @@ import {
 } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { createBooking } from '@/lib/actions/bookings';
-import { createCustomer } from '@/lib/actions/customers';
+import { createCustomer, getCustomers } from '@/lib/actions/customers'; // <--- 1. IMPORT getCustomers
 import { RoomWithBranch, ServiceItem } from '@/lib/actions/studio';
 import { CustomerRow } from '@/lib/actions/customers';
 import ModalPortal from '@/components/ui/ModalPortal';
@@ -24,10 +24,12 @@ const generateTimeOptions = () => {
   }
   return times;
 };
+const formatCurrency = (val: number) => new Intl.NumberFormat('vi-VN').format(val);
 
 const TIME_OPTIONS = generateTimeOptions();
 
-// --- SUB-COMPONENT: DATE SELECTOR (MINI CALENDAR) ---
+// --- SUB-COMPONENT: DATE SELECTOR ---
+// (Giữ nguyên code DateSelector cũ của bạn, không thay đổi)
 interface DateSelectorProps {
   value: Date;
   onChange: (date: Date) => void;
@@ -35,108 +37,51 @@ interface DateSelectorProps {
 }
 
 const DateSelector = ({ value, onChange, align = 'left' }: DateSelectorProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  // State viewDate để user lướt xem tháng khác mà không đổi ngày đã chọn
-  const [viewDate, setViewDate] = useState(value);
-  const containerRef = useRef<HTMLDivElement>(null);
+    // ... (Giữ nguyên logic DateSelector như cũ)
+    // Để tiết kiệm không gian hiển thị, tôi xin phép thu gọn phần này vì nó không đổi
+    // Bạn hãy giữ nguyên code DateSelector cũ nhé
+    const [isOpen, setIsOpen] = useState(false);
+    const [viewDate, setViewDate] = useState(value);
+    const containerRef = useRef<HTMLDivElement>(null);
+    useEffect(() => { if (isOpen) setViewDate(value); }, [isOpen, value]);
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+        if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false);
+        };
+        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen]);
+    const daysInMonth = useMemo(() => eachDayOfInterval({ start: startOfMonth(viewDate), end: endOfMonth(viewDate) }), [viewDate]);
+    const startDay = getDay(startOfMonth(viewDate));
+    const paddingDaysCount = startDay === 0 ? 6 : startDay - 1;
+    const paddingDays = Array(paddingDaysCount).fill(null);
 
-  // Sync viewDate khi mở lại hoặc value đổi
-  useEffect(() => {
-    if (isOpen) setViewDate(value);
-  }, [isOpen, value]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  // Logic tạo lịch
-  const daysInMonth = useMemo(() => {
-    return eachDayOfInterval({
-      start: startOfMonth(viewDate),
-      end: endOfMonth(viewDate),
-    });
-  }, [viewDate]);
-
-  const startDay = getDay(startOfMonth(viewDate));
-  // Điều chỉnh để Thứ 2 là đầu tuần (0: CN, 1: T2,... 6: T7) -> Muốn T2 index 0
-  // getDay: 0(CN), 1(T2)... 
-  // Map: T2(1)->0, T3(2)->1, ... CN(0)->6
-  const paddingDaysCount = startDay === 0 ? 6 : startDay - 1;
-  const paddingDays = Array(paddingDaysCount).fill(null);
-
-  return (
-    <div ref={containerRef} className="relative inline-block ml-2">
-      <span 
-        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
-        className={`text-xs font-medium cursor-pointer transition-all border-b border-transparent
-          ${isOpen 
-            ? 'text-[var(--admin-primary)] border-[var(--admin-primary)]' 
-            : 'text-[var(--admin-sub)] hover:text-[var(--admin-fg)] hover:border-[var(--admin-sub)]'
-          }
-        `}
-      >
-        {format(value, 'dd/MM', { locale: vi })}
-      </span>
-
-      {isOpen && (
-        <div onClick={(e) => e.stopPropagation()}
-            className={`
-                absolute top-full mt-2 p-3 bg-[var(--admin-card)] border border-[var(--admin-border)] 
-                rounded-xl shadow-xl z-[60] w-64 animate-in fade-in zoom-in-95 duration-100
-                ${align === 'right' ? 'right-0' : 'left-0'} /* Căn phải nếu align=right */
-            `}>
-           {/* Header: Tháng & Nav */}
-           <div className="flex items-center justify-between mb-3">
-              <button onClick={() => setViewDate(subMonths(viewDate, 1))} className="hover:bg-[var(--admin-hover)] p-1 rounded text-[var(--admin-sub)] text-xs">‹</button>
-              <div className="text-[11px] font-bold text-[var(--admin-fg)] uppercase tracking-wider">
-                  Tháng {format(viewDate, 'MM/yyyy')}
-              </div>
-              <button onClick={() => setViewDate(addMonths(viewDate, 1))} className="hover:bg-[var(--admin-hover)] p-1 rounded text-[var(--admin-sub)] text-xs">›</button>
-          </div>
-          
-          {/* Thứ trong tuần */}
-          <div className="grid grid-cols-7 text-center text-[9px] gap-y-2 text-[var(--admin-sub)] font-medium mb-1">
-              <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span className="text-red-400">CN</span>
-          </div>
-
-          {/* Lưới ngày */}
-          <div className="grid grid-cols-7 text-center text-[10px] gap-1">
-              {paddingDays.map((_, i) => <span key={`pad-${i}`} />)}
-              {daysInMonth.map(d => {
-                  const isSelected = isSameDay(d, value);
-                  const isToday = isSameDay(d, new Date());
-                  return (
-                      <span 
-                          key={d.toString()} 
-                          onClick={() => { onChange(d); setIsOpen(false); }}
-                          className={`
-                              cursor-pointer h-7 w-7 flex items-center justify-center rounded-full transition-all
-                              ${isSelected 
-                                  ? 'bg-[var(--admin-primary)] text-white font-bold shadow-md' 
-                                  : isToday 
-                                      ? 'text-[var(--admin-primary)] font-bold border border-[var(--admin-primary)]'
-                                      : 'text-[var(--admin-fg)] hover:bg-[var(--admin-hover)]'
-                              }
-                          `}
-                      >
-                          {format(d, 'd')}
-                      </span>
-                  )
-              })}
-          </div>
+    return (
+        <div ref={containerRef} className="relative inline-block ml-2">
+        <span onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }} className={`text-xs font-medium cursor-pointer transition-all border-b border-transparent ${isOpen ? 'text-[var(--admin-primary)] border-[var(--admin-primary)]' : 'text-[var(--admin-sub)] hover:text-[var(--admin-fg)] hover:border-[var(--admin-sub)]'}`}>{format(value, 'dd/MM', { locale: vi })}</span>
+        {isOpen && (
+            <div onClick={(e) => e.stopPropagation()} className={`absolute top-full mt-2 p-3 bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl shadow-xl z-[60] w-64 animate-in fade-in zoom-in-95 duration-100 ${align === 'right' ? 'right-0' : 'left-0'}`}>
+            <div className="flex items-center justify-between mb-3">
+                <button onClick={() => setViewDate(subMonths(viewDate, 1))} className="hover:bg-[var(--admin-hover)] p-1 rounded text-[var(--admin-sub)] text-xs">‹</button>
+                <div className="text-[11px] font-bold text-[var(--admin-fg)] uppercase tracking-wider">Tháng {format(viewDate, 'MM/yyyy')}</div>
+                <button onClick={() => setViewDate(addMonths(viewDate, 1))} className="hover:bg-[var(--admin-hover)] p-1 rounded text-[var(--admin-sub)] text-xs">›</button>
+            </div>
+            <div className="grid grid-cols-7 text-center text-[9px] gap-y-2 text-[var(--admin-sub)] font-medium mb-1"><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span className="text-red-400">CN</span></div>
+            <div className="grid grid-cols-7 text-center text-[10px] gap-1">
+                {paddingDays.map((_, i) => <span key={`pad-${i}`} />)}
+                {daysInMonth.map(d => {
+                    const isSelected = isSameDay(d, value); const isToday = isSameDay(d, new Date());
+                    return (<span key={d.toString()} onClick={() => { onChange(d); setIsOpen(false); }} className={`cursor-pointer h-7 w-7 flex items-center justify-center rounded-full transition-all ${isSelected ? 'bg-[var(--admin-primary)] text-white font-bold shadow-md' : isToday ? 'text-[var(--admin-primary)] font-bold border border-[var(--admin-primary)]' : 'text-[var(--admin-fg)] hover:bg-[var(--admin-hover)]'}`}>{format(d, 'd')}</span>)
+                })}
+            </div>
+            </div>
+        )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
-// --- SUB-COMPONENT: TIME SELECTOR (Modified to include DateSelector) ---
+// --- SUB-COMPONENT: TIME SELECTOR ---
+// (Giữ nguyên code TimeSelector cũ của bạn)
 interface TimeSelectorProps {
   label: string;
   timeValue: string;
@@ -146,71 +91,36 @@ interface TimeSelectorProps {
   className?: string;
   align?: 'left' | 'right';
 }
-
-const TimeSelector = ({ 
-    label, timeValue, dateValue, onTimeChange, onDateChange, className, 
-    align = 'left' // Mặc định left
-}: TimeSelectorProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  return (
-    <div className={`relative ${className}`}>
-      <span className="text-[10px] font-bold text-[var(--admin-sub)] uppercase mb-1 block tracking-wider">
-        {label}
-      </span>
-      <div 
-        className="flex items-baseline gap-1 select-none"
-      >
-        {/* TIME TRIGGER */}
-        <div 
-            ref={containerRef}
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-1 cursor-pointer group"
-        >
-            <span className={`text-2xl font-bold text-[var(--admin-fg)] border-b-2 border-transparent transition-all
-            ${isOpen ? 'border-[var(--admin-primary)] text-[var(--admin-primary)]' : 'group-hover:border-[var(--admin-sub)]'}
-            `}>
-            {timeValue}
-            </span>
-            <ChevronDown size={14} className={`text-[var(--admin-sub)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </div>
-
-        {/* DATE TRIGGER (Tách riêng để không bị lẫn sự kiện click) */}
-        <DateSelector value={dateValue} onChange={onDateChange} align={align} />
-      </div>
-
-      {/* DROPDOWN CHỌN GIỜ */}
-      {isOpen && (
-        <div ref={containerRef} className={`absolute top-full mt-2 w-32 max-h-60 overflow-y-auto bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl shadow-xl z-50 table-scrollbar animate-in fade-in zoom-in-95 duration-100
-          ${align === 'right' ? 'right-0' : 'left-0'}
-        `}>
-          {TIME_OPTIONS.map((t) => (
-            <div
-              key={t}
-              onClick={() => { onTimeChange(t); setIsOpen(false); }}
-              className={`px-4 py-2 text-sm cursor-pointer transition-colors flex items-center justify-between
-                ${t === timeValue ? 'bg-[var(--admin-primary)] text-white font-bold' : 'text-[var(--admin-fg)] hover:bg-[var(--admin-hover)]'}
-              `}
-            >
-              {t}
-              {t === timeValue && <Check size={14} />}
+const TimeSelector = ({ label, timeValue, dateValue, onTimeChange, onDateChange, className, align = 'left' }: TimeSelectorProps) => {
+    // ... (Giữ nguyên logic TimeSelector)
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+        if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false);
+        };
+        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen]);
+    return (
+        <div className={`relative ${className}`}>
+        <span className="text-[10px] font-bold text-[var(--admin-sub)] uppercase mb-1 block tracking-wider">{label}</span>
+        <div className="flex items-baseline gap-1 select-none">
+            <div ref={containerRef} onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-1 cursor-pointer group">
+                <span className={`text-2xl font-bold text-[var(--admin-fg)] border-b-2 border-transparent transition-all ${isOpen ? 'border-[var(--admin-primary)] text-[var(--admin-primary)]' : 'group-hover:border-[var(--admin-sub)]'}`}>{timeValue}</span>
+                <ChevronDown size={14} className={`text-[var(--admin-sub)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </div>
-          ))}
+            <DateSelector value={dateValue} onChange={onDateChange} align={align} />
         </div>
-      )}
-    </div>
-  );
+        {isOpen && (
+            <div ref={containerRef} className={`absolute top-full mt-2 w-32 max-h-60 overflow-y-auto bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl shadow-xl z-50 table-scrollbar animate-in fade-in zoom-in-95 duration-100 ${align === 'right' ? 'right-0' : 'left-0'}`}>
+            {TIME_OPTIONS.map((t) => (
+                <div key={t} onClick={() => { onTimeChange(t); setIsOpen(false); }} className={`px-4 py-2 text-sm cursor-pointer transition-colors flex items-center justify-between ${t === timeValue ? 'bg-[var(--admin-primary)] text-white font-bold' : 'text-[var(--admin-fg)] hover:bg-[var(--admin-hover)]'}`}>{t}{t === timeValue && <Check size={14} />}</div>
+            ))}
+            </div>
+        )}
+        </div>
+    );
 };
 
 // --- MAIN COMPONENT ---
@@ -225,7 +135,7 @@ interface BookingCreateModalProps {
   };
   rooms: RoomWithBranch[];
   services: ServiceItem[];
-  customers: CustomerRow[];
+  // customers: CustomerRow[]; // <--- 2. XÓA DÒNG NÀY ĐỂ FIX LỖI
   currentUserId: number;
 }
 
@@ -235,19 +145,20 @@ export default function BookingCreateModal({
   initialData,
   rooms,
   services,
-  customers: initialCustomers,
+  // customers: initialCustomers, // <--- 3. XÓA NHẬN PROP NÀY
   currentUserId
 }: BookingCreateModalProps) {
   
   // --- STATES ---
-  const [customers, setCustomers] = useState<CustomerRow[]>(initialCustomers);
+  // Thay thế state customers tĩnh bằng state searchResults
+  const [searchResults, setSearchResults] = useState<CustomerRow[]>([]); 
+  const [isSearchingCustomer, setIsSearchingCustomer] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Thời gian (Giờ:Phút)
+  // Thời gian
   const [startTimeStr, setStartTimeStr] = useState('');
   const [endTimeStr, setEndTimeStr] = useState('');
-  
-  // Ngày đặt (Tách riêng để quản lý chọn ngày)
   const [bookingDate, setBookingDate] = useState<Date>(new Date());
   
   const [selectedRoomId, setSelectedRoomId] = useState(initialData.roomId);
@@ -267,8 +178,6 @@ export default function BookingCreateModal({
   const [newCustomerPhone, setNewCustomerPhone] = useState('');
   const [isCreatingCustLoading, setIsCreatingCustLoading] = useState(false);
 
-  // --- 1. Tách các giá trị nguyên thủy (Primitives) để so sánh ổn định ---
-  // .getTime() trả về số (number), React so sánh số theo giá trị chứ không theo địa chỉ bộ nhớ
   const initStartMillis = initialData.start.getTime();
   const initEndMillis = initialData.end.getTime();
   const initRoomId = initialData.roomId;
@@ -276,8 +185,6 @@ export default function BookingCreateModal({
   // Sync Data khi mở Modal
   useEffect(() => {
     if (isOpen) {
-      // --- 2. Dùng các biến nguyên thủy để set state ---
-      // Tạo lại Date từ timestamp để đảm bảo an toàn
       const startDate = new Date(initStartMillis);
       const endDate = new Date(initEndMillis);
 
@@ -287,31 +194,43 @@ export default function BookingCreateModal({
       
       setSelectedRoomId(initRoomId);
       
-      // Reset form
       setSelectedCustomerId('');
       setNote('');
       setDeposit(0);
       setSelectedServices([]);
       
-      // Reset Customer Search
       setIsCreatingCustomer(false);
       setCustomerSearch('');
       setIsCustomerDropdownOpen(false);
       setNewCustomerName('');
       setNewCustomerPhone('');
+      setSearchResults([]); // Reset kết quả tìm kiếm
     }
-  }, [
-      // --- 3. Dependency Array chỉ chứa Primitive Values ---
-      // ESLint sẽ hài lòng vì ta dùng chính xác các biến này bên trong
-      isOpen, 
-      initStartMillis, 
-      initEndMillis, 
-      initRoomId
-  ]);
+  }, [isOpen, initStartMillis, initEndMillis, initRoomId]);
 
+  // --- 4. LOGIC SEARCH ASYNC (THAY THẾ FILTER CLIENT-SIDE) ---
   useEffect(() => {
-    setCustomers(initialCustomers);
-  }, [initialCustomers]);
+    // Debounce search để tránh spam API
+    const delayDebounceFn = setTimeout(async () => {
+        if (customerSearch.trim().length > 0) {
+            setIsSearchingCustomer(true);
+            try {
+                // Gọi Server Action tìm kiếm
+                const results = await getCustomers(customerSearch, 10);
+                setSearchResults(results);
+            } catch (error) {
+                console.error("Search error", error);
+                setSearchResults([]);
+            } finally {
+                setIsSearchingCustomer(false);
+            }
+        } else {
+            setSearchResults([]);
+        }
+    }, 300); // Delay 300ms
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [customerSearch]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -325,15 +244,6 @@ export default function BookingCreateModal({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isCustomerDropdownOpen]);
 
-  // --- LOGIC SEARCH KHÁCH HÀNG ---
-  const filteredCustomers = useMemo(() => {
-    if (!customerSearch.trim()) return customers;
-    const lowerTerm = customerSearch.toLowerCase();
-    return customers.filter(c => 
-      c.full_name.toLowerCase().includes(lowerTerm) || 
-      (c.phone && c.phone.includes(lowerTerm))
-    );
-  }, [customers, customerSearch]);
 
   const handleSelectCustomer = (customer: CustomerRow) => {
     setSelectedCustomerId(customer.customer_id);
@@ -341,7 +251,7 @@ export default function BookingCreateModal({
     setIsCustomerDropdownOpen(false);
   };
 
-  // --- LOGIC TÍNH TOÁN ---
+  // --- LOGIC TÍNH TOÁN (Giữ nguyên) ---
   const durationHours = useMemo(() => {
     const [startH, startM] = startTimeStr.split(':').map(Number);
     const [endH, endM] = endTimeStr.split(':').map(Number);
@@ -383,7 +293,8 @@ export default function BookingCreateModal({
     if (res.success && res.data) {
       toast.success('Đã thêm khách hàng mới!');
       const newCust = res.data as CustomerRow;
-      setCustomers([newCust, ...customers]);
+      // Thêm khách mới vào list searchResults để chọn luôn
+      setSearchResults([newCust]); 
       
       setSelectedCustomerId(newCust.customer_id);
       setCustomerSearch(newCust.full_name);
@@ -412,8 +323,7 @@ export default function BookingCreateModal({
       return;
     }
 
-    // TỔNG HỢP NGÀY VÀ GIỜ
-    const baseDate = format(bookingDate, 'yyyy-MM-dd'); // Sử dụng ngày đã chọn
+    const baseDate = format(bookingDate, 'yyyy-MM-dd');
     const startISO = `${baseDate}T${startTimeStr}:00`;
     const endISO = `${baseDate}T${endTimeStr}:00`;
 
@@ -472,20 +382,16 @@ export default function BookingCreateModal({
         {/* --- LEFT COLUMN: INPUT FORM --- */}
         <div className="flex-1 p-6 space-y-6 overflow-y-auto table-scrollbar">
           
-          {/* 1. KHU VỰC CHỌN GIỜ & NGÀY */}
+          {/* 1. CHỌN GIỜ & NGÀY */}
           <div className="bg-[var(--admin-bg)] p-5 rounded-2xl border border-[var(--admin-border)] flex items-center justify-between gap-4">
-             {/* Chọn Bắt đầu (Bao gồm cả Giờ và Ngày) */}
              <TimeSelector 
                 label="Bắt đầu" 
                 timeValue={startTimeStr} 
                 dateValue={bookingDate} 
                 onTimeChange={setStartTimeStr}
-                onDateChange={setBookingDate} // Cập nhật ngày chung
+                onDateChange={setBookingDate}
              />
-             
              <div className="h-8 w-[1px] bg-[var(--admin-border)]"></div>
-             
-             {/* Chọn Kết thúc (Dùng chung ngày với bắt đầu cho đơn giản hóa UI) */}
              <TimeSelector 
                 label="Kết thúc" 
                 timeValue={endTimeStr} 
@@ -497,8 +403,6 @@ export default function BookingCreateModal({
              />
           </div>
 
-          {/* ... PHẦN CÒN LẠI GIỮ NGUYÊN ... */}
-          
           {/* 2. CHỌN PHÒNG */}
           <div>
              <label className="text-xs font-bold text-[var(--admin-sub)] uppercase mb-2 block">Phòng Studio</label>
@@ -508,9 +412,8 @@ export default function BookingCreateModal({
                     value={selectedRoomId}
                     onChange={(e) => setSelectedRoomId(Number(e.target.value))}
                 >
-                    {rooms.filter(r => r.status === 'available'
-                      && !(r.is_equipment_room === true)
-                    ).map(r => (
+                    {rooms.filter(r => r.status === 'available' && !(r.is_equipment_room === true))
+                      .map(r => (
                         <option key={r.room_id} value={r.room_id}>{r.name || r.code}</option>
                     ))}
                 </select>
@@ -523,7 +426,7 @@ export default function BookingCreateModal({
              </div>
           </div>
 
-          {/* 3. KHÁCH HÀNG */}
+          {/* 3. KHÁCH HÀNG (ĐÃ UPDATE ASYNC SEARCH) */}
           <div className="space-y-2" ref={customerInputRef}>
              <div className="flex justify-between items-center mb-1">
                 <label className="text-xs font-bold text-[var(--admin-sub)] uppercase">Khách Hàng</label>
@@ -565,13 +468,13 @@ export default function BookingCreateModal({
                     </button>
                 </div>
              ) : (
-                // SEARCHABLE INPUT
+                // SEARCHABLE INPUT (ASYNC)
                 <div className="relative">
                     <div className="relative">
                         <User size={18} className="absolute left-3 top-3.5 text-[var(--admin-sub)]" />
                         <input
                             type="text"
-                            placeholder="Tìm tên hoặc SĐT khách..."
+                            placeholder="Nhập tên hoặc SĐT..."
                             className="w-full p-3 pl-10 pr-10 bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)] transition-all text-[var(--admin-fg)]"
                             value={customerSearch}
                             onChange={(e) => {
@@ -581,9 +484,16 @@ export default function BookingCreateModal({
                             }}
                             onFocus={() => setIsCustomerDropdownOpen(true)}
                         />
+                        {/* Loading Icon khi đang search */}
+                        {isSearchingCustomer && (
+                             <div className="absolute right-10 top-3.5 text-[var(--admin-primary)]">
+                                <Loader2 size={16} className="animate-spin" />
+                             </div>
+                        )}
+                        
                         {customerSearch && (
                             <button 
-                                onClick={() => { setCustomerSearch(''); setSelectedCustomerId(''); }}
+                                onClick={() => { setCustomerSearch(''); setSelectedCustomerId(''); setSearchResults([]) }}
                                 className="absolute right-3 top-3.5 text-[var(--admin-sub)] hover:text-[var(--admin-fg)]"
                             >
                                 <X size={16} />
@@ -593,14 +503,14 @@ export default function BookingCreateModal({
                     </div>
 
                     {/* DROPDOWN RESULTS */}
-                    {isCustomerDropdownOpen && (
+                    {isCustomerDropdownOpen && customerSearch && (
                         <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl shadow-lg z-50 table-scrollbar animate-in fade-in zoom-in-95 duration-100">
-                            {filteredCustomers.length === 0 ? (
+                            {searchResults.length === 0 ? (
                                 <div className="p-3 text-center text-sm text-[var(--admin-sub)] italic">
-                                    Không tìm thấy khách hàng.
+                                    {isSearchingCustomer ? 'Đang tìm...' : 'Không tìm thấy khách hàng.'}
                                 </div>
                             ) : (
-                                filteredCustomers.map(c => (
+                                searchResults.map(c => (
                                     <div
                                         key={c.customer_id}
                                         onClick={() => handleSelectCustomer(c)}
@@ -617,7 +527,7 @@ export default function BookingCreateModal({
              )}
           </div>
 
-          {/* 4. DỊCH VỤ THÊM */}
+          {/* 4. DỊCH VỤ THÊM (Giữ nguyên) */}
           <div>
              <label className="text-xs font-bold text-[var(--admin-sub)] uppercase mb-2 block">Dịch vụ đi kèm</label>
              <div className="relative">
@@ -637,8 +547,6 @@ export default function BookingCreateModal({
                 </select>
                 <Plus size={18} className="absolute left-3 top-3.5 text-[var(--admin-sub)]" />
              </div>
-
-             {/* List dịch vụ đã chọn */}
              {selectedServices.length > 0 && (
                  <div className="mt-3 space-y-2">
                     {selectedServices.map(item => {
@@ -666,24 +574,25 @@ export default function BookingCreateModal({
              {/* Tiền cọc */}
              <div>
                 <label className="text-xs font-bold text-[var(--admin-sub)] uppercase mb-2 block">
-                  Tiền cọc (x1.000 đ)
+                  Tiền cọc (VNĐ)
                 </label>
                 <div className="relative">
                   <input 
-                    type="number" 
-                    min="0"
-                    className="w-full p-3 pr-12 rounded-xl bg-[var(--admin-card)] border border-[var(--admin-border)] focus:border-[var(--admin-primary)] outline-none font-mono text-sm"
-                    placeholder="VD: 300"
-                    value={deposit === 0 ? '' : deposit} 
-                    onChange={e => setDeposit(Number(e.target.value))}
+                    type="text"
+                    className="w-full p-3 rounded-xl bg-[var(--admin-card)] border border-[var(--admin-border)] focus:border-[var(--admin-primary)] outline-none font-mono text-sm font-bold"
+                    placeholder="0"
+                    value={deposit > 0 ? formatCurrency(deposit) : ''} 
+                    onChange={e => {
+                        const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                        setDeposit(Number(rawValue));
+                    }}
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono text-sm pointer-events-none select-none">.000</div>
                 </div>
                 {deposit > 0 && (
                   <div className="text-right mt-1">
-                    <span className="text-xs text-[var(--admin-sub)]">
-                      Thực tế: <span className="ml-1 font-bold text-[var(--admin-fg)]">{(deposit * 1000).toLocaleString('vi-VN')} đ</span>
-                    </span>
+                     <span className="text-[10px] text-[var(--admin-sub)] italic">
+                        {deposit.toLocaleString('vi-VN')} đ
+                     </span>
                   </div>
                 )}
              </div>
@@ -698,32 +607,30 @@ export default function BookingCreateModal({
                 />
              </div>
           </div>
-
         </div>
 
-        {/* --- RIGHT COLUMN: SUMMARY & ACTIONS --- */}
+        {/* --- RIGHT COLUMN: SUMMARY & ACTIONS (Giữ nguyên) --- */}
         <div className="w-full md:w-80 bg-[var(--admin-bg)] border-t md:border-t-0 md:border-l border-[var(--admin-border)] p-6 flex flex-col justify-between">
             <div className="space-y-6">
                 <h3 className="text-sm font-bold text-[var(--admin-sub)] uppercase tracking-wider">Chi tiết thanh toán</h3>
-                
                 <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                         <span className="text-[var(--admin-sub)]">Tiền phòng ({durationHours.toFixed(1)}h)</span>
-                        <span className="font-medium text-[var(--admin-fg)]">{new Intl.NumberFormat('vi-VN').format(roomTotal)}đ</span>
+                        <span className="font-medium text-[var(--admin-fg)]">{new Intl.NumberFormat('vi-VN').format(roomTotal)} VNĐ</span>
                     </div>
                     <div className="flex justify-between text-sm">
                         <span className="text-[var(--admin-sub)]">Dịch vụ</span>
-                        <span className="font-medium text-[var(--admin-fg)]">{new Intl.NumberFormat('vi-VN').format(servicesTotal)}đ</span>
+                        <span className="font-medium text-[var(--admin-fg)]">{new Intl.NumberFormat('vi-VN').format(servicesTotal)} VNĐ</span>
                     </div>
                     <div className="border-t border-[var(--admin-border)] my-2"></div>
                     <div className="flex justify-between text-base font-bold">
                         <span className="text-[var(--admin-fg)]">TỔNG CỘNG</span>
-                        <span className="text-[var(--admin-primary)] text-lg">{new Intl.NumberFormat('vi-VN').format(grandTotal)}đ</span>
+                        <span className="text-[var(--admin-primary)] text-lg">{new Intl.NumberFormat('vi-VN').format(grandTotal)} VNĐ</span>
                     </div>
                     {deposit > 0 && (
                         <div className="flex justify-between text-sm text-green-600">
                             <span>Đã cọc</span>
-                            <span>-{new Intl.NumberFormat('vi-VN').format(deposit * 1000)}đ</span>
+                            <span>-{new Intl.NumberFormat('vi-VN').format(deposit)} VNĐ</span>
                         </div>
                     )}
                 </div>
@@ -746,7 +653,6 @@ export default function BookingCreateModal({
                 </button>
             </div>
         </div>
-
       </div>
     </ModalPortal>
   );

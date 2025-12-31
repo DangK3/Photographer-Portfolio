@@ -41,4 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 # Local documentation with secrets
-docs/create_db.txt
+/docs/

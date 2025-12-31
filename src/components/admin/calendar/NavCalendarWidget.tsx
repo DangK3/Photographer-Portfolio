@@ -72,18 +72,18 @@ export default function NavCalendarWidget({ rooms }: { rooms: Room[] }) {
   };
 
   return (
-    <div className="mt-1 mb-2 px-3">
+    <div className="my-1">
       {/* Header Button */}
       <div className="flex items-stretch gap-[1px]"> 
         <button 
           onClick={() => { navigateToCalendar() }}
-          className={`flex-1 flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-l-lgcursor-pointer transition-all duration-200 
+          className={`flex-1 flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-l-lg cursor-pointer transition-all duration-200 
             ${pathname === '/admin/calendar' 
-              ? 'bg-[var(--admin-primary)]  text-white shadow-md shadow-indigo-500/20' 
+              ? 'bg-[var(--admin-bg)] text-[var(--admin-primary)] shadow-md shadow-gray-500/20' 
               : 'text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] hover:text-[var(--admin-fg)]'
             }`}
         >
-            <CalendarIcon size={18} />
+            <CalendarIcon size={20} />
             <span className="truncate ">Lịch Studio</span>
         </button>
         <button 
@@ -102,8 +102,8 @@ export default function NavCalendarWidget({ rooms }: { rooms: Room[] }) {
             <button 
                 onClick={handleQuickCreate}
                 className="w-full flex items-center justify-center gap-2 bg-[var(--admin-card)] 
-                border border-[var(--admin-primary)] text-[var(--admin-primary)] text-xs font-bold py-2 
-                rounded-lg hover:bg-[var(--admin-primary)] hover:text-white transition-all cursor-pointer shadow-sm"
+                border border-[var(--admin-primary)] text-[var(--admin-fg)] text-xs font-bold py-2 
+                rounded-lg hover:bg-[var(--admin-primary)] hover:text-[var(--admin-bg)] transition-all cursor-pointer shadow-sm"
             >
                 <Plus size={14} /> TẠO BOOKING
             </button>
@@ -133,7 +133,7 @@ export default function NavCalendarWidget({ rooms }: { rooms: Room[] }) {
                                 className={`
                                     cursor-pointer h-6 w-6 flex items-center justify-center rounded-full transition-all
                                     ${isSelected 
-                                        ? 'bg-[var(--admin-primary)] text-white font-bold shadow-md' 
+                                        ? 'bg-[var(--admin-primary)] text-[var(--admin-primary-fg)] font-bold shadow-md' 
                                         : 'text-[var(--admin-fg)] hover:bg-[var(--admin-hover)]'
                                     }
                                 `}
