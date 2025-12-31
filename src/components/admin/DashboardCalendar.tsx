@@ -70,7 +70,12 @@ export default function DashboardCalendar({
 
   // --- LOGIC EVENT HANDLERS (Drag, Drop, Resize) ---
   const handleEventChange = useCallback(async ({ event, start, end, resourceId }: EventInteractionArgs<CalendarEvent>) => {
-      const bookingItemId = Number(event.id);
+    const lockedStatuses = ['checked_in', 'checked_out', 'completed', 'paid', 'cancelled'];  
+    if (event.status && lockedStatuses.includes(event.status)) {
+    toast.error(`Không thể sửa lịch khi trạng thái là ${event.status}`);
+    return;
+    }
+    const bookingItemId = Number(event.id);
       if (isNaN(bookingItemId)) return;
 
       const newStartDate = new Date(start);
