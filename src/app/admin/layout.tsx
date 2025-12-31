@@ -22,6 +22,9 @@ import ThemeToggle from '@/components/ThemeToggle';
 import localFont from 'next/font/local'; 
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { getCurrentUserProfile } from '@/lib/actions';
+import { getRooms, type RoomWithBranch } from '@/lib/actions/studio'; 
+import NavCalendarWidget from '@/components/admin/calendar/NavCalendarWidget';
+import { CalendarProvider } from '@/context/CalendarContext';
 
 const logoFont = localFont({
   src: '../../fonts/cameliya-regular.ttf',
@@ -71,6 +74,22 @@ export default function AdminLayout({
   
   // Ref lưu giá trị timeout để dùng trong setInterval mà không cần restart interval
   const timeoutRef = useRef(idleTimeoutMinutes);
+
+  // --- THÊM LOGIC LẤY DANH SÁCH PHÒNG ---
+  const [rooms, setRooms] = useState<RoomWithBranch[]>([]);
+
+  useEffect(() => {
+    // Fetch phòng để hiển thị trong Sidebar Calendar Widget
+    const fetchRooms = async () => {
+      try {
+        const data = await getRooms();
+        setRooms(data);
+      } catch (error) {
+        console.error("Lỗi lấy danh sách phòng:", error);
+      }
+    };
+    fetchRooms();
+  }, []); // Chỉ chạy 1 lần khi mount
 
   // State lưu thông tin user
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -236,84 +255,89 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-[var(--admin-bg)] text-[var(--admin-fg)] transition-colors duration-300 font-sans">
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-      )}
+    <CalendarProvider>
+      <div className="flex min-h-screen bg-[var(--admin-bg)] text-[var(--admin-fg)] transition-colors duration-300 font-sans">
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+        )}
 
-      <aside className={`fixed top-0 left-0 z-50 h-full w-64 bg-[var(--admin-card)] border-r border-[var(--admin-border)] transform transition-transform duration-300 ease-in-out shadow-xl md:shadow-none ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:flex md:flex-col`}>
-        <div className="h-16 flex items-center justify-between px-6 border-b border-[var(--admin-border)]">
-          <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 bg-[var(--admin-primary)] rounded-lg flex items-center justify-center text-white font-bold ${logoFont.className}`}>O</div>
-            <span className={`${logoFont.variable} text-xl font-bold tracking-widest text-[var(--admin-fg)] ${logoFont.className}`}>Oni Admin</span>
-          </div>
-          <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-[var(--admin-sub)]"><X size={24} /></button>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mb-3 px-4 mt-2">Studio</div>
-          <NavLink href="/admin" icon={<LayoutDashboard size={20} />} label="Tổng quan" isActive={pathname === '/admin'} onClick={handleLinkClick} />
-          <NavLink href="/admin/projects" icon={<ImageIcon size={20} />} label="Dự án" isActive={pathname === '/admin/projects' || pathname === '/admin/projects/new' || pathname.startsWith('/admin/projects/')} onClick={handleLinkClick} />
-          <NavLink href="/admin/grid" icon={<LayoutTemplate size={20} />} label="Bố cục Portfolio" isActive={pathname.startsWith('/admin/grid')} onClick={handleLinkClick} />
-          {/* CHỈ ADMIN MỚI THẤY */}
-          {userProfile?.role === 'Admin' && (
-            <>
-              <NavLink href="/admin/staff" icon={<Users size={20} />} label="Nhân sự" isActive={pathname.startsWith('/admin/staff')} onClick={handleLinkClick} />
-              
-              <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mt-8 mb-3 px-4">Hệ thống</div>
-              <NavLink href="/admin/settings" icon={<Settings size={20} />} label="Cài đặt chung" isActive={pathname.startsWith('/admin/settings')} onClick={handleLinkClick} />
-            </>
-          )}
-        </nav>
-
-        <div className="p-4 border-t border-[var(--admin-border)] space-y-2">
-          <Link href="/" className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] hover:text-[var(--admin-fg)] rounded-lg transition-colors"><Home size={20} /> Xem Website</Link>
-          <button onClick={() => setShowModal(true)} className="flex cursor-pointer items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><LogOut size={20} /> Đăng xuất</button>
-        </div>
-      </aside>
-
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 bg-[var(--admin-card)]/80 backdrop-blur-md border-b border-[var(--admin-border)] flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 -ml-2 text-[var(--admin-sub)] rounded-lg"><Menu size={24} /></button>
-            <h1 className="font-semibold text-lg text-[var(--admin-fg)] hidden sm:block">{getPageTitle(pathname)}</h1>
-          </div>
-
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-full text-xs font-mono font-medium text-[var(--admin-sub)]" title="Tự động đăng xuất nếu không hoạt động">
-              <Clock size={14} className="text-[var(--admin-primary)] animate-pulse" />
-              <span>{timeLeft}</span>
+        <aside className={`fixed top-0 left-0 z-50 h-full w-64 bg-[var(--admin-card)] border-r border-[var(--admin-border)] transform transition-transform duration-300 ease-in-out shadow-xl md:shadow-none ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:flex md:flex-col`}>
+          <div className="h-16 flex items-center justify-between px-6 border-b border-[var(--admin-border)]">
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 bg-[var(--admin-primary)] rounded-lg flex items-center justify-center text-[var(--admin-primary-fg)] font-bold ${logoFont.className}`}>O</div>
+              <span className={`${logoFont.variable} text-xl font-bold tracking-widest text-[var(--admin-fg)] ${logoFont.className}`}>Oni Admin</span>
             </div>
-            <div className="h-6 w-px bg-[var(--admin-border)] hidden sm:block"></div>
-            <ThemeToggle isAdmin={true}/>
-            <div className="flex items-center gap-3 pl-2">
-                <div className="hidden md:block text-sm text-right">
-                  <p className="font-medium text-[var(--admin-fg)] leading-tight">
-                    {userProfile?.full_name || 'Đang tải...'}
-                  </p>
-                  <p className="text-[10px] text-[var(--admin-sub)] uppercase tracking-wider">
-                    {userProfile?.role || '...'}
-                  </p>
-                </div>
-                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--admin-primary)] to-purple-600 border-2 border-[var(--admin-card)] shadow-sm flex items-center justify-center text-white font-bold text-xs">
-                  {getInitials(userProfile?.full_name)}
-                </div>
-              </div>
+            <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden text-[var(--admin-sub)]"><X size={24} /></button>
           </div>
-        </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-auto">
-          <ConfirmModal isOpen={showModal} onClose={() => setShowModal(false)} onConfirm={handleLogout} title="Đăng xuất?" description="Bạn có chắc chắn muốn đăng xuất?" confirmText="Đăng xuất" cancelText="Hủy bỏ" variant="danger" />
-          <div className="mx-auto max-w-7xl animate-fade-in-up">{children}</div>
-        </main>
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
+            <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mb-3 px-4 mt-2">Studio</div>
+            <NavLink href="/admin" title="Đi tới trang Tổng quan" icon={<LayoutDashboard size={20} />} label="Tổng quan" isActive={pathname === '/admin'} onClick={handleLinkClick} />
+            <NavCalendarWidget rooms={rooms} />
+            <NavLink href="/admin/projects" title="Quản lý dự án" icon={<ImageIcon size={20} />} label="Dự án" isActive={pathname === '/admin/projects' || pathname === '/admin/projects/new' || pathname.startsWith('/admin/projects/')} onClick={handleLinkClick} />
+            <NavLink href="/admin/grid" title="Bố cục Portfolio" icon={<LayoutTemplate size={20} />} label="Bố cục Portfolio" isActive={pathname.startsWith('/admin/grid')} onClick={handleLinkClick} />
+            {userProfile?.role === 'Admin' && (
+              <>
+                <NavLink href="/admin/staff" title="Quản lý nhân sự" icon={<Users size={20} />} label="Nhân sự" isActive={pathname.startsWith('/admin/staff')} onClick={handleLinkClick} />
+              </>
+            )}
+          </nav>
+
+          <div className="p-4 border-t border-[var(--admin-border)] space-y-2">
+            {userProfile?.role === 'Admin' && (
+              <>
+                <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mt-8 mb-3 px-4">Hệ thống</div>
+                <NavLink href="/admin/settings" title="Cài đặt chung" icon={<Settings size={20} />} label="Cài đặt chung" isActive={pathname.startsWith('/admin/settings')} onClick={handleLinkClick} />
+              </>
+            )}
+            <Link href="/" className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium text-[var(--admin-sub)] hover:bg-[var(--admin-bg)] hover:text-[var(--admin-fg)] rounded-lg transition-colors"><Home size={20} /> Xem Website</Link>
+            <button onClick={() => setShowModal(true)} className="flex cursor-pointer items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><LogOut size={20} /> Đăng xuất</button>
+          </div>
+        </aside>
+
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <header className="h-16 bg-[var(--admin-card)]/80 backdrop-blur-md border-b border-[var(--admin-border)] flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+            <div className="flex items-center gap-4">
+              <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 -ml-2 text-[var(--admin-sub)] rounded-lg"><Menu size={24} /></button>
+              <h1 className="font-semibold text-lg text-[var(--admin-fg)] hidden sm:block">{getPageTitle(pathname)}</h1>
+            </div>
+
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--admin-bg)] border border-[var(--admin-border)] rounded-full text-xs font-mono font-medium text-[var(--admin-sub)]" title="Tự động đăng xuất nếu không hoạt động">
+                <Clock size={14} className="text-[var(--admin-primary)] animate-pulse" />
+                <span>{timeLeft}</span>
+              </div>
+              <div className="h-6 w-px bg-[var(--admin-border)] hidden sm:block"></div>
+              <ThemeToggle isAdmin={true}/>
+              <div className="flex items-center gap-3 pl-2">
+                  <div className="hidden md:block text-sm text-right">
+                    <p className="font-medium text-[var(--admin-fg)] leading-tight">
+                      {userProfile?.full_name || 'Đang tải...'}
+                    </p>
+                    <p className="text-[10px] text-[var(--admin-sub)] uppercase tracking-wider">
+                      {userProfile?.role || '...'}
+                    </p>
+                  </div>
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--admin-primary)] to-purple-600 border-2 border-[var(--admin-card)] shadow-sm flex items-center justify-center text-white font-bold text-xs">
+                    {getInitials(userProfile?.full_name)}
+                  </div>
+                </div>
+            </div>
+          </header>
+
+          <main className="flex-1 p-4 md:p-8 overflow-auto table-scrollbar">
+            <ConfirmModal isOpen={showModal} onClose={() => setShowModal(false)} onConfirm={handleLogout} title="Đăng xuất?" description="Bạn có chắc chắn muốn đăng xuất?" confirmText="Đăng xuất" cancelText="Hủy bỏ" variant="danger" />
+            <div className="mx-auto max-w-7xl animate-fade-in-up">{children}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </CalendarProvider>
   );
 }
 
-function NavLink({ href, icon, label, isActive, onClick }: NavLinkProps) {
+function NavLink({ href, icon, label, isActive, onClick, title }: NavLinkProps & { title?: string }) {
   return (
-    <Link href={href} onClick={onClick} className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 mb-1 ${isActive ? 'bg-[var(--admin-primary)] text-[var(--admin-primary-fg)] shadow-md shadow-indigo-500/20' : 'text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] hover:text-[var(--admin-fg)]'}`}>{icon}{label}</Link>
+    <Link href={href} onClick={onClick} title={title} className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 mb-1 ${isActive ? 'bg-[var(--admin-bg)] text-[var(--admin-primary)] shadow-md shadow-gray-500/20' : 'text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] hover:text-[var(--admin-fg)]'}`}>{icon}{label}</Link>
   );
 }
 

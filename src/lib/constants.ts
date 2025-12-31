@@ -17,7 +17,14 @@ export const SLUG_CATE_PERSONAL = 'ca-nhan';
 export const SLUG_CATE_COMMERCIAL = 'thuong-mai';
 export const SLUG_CATE_FASHION = 'thoi-trang';
 
-// CÔNG TẮC DEMO MODE
-// true: Sẽ nhân bản dự án thật để lấp đầy trang (dùng seed-helpers)
-// false: Chỉ hiển thị các dự án thật (dùng cho production)
-export const IS_DEMO_MODE = true;
+
+export const ROOM_COLORS = [
+  '#4285F4', // Xanh dương (Google)
+  '#34A853', // Xanh lá
+  '#EA4335', // Đỏ
+  '#FBBC05', // Vàng
+  '#8E24AA', // Tím
+  '#F6BF26', // Cam
+  '#06b6d4', // Cyan
+  '#ec4899', // Pink
+];

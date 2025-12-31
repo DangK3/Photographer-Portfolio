@@ -56,7 +56,6 @@ export default function SelectBox({
       )}
 
       <div className="relative">
-        {/* TRIGGER BUTTON */}
         <button
           type="button" // Quan trọng: type button để không submit form
           onClick={() => setIsOpen(!isOpen)}
@@ -101,7 +100,7 @@ export default function SelectBox({
                         setIsOpen(false);
                       }}
                       className={`
-                        w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors mb-0.5
+                        w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors mb-0.5 cursor-pointer
                         ${isActive 
                           ? 'bg-[var(--admin-primary)]/10 text-[var(--admin-primary)] font-medium' 
                           : 'text-[var(--admin-fg)] hover:bg-[var(--admin-hover)]'

@@ -1,22 +1,27 @@
 // src/app/admin/settings/page.tsx
-import { getSettings } from '@/lib/actions';
 import SettingsForm from '@/components/admin/SettingsForm';
 import { Settings } from 'lucide-react';
 import { createServerClient } from '@supabase/ssr'; 
 import { cookies } from 'next/headers'; 
 import { redirect } from 'next/navigation'; 
+import { getSettings, getCleanupMinutes } from '@/lib/actions/settings';
 
 export default async function AdminSettingsPage() {
-  // 1. Check quyền ngay tại Server Page
-  const cookieStore = await cookies(); // Await cookies() (Next.js 15)
+  const cookieStore = await cookies(); 
   
+  // 1. Fetch dữ liệu song song (Server Side)
+  const [settings, cleanupMinutes] = await Promise.all([
+    getSettings(),
+    getCleanupMinutes()
+  ]);
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() { return cookieStore.getAll() },
-        setAll() {} // Server Component không set cookie
+        setAll() {} 
       },
     }
   );
@@ -30,15 +35,15 @@ export default async function AdminSettingsPage() {
     .eq('auth_id', user.id)
     .single();
 
-  // Nếu không phải Admin -> Đá về trang chủ Admin
   if (profile?.role !== 'Admin') {
     redirect('/admin');
   }
-  const settings = await getSettings();
+
+  // --- XÓA DÒNG NÀY (Vì biến settings đã có ở trên dòng 14) ---
+  // const settings = await getSettings(); 
 
   return (
     <div className="max-w-7xl mx-auto pb-20">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[var(--admin-fg)] flex items-center gap-3">
           <Settings className="text-[var(--admin-primary)]" size={32} />
@@ -49,8 +54,10 @@ export default async function AdminSettingsPage() {
         </p>
       </div>
 
-      {/* Form */}
-      <SettingsForm initialSettings={settings} />
+      <SettingsForm 
+        initialSettings={settings} 
+        initialCleanupMinutes={cleanupMinutes} // Giờ Props này sẽ hợp lệ sau khi sửa bước 2
+      />
     </div>
   );
 }

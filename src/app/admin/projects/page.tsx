@@ -35,7 +35,7 @@ export default async function ProjectsListPage() {
         {userProfile?.role === 'Admin' && (
           <Link 
             href="/admin/projects/new" 
-            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] text-white rounded-lg font-medium hover:opacity-90 transition-all shadow-lg shadow-indigo-500/30"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] text-[var(--admin-bg)] rounded-lg font-medium hover:opacity-90 transition-all shadow-lg shadow-indigo-500/30"
           >
             <Plus size={20} /> Thêm dự án mới
           </Link>

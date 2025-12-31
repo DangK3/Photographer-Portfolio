@@ -16,7 +16,8 @@ export default function StaffPageHeader({ total }: { total: number }) {
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] text-white rounded-lg hover:opacity-90 transition-all shadow-lg shadow-indigo-500/30 font-medium"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--admin-primary)] text-[var(--admin-bg)] 
+          rounded-lg hover:opacity-90 transition-all shadow-lg shadow-indigo-500/30 font-medium cursor-pointer"
         >
           <Plus size={20} /> Thêm Nhân viên
         </button>

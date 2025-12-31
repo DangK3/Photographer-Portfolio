@@ -1,82 +1,72 @@
 // src/components/admin/SettingsForm.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState } from 'react'; // Bỏ useTransition vì không dùng nút riêng nữa
 import { toast } from 'sonner';
-import { Save, RotateCcw, Monitor, List, Database, Minus, Plus, Loader2 } from 'lucide-react';
-import { SettingItem, updateSettings } from '@/lib/actions';
-// 1. THAY ĐỔI IMPORT: Dùng thư viện hỗ trợ Cookie
-import { createBrowserClient } from '@supabase/ssr';
+import { Save, RotateCcw, Monitor, List, Database, Minus, Plus, Loader2, Clock } from 'lucide-react';
+import { SettingItem, updateSettings } from '@/lib/actions/settings';
 
 interface SettingsFormProps {
   initialSettings: SettingItem[];
+  initialCleanupMinutes: number;
 }
 
-export default function SettingsForm({ initialSettings }: SettingsFormProps) {
-  // 2. KHỞI TẠO CLIENT ĐÚNG CHUẨN (Đọc Token từ Cookie)
-  const [supabase] = useState(() => createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  ));
-
+export default function SettingsForm({ initialSettings, initialCleanupMinutes }: SettingsFormProps) {
+  // State chung
   const [settings, setSettings] = useState<SettingItem[]>(initialSettings);
+  // State riêng cho cleanup (để bind vào input number)
+  const [cleanupTime, setCleanupTime] = useState(initialCleanupMinutes);
+  
   const [isSaving, setIsSaving] = useState(false);
 
+  // Helper lấy value từ state chung
   const getValue = (key: string) => settings.find(s => s.key === key)?.value || '';
 
+  // Helper update state chung
   const updateLocalSetting = (key: string, newValue: string) => {
     setSettings(prev => prev.map(s => s.key === key ? { ...s, value: newValue } : s));
   };
 
+  // Logic tăng giảm số lượng (giữ nguyên)
   const handleNumberChange = (key: string, type: 'increase' | 'decrease') => {
     const currentVal = parseInt(getValue(key) || '10');
     let newVal = currentVal;
-
     if (type === 'increase') {
-      // Nếu đang < 5 (tức là 1), nhảy cóc lên 5
-      if (currentVal < 5) {
-        newVal = 5;
-      } else {
-        // Ngược lại cứ cộng 5
-        newVal = currentVal + 5;
-      }
+        newVal = currentVal < 5 ? 5 : currentVal + 5;
     } else {
-      // Nếu đang <= 5, nhảy cóc về 1
-      if (currentVal <= 5) {
-        newVal = 1;
-      } else {
-        // Ngược lại cứ trừ 5
-        newVal = currentVal - 5;
-      }
+        newVal = currentVal <= 5 ? 1 : currentVal - 5;
     }
-
-    // Giới hạn Min 1, Max 100
     newVal = Math.max(1, Math.min(100, newVal));
-    
     updateLocalSetting(key, newVal.toString());
   };
 
+  // --- HÀM LƯU TỔNG HỢP (QUAN TRỌNG NHẤT) ---
   const handleSave = async () => {
     setIsSaving(true);
     const toastId = toast.loading('Đang lưu cấu hình...');
 
     try {
-      // 3. LẤY SESSION TỪ COOKIE (Bây giờ sẽ thành công)
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error('Không tìm thấy phiên đăng nhập. Vui lòng F5.', { id: toastId });
-        return;
-      }
+      // 1. Tạo payload từ danh sách settings hiện tại
+      // Lọc bỏ key 'CLEANUP_GAP_MINUTES' cũ nếu lỡ nó có nằm trong mảng settings (để tránh trùng lặp)
+      const baseUpdates = settings
+        .filter(s => s.key !== 'CLEANUP_GAP_MINUTES')
+        .map(s => ({ key: s.key, value: s.value }));
 
-      const updates = settings.map(s => ({ key: s.key, value: s.value }));
-      
-      // Truyền token lấy được lên Server Action
-      const res = await updateSettings(session.access_token, updates);
+      // 2. Gộp giá trị Cleanup Time hiện tại vào payload
+      const finalUpdates = [
+        ...baseUpdates,
+        { key: 'CLEANUP_GAP_MINUTES', value: cleanupTime.toString() }
+      ];
+
+      // 3. Gửi 1 request duy nhất update tất cả
+      const res = await updateSettings(finalUpdates);
 
       if (res.success) {
-        toast.success('Lưu thành công! Đã áp dụng cho toàn trang.', { id: toastId });
-        window.dispatchEvent(new Event('settings:updated'));
+        toast.success('Đã lưu tất cả cấu hình!', { id: toastId });
+        // Dispatch event nếu cần
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('settings:updated'));
+        }
       } else {
         toast.error(`Lỗi: ${res.error}`, { id: toastId });
       }
@@ -91,7 +81,37 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       
-      {/* CARD 1: CẤU HÌNH HIỂN THỊ */}
+      {/* CARD 0: VẬN HÀNH STUDIO */}
+      <div className="bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-6 border-b border-[var(--admin-border)] pb-4">
+          <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+            <Clock size={20} />
+          </div>
+          <div>
+            <h3 className="font-bold text-[var(--admin-fg)]">Vận hành Studio</h3>
+            <p className="text-xs text-[var(--admin-sub)]">Quản lý thời gian và quy trình.</p>
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row gap-4 items-end">
+            <div className="flex-1">
+                <label className="block text-sm font-medium text-[var(--admin-sub)] mb-2">
+                    Thời gian dọn dẹp (Phút)
+                </label>
+                <input
+                    type="number" step="15" min="0"
+                    value={cleanupTime}
+                    onChange={(e) => setCleanupTime(Number(e.target.value))}
+                    disabled
+                    className="w-full max-w-[200px] p-2 rounded-lg bg-[var(--admin-bg)] border border-[var(--admin-border)] text-[var(--admin-fg)] focus:ring-2 focus:ring-[var(--admin-primary)] outline-none"
+                />
+                <p className="text-[10px] text-[var(--admin-sub)] mt-2">
+                    * Giá trị này sẽ được lưu cùng nút Lưu cấu hình bên dưới.
+                </p>
+            </div>
+        </div>
+      </div>
+
+      {/* CARD 1: HIỂN THỊ */}
       <div className="bg-[var(--admin-card)] border border-[var(--admin-border)] rounded-xl p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6 border-b border-[var(--admin-border)] pb-4">
           <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
@@ -111,7 +131,8 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
               <div className="flex items-center border border-[var(--admin-border)] rounded-lg bg-[var(--admin-bg)]">
                 <button 
                   onClick={() => handleNumberChange('items_per_page', 'decrease')}
-                  className="p-3 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] hover:text-[var(--admin-fg)] border-r border-[var(--admin-border)]"
+                  className="p-3 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)]
+                   hover:text-[var(--admin-fg)] border-r border-[var(--admin-border)] cursor-pointer"
                 >
                   <Minus size={16} />
                 </button>
@@ -123,7 +144,8 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
                 />
                 <button 
                   onClick={() => handleNumberChange('items_per_page', 'increase')}
-                  className="p-3 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] hover:text-[var(--admin-fg)] border-l border-[var(--admin-border)]"
+                  className="p-3 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] 
+                  hover:text-[var(--admin-fg)] border-l border-[var(--admin-border)] cursor-pointer"
                 >
                   <Plus size={16} />
                 </button>
@@ -186,7 +208,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
               checked={getValue('is_demo_mode') === 'true'}
               onChange={(e) => updateLocalSetting('is_demo_mode', e.target.checked ? 'true' : 'false')}
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[var(--admin-primary)]"></div>
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:bg-[var(--admin-primary)] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
           </label>
         </div>
         <div className="flex items-center justify-between p-4 bg-[var(--admin-bg)] rounded-lg border border-[var(--admin-border)]">
@@ -198,8 +220,8 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
             <div className="flex items-center border border-[var(--admin-border)] rounded-lg bg-[var(--admin-card)]">
               <button 
                 onClick={() => handleNumberChange('idle_timeout_minutes', 'decrease')}
-                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] border-r border-[var(--admin-border)] disabled:opacity-50"
-                // Giới hạn thấp nhất là 5 phút
+                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] 
+                border-r border-[var(--admin-border)] disabled:opacity-50 cursor-pointer"
                 disabled={parseInt(getValue('idle_timeout_minutes')) <= 5}
               >
                 <Minus size={16} />
@@ -211,7 +233,8 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
               
               <button 
                 onClick={() => handleNumberChange('idle_timeout_minutes', 'increase')}
-                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] border-l border-[var(--admin-border)]"
+                className="p-2 hover:bg-[var(--admin-hover)] text-[var(--admin-sub)] 
+                border-l border-[var(--admin-border)] cursor-pointer"
               >
                 <Plus size={16} />
               </button>
@@ -219,21 +242,26 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
           </div>
       </div>
 
-      {/* ACTION BAR */}
-      <div className="flex justify-end gap-4 sticky bottom-4 pt-4">
+      {/* ACTION BAR - NÚT LƯU DUY NHẤT */}
+      <div className="flex justify-end gap-4 sticky bottom-4 pt-4 bg-gradient-to-t from-[var(--admin-bg)] to-transparent pb-4 z-10">
         <button 
-          onClick={() => setSettings(initialSettings)}
-          className="px-4 py-2 rounded-lg bg-[var(--admin-card)] border border-[var(--admin-border)] text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] flex items-center gap-2 shadow-sm"
+          onClick={() => {
+              setSettings(initialSettings);
+              setCleanupTime(initialCleanupMinutes);
+          }}
+          className="px-4 py-2 rounded-lg bg-[var(--admin-card)] border border-[var(--admin-border)] 
+          text-[var(--admin-sub)] hover:bg-[var(--admin-hover)] flex items-center gap-2 shadow-sm cursor-pointer"
         >
           <RotateCcw size={18} /> Khôi phục
         </button>
         <button 
           onClick={handleSave}
           disabled={isSaving}
-          className="px-6 py-2 rounded-lg bg-[var(--admin-primary)] text-white font-medium hover:opacity-90 flex items-center gap-2 shadow-lg shadow-indigo-500/30 disabled:opacity-70"
+          className="px-6 py-2 rounded-lg bg-[var(--admin-primary)] text-[var(--admin-bg)] font-medium 
+          hover:opacity-90 flex items-center gap-2 shadow-lg shadow-indigo-500/30 disabled:opacity-70 cursor-pointer"
         >
           {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-          Lưu cấu hình
+          Lưu tất cả cấu hình
         </button>
       </div>
     </div>
