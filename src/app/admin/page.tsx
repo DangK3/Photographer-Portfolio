@@ -124,11 +124,11 @@ export default function AdminDashboard() {
   if (loading) return <div className="h-96 flex items-center justify-center"><Spinner /></div>;
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-8">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
         <div className="min-w-0 flex-1"> 
           <h1 className="text-3xl font-bold text-[var(--admin-fg)] truncate">
-            Dashboard
+            Làm Chủ Ánh Sáng - Tỏa Sáng Doanh Thu
           </h1>
           <p className="text-[var(--admin-sub)] truncate max-w-[500px] md:max-w-none">
             Chào mừng trở lại, quản trị viên.

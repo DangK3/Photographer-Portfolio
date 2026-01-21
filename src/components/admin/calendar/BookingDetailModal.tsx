@@ -464,17 +464,15 @@ export default function BookingDetailModal({ isOpen, onClose, bookingId, service
                             {/* 3. ĐÃ CỌC & TỔNG KẾT */}
                             <div className="border-t border-[var(--admin-border)] pt-3 space-y-3">
                                 <div className="flex justify-between items-center text-green-600 text-xs font-medium">
-                                    {fmtMoney(deposit) !== '0 VNĐ' && (
+                                    {fmtMoney(deposit) !== '0 VNĐ' ? (
                                         <>
-                                            <span>Đã cọc trước</span>
-                                            <span>- {fmtMoney(deposit)}</span>
+                                        <span>Đã cọc trước</span>
+                                        <span>- {fmtMoney(deposit)}</span>
                                         </>
-                                    )} else (
-                                         <>
-                                            <span>Chưa cọc</span>
-                                        </>
-                                    )
-                                </div>
+                                    ) : (
+                                        <span>Chưa cọc</span>
+                                    )}
+                                    </div>
 
                                 <div className="flex justify-between items-center bg-[var(--admin-primary)]/5 p-3 rounded-lg border border-[var(--admin-primary)]/20">
                                     <span className="text-base font-bold text-[var(--admin-primary)] uppercase tracking-tight">Cần thanh toán</span>

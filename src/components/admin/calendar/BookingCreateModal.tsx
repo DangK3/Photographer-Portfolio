@@ -262,7 +262,11 @@ export default function BookingCreateModal({
     return Math.max(0, duration);
   }, [startTimeStr, endTimeStr]);
 
-  const roomPricePerHour = 500000;
+  // Tìm phòng đang chọn trong danh sách rooms (props truyền vào)
+  const selectedRoom = rooms.find(r => r.room_id === selectedRoomId);
+
+  // Lấy giá của phòng đó, nếu không tìm thấy thì fallback về 0 hoặc giá mặc định
+  const roomPricePerHour = selectedRoom ? (selectedRoom.price_per_hour || 0) : 0;
   const roomTotal = durationHours * roomPricePerHour;
 
   const servicesTotal = selectedServices.reduce((acc, item) => {
@@ -640,7 +644,7 @@ export default function BookingCreateModal({
                 <button 
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="w-full py-3.5 bg-[var(--admin-primary)] text-white rounded-xl font-bold hover:opacity-90 shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                    className="w-full py-3.5 bg-[var(--admin-primary)] text-[var(--admin-bg)] rounded-xl font-bold hover:opacity-90 shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                 >
                     {isSubmitting ? <Loader2 className="animate-spin"/> : <Check size={18}/>}
                     Xác nhận Đặt Lịch

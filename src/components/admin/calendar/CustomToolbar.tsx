@@ -61,8 +61,8 @@ export default function CustomToolbar({
     }
   }
   return (
-    <div className="flex items-center justify-between px-4 py-3 
-    border-b border-[var(--admin-border)] bg-[var(--admin-card)]">
+    <div className="flex items-center justify-between px-3 py-3
+    border-b border-[var(--admin-border)] bg-transparent">
       
       {/* LEFT: Logo/Title & Navigation */}
       <div className="flex items-center gap-6">
@@ -70,7 +70,7 @@ export default function CustomToolbar({
         <button
           onClick={() => navigate('TODAY')}
           className="px-4 py-2 text-sm font-medium 
-          border border-[var(--admin-border)] rounded hover:bg-[var(--admin-hover)] 
+          border border-[var(--admin-border)] rounded-full hover:bg-[var(--admin-hover)] 
           transition-colors text-[var(--admin-fg)] cursor-pointer"
         >
           Hôm nay
@@ -80,14 +80,14 @@ export default function CustomToolbar({
         <div className="flex items-center gap-1 text-[var(--admin-fg)]">
           <button 
             onClick={() => navigate('PREV')}
-            className="p-2 rounded-full hover:bg-[var(--admin-hover)] transition-colors"
+            className="p-2 rounded-full hover:bg-[var(--admin-hover)] transition-colors cursor-pointer"
             title="Trước"
           >
             <ChevronLeft size={20} />
           </button>
           <button 
             onClick={() => navigate('NEXT')}
-            className="p-2 rounded-full hover:bg-[var(--admin-hover)] transition-colors"
+            className="p-2 rounded-full hover:bg-[var(--admin-hover)] transition-colors cursor-pointer"
             title="Sau"
           >
             <ChevronRight size={20} />
@@ -112,7 +112,7 @@ export default function CustomToolbar({
         <div className="relative" ref={menuRef}>
           <button 
             onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium border border-[var(--admin-border)] rounded hover:bg-[var(--admin-hover)] transition-colors text-[var(--admin-fg)] bg-[var(--admin-card)] min-w-[100px] justify-between"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium border border-[var(--admin-border)] rounded-full hover:bg-[var(--admin-hover)] transition-colors text-[var(--admin-fg)] bg-[var(--admin-card)] min-w-[100px] justify-between"
           >
             <span>{viewLabels[view] || view}</span>
             <ChevronDown size={14} className="opacity-70" />

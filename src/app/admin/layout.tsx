@@ -286,7 +286,7 @@ export default function AdminLayout({
           <div className="p-4 border-t border-[var(--admin-border)] space-y-2">
             {userProfile?.role === 'Admin' && (
               <>
-                <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mt-8 mb-3 px-4">Hệ thống</div>
+                <div className="text-xs font-bold text-[var(--admin-sub)] uppercase tracking-wider mb-3 px-4">Hệ thống</div>
                 <NavLink href="/admin/settings" title="Cài đặt chung" icon={<Settings size={20} />} label="Cài đặt chung" isActive={pathname.startsWith('/admin/settings')} onClick={handleLinkClick} />
               </>
             )}

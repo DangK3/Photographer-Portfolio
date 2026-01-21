@@ -52,16 +52,12 @@ export default async function CalendarPage() {
   // 4. Xử lý dữ liệu Bookings
   const bookings = rawBookings.map((item) => ({
     ...item,
-    booking_id: item.bookings?.booking_id || 0,
+    booking_id: item.booking_item_id || item.bookings?.booking_id || 0,
   }));
 
   return (
-    <div className="h-[calc(100vh-theme(spacing.16))] flex flex-col gap-4 p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Lịch Đặt Phòng</h1>
-      </div>
-
-      <div className="flex-1 rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
+    <div className=" flex flex-col">
+      <div className="flex-1 overflow-y-auto text-card-foreground">
         <DashboardCalendar
           rooms={rooms}
           bookings={bookings} 

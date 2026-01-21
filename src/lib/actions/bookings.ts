@@ -223,6 +223,7 @@ export async function getBookingsForCalendar(startStr: string, endStr: string) {
       bookings ( 
         status, 
         customer_id, 
+        deposit_amount,
         customers ( full_name, phone )
       )
     `)

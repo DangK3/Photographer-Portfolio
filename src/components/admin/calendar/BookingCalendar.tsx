@@ -26,6 +26,7 @@ const localizer = momentLocalizer(moment)
 interface BookingInfo {
   booking_id: number; // Đảm bảo field này tồn tại nếu bạn dùng nested
   status: string | null;
+  deposit_amount?: number;
   customers: {
     full_name: string | null;
   } | null;
@@ -66,6 +67,9 @@ export interface CalendarEvent {
   resource?: { 
     bookingId?: number; 
   };
+  extendedProps?: {
+    deposit_amount?: number;
+  };
 }
 
 interface BookingCalendarProps {
@@ -100,7 +104,12 @@ const CustomEvent = ({ event }: EventProps<CalendarEvent>) => {
           </div>
           <div className="text-[10px] opacity-90 truncate flex items-center gap-1">
              <span className={`w-1.5 h-1.5 rounded-full ${event.status === 'confirmed' ? 'bg-white' : 'bg-white/50'}`}></span>
-             <span className="capitalize">{event.status === 'confirmed' ? 'Đã cọc' : event.status}</span>
+             <span className="capitalize">
+              {Number(event.extendedProps?.deposit_amount) > 0 
+                ? 'Đã cọc' 
+                : (event.status === 'confirmed' ? 'Chưa cọc' : event.status)
+              }
+            </span>
           </div>
         </>
       )}
@@ -139,7 +148,9 @@ export default function BookingCalendar({
         type: 'booking',
         status: b.bookings?.status || 'unknown',
         allDay: false,
-        // Lưu bookingId vào đây
+        extendedProps: {
+          deposit_amount: b.bookings?.deposit_amount || 0
+        },
         resource: { bookingId: bookingId } 
       })
 
@@ -221,7 +232,7 @@ export default function BookingCalendar({
   }, [onSelectSlot])
 
   return (
-    <div className="h-full w-full bg-[var(--admin-card)] text-[var(--admin-fg)] font-sans">
+    <div className="h-full w-full text-[var(--admin-fg)] font-sans">
       <DnDCalendar
         localizer={localizer}
         events={events}

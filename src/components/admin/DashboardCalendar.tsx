@@ -159,11 +159,7 @@ export default function DashboardCalendar({
   };
 
   return (
-    <div className="h-full border border-[var(--admin-border)] rounded-2xl overflow-hidden shadow-sm bg-[var(--admin-card)] flex flex-col">
-      <div className="px-6 py-4 border-b border-[var(--admin-border)] flex items-center justify-between">
-         <h3 className="font-bold text-[var(--admin-fg)]">Lịch Đặt Phòng</h3>
-      </div>
-
+    <div className="h-full overflow-hidden shadow-sm flex flex-col">
       <div className="flex-1 min-h-0">
         <BookingCalendar 
             bookings={filteredBookings} 
