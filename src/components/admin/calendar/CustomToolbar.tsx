@@ -29,7 +29,13 @@ export default function CustomToolbar({
   }, [])
 
   const navigate = (action: 'PREV' | 'NEXT' | 'TODAY') => {
+    // 1. Thực hiện điều hướng thời gian (hành vi mặc định)
     onNavigate(action)
+
+    // 2. Logic thêm mới: Nếu bấm "Hôm nay" -> Ép về view NGÀY
+    if (action === 'TODAY') {
+      onView(Views.DAY)
+    }
   }
 
   const handleViewChange = (v: View) => {
@@ -54,15 +60,16 @@ export default function CustomToolbar({
         // Format: Tháng 12 2025
         return moment(date).format('[Tháng] MM, YYYY');
       case 'week':
-        // View tuần thì dùng label mặc định của thư viện (xử lý khoảng ngày 01-07) sẽ tốt hơn
         return label; 
+      case 'agenda':
+        return label;
       default:
         return label;
     }
   }
   return (
     <div className="flex items-center justify-between px-3 py-3
-    border-b border-[var(--admin-border)] bg-transparent">
+    border-b border-[var(--admin-border)] bg-[var(--admin-card-opa50)]">
       
       {/* LEFT: Logo/Title & Navigation */}
       <div className="flex items-center gap-6">

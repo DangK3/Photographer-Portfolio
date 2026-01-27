@@ -397,6 +397,7 @@ body::-webkit-scrollbar-thumb:hover {
 .rbc-current-time-indicator {
   background-color: #ea4335 !important;
   height: 2px !important;
+  z-index: 50 !important;
 }
 
 /* 5. Ẩn các phần thừa */
@@ -432,7 +433,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .rbc-time-view .rbc-time-gutter{
-  text-align: left;
+  text-align: left !important;
 }
 
 /* 1. Ẩn label của ô đầu tiên (00:00) */
@@ -446,7 +447,7 @@ body::-webkit-scrollbar-thumb:hover {
 
 .rbc-label .rbc-time-header-gutter{
   /* min-width: 37.55px; */
-  min-width: 50px;
+  min-width: 70px;
 }
 .rbc-label {
   width: 100%;
@@ -456,6 +457,8 @@ body::-webkit-scrollbar-thumb:hover {
   font-size: 0.65em; 
   font-weight: 700;
   z-index: 10;
+  padding-left: 12px !important;
+  padding-right: 2px !important;
 }
 
 .rbc-time-view-resources .rbc-time-gutter, .rbc-time-view-resources .rbc-time-header-gutter{
@@ -496,4 +499,22 @@ body::-webkit-scrollbar-thumb:hover {
 /* 4. Hiệu ứng khi di chuột vào tay cầm */
 .rbc-time-content::-webkit-scrollbar-thumb:hover {
     background-color: var(--admin-sub); /* Đậm hơn chút khi hover */
+}
+
+
+/* --- TÙY CHỈNH RIÊNG CHO CHẾ ĐỘ TUẦN (WEEK VIEW) --- */
+
+/* 1. Ẩn cột mốc giờ bên trái (9:00, 10:00...) */
+.rbc-calendar.mode-week .rbc-time-gutter {
+  display: none !important;
+}
+
+/* 2. Ẩn luôn ô trống trên header (góc trên cùng bên trái) để các cột ngày tràn ra lấp đầy */
+.rbc-calendar.mode-week .rbc-time-header-gutter {
+  display: none !important;
+}
+
+/* 3. Tùy chỉnh (Optional): Nếu ẩn giờ, có thể bạn muốn cột ngày chia đều đẹp hơn */
+.rbc-calendar.mode-week .rbc-time-header-content {
+  border-left: none !important; /* Xóa viền trái thừa */
 }

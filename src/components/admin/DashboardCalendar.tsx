@@ -19,7 +19,15 @@ interface DashboardCalendarProps {
   currentUserId: number;
   cleanupMinutes: number; 
 }
-
+const BOOKING_STATUS_LABELS: Record<string, string> = {
+  checked_in: 'Khách đang ở Stu',
+  checked_out: 'Khách đã rời Stu',
+  paid: 'Đã thanh toán',
+  cancelled: 'Đã huỷ lịch',
+  confirmed: 'Đã xác nhận',
+  completed: 'Đã hoàn thành',
+  pending: 'Chờ xử lý'
+};
 export default function DashboardCalendar({
   rooms,
   bookings: initialBookings,
@@ -68,12 +76,14 @@ export default function DashboardCalendar({
     roomId: number;
   } | null>(null);
 
+
   // --- LOGIC EVENT HANDLERS (Drag, Drop, Resize) ---
   const handleEventChange = useCallback(async ({ event, start, end, resourceId }: EventInteractionArgs<CalendarEvent>) => {
     const lockedStatuses = ['checked_in', 'checked_out', 'completed', 'paid', 'cancelled'];  
     if (event.status && lockedStatuses.includes(event.status)) {
-    toast.error(`Không thể sửa lịch khi trạng thái là ${event.status}`);
-    return;
+      const statusText = BOOKING_STATUS_LABELS[event.status] || event.status;
+      toast.error(`Không thể sửa lịch khi: ${statusText}`);
+      return; // Chặn hành động
     }
     const bookingItemId = Number(event.id);
       if (isNaN(bookingItemId)) return;
@@ -159,7 +169,7 @@ export default function DashboardCalendar({
   };
 
   return (
-    <div className="h-full overflow-hidden shadow-sm flex flex-col">
+    <div className="h-[calc(100vh-100px)] overflow-hidden shadow-sm flex flex-col">
       <div className="flex-1 min-h-0">
         <BookingCalendar 
             bookings={filteredBookings} 

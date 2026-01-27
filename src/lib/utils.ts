@@ -26,7 +26,7 @@ export const calculateBilling = (
     bookedEnd: Date,
     actualIn: Date | null,
     actualOut: Date | null,
-    pricePerHour: number,
+    pricePerHour: number, // Giá này lấy từ DB Room
     settings: { earlyGrace: number; otFree: number }
 ) => {
     let totalSurcharge = 0;
@@ -47,13 +47,13 @@ export const calculateBilling = (
         message: ''
     };
 
-    // 1. Logic Check-in Sớm
-    if (actualIn) {
+    // 1. Logic Check-in Sớm (Giữ nguyên logic 15p của bạn hoặc sửa tùy ý)
+    if (actualIn && actualIn < bookedStart) {
         const earlyMinutes = differenceInMinutes(bookedStart, actualIn);
         earlyFee.minutes = earlyMinutes;
 
         if (earlyMinutes > settings.earlyGrace) {
-            // Logic: Làm tròn lên mỗi 15p
+            // Logic: Làm tròn lên mỗi 15p (Ví dụ 16p -> 30p = 0.5h)
             const billableMinutes = Math.ceil(earlyMinutes / 15) * 15;
             const billableHours = billableMinutes / 60;
             
@@ -61,33 +61,30 @@ export const calculateBilling = (
             earlyFee.billableHours = billableHours;
             earlyFee.amount = billableHours * pricePerHour;
             
-            // SỬ DỤNG formatDuration để hiển thị
-            earlyFee.message = `Sớm ${formatDuration(earlyMinutes)} (Tính ${billableHours}h)`;
-            
+            earlyFee.message = `Sớm ${earlyMinutes}p (Tính ${billableHours}h)`;
             totalSurcharge += earlyFee.amount;
         }
     }
 
-    // 2. Logic OT (Check-out Trễ)
+    // 2. Logic OT (Check-out Trễ) - SỬA LOGIC THEO YÊU CẦU: BLOCK 30 PHÚT
     const checkOutTime = actualOut || new Date(); 
     if (checkOutTime > bookedEnd) {
         const otMinutes = differenceInMinutes(checkOutTime, bookedEnd);
         otFee.minutes = otMinutes;
 
         if (otMinutes > settings.otFree) {
-            // Logic: Tính tròn giờ (làm tròn xuống)
-            const otHours = Math.floor(otMinutes / 60);
+            // YÊU CẦU: Tính thấp nhất là nửa tiếng (0.5h)
+            // Logic: Chia cho 30, làm tròn lên.
+            // VD: 10p -> 1 block (0.5h). 35p -> 2 blocks (1h).
+            const blocks = Math.ceil(otMinutes / 30);
+            const otHours = blocks * 0.5;
             
-            if (otHours > 0) {
-                otFee.isBillable = true;
-                otFee.billableHours = otHours;
-                otFee.amount = otHours * pricePerHour;
+            otFee.isBillable = true;
+            otFee.billableHours = otHours;
+            otFee.amount = otHours * pricePerHour; // Giá OT bằng giá phòng
 
-                // SỬ DỤNG formatDuration để hiển thị
-                otFee.message = `Trễ ${formatDuration(otMinutes)} (Tính ${otHours}h)`;
-                
-                totalSurcharge += otFee.amount;
-            }
+            otFee.message = `Trễ ${otMinutes}p (Tính ${otHours}h)`;
+            totalSurcharge += otFee.amount;
         }
     }
 

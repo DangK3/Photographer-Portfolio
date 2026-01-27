@@ -53,7 +53,7 @@ export default function DashboardFilter() {
         disabled={isPending}
         className={`
           flex items-center justify-between gap-2 px-4 py-2 rounded-lg border transition-all duration-200 whitespace-nowrap
-          text-sm font-medium bg-[var(--admin-card)] hover:bg-[var(--admin-hover)]
+          text-sm font-medium bg-[var(--admin-card)] hover:bg-[var(--admin-hover)] cursor-pointer
           w-full md:w-auto
           ${isOpen 
             ? 'border-[var(--admin-primary)] ring-2 ring-[var(--admin-primary)]/10 text-[var(--admin-fg)]' 

@@ -220,7 +220,7 @@ export async function getBookingsForCalendar(startStr: string, endStr: string) {
       *,
       cleanup_minutes, 
       rooms ( name, code ),
-      bookings ( 
+      bookings!inner ( 
         status, 
         customer_id, 
         deposit_amount,
@@ -228,16 +228,13 @@ export async function getBookingsForCalendar(startStr: string, endStr: string) {
       )
     `)
     .lt('start_dt', endStr)
-    .gt('end_dt', startStr)
-    .not('bookings.status', 'eq', 'cancelled')
+    .gt('end_dt', startStr);
 
   if (error) {
-    console.error("Error fetching calendar bookings:", error);
+    console.error("Error fetching calendar bookings:", JSON.stringify(error, null, 2));
     return [];
   }
-
-  // FIX LỖI TypeScript: Ép kiểu 'data' (đang bị Supabase hiểu là lỗi) về Interface chuẩn
-  // Kỹ thuật "Double Casting": (data as unknown) -> as CalendarBookingItem[]
+  
   return (data as unknown) as CalendarBookingItem[];
 }
 

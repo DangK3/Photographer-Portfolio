@@ -89,9 +89,9 @@ const DnDCalendar = withDragAndDrop<CalendarEvent, CalendarResource>(Calendar)
 
 // --- CUSTOM EVENT COMPONENT ---
 const CustomEvent = ({ event }: EventProps<CalendarEvent>) => {
+  const isCancelled = event.status === 'cancelled';
   return (
-    <div className="h-full w-full flex flex-col px-1.5 py-0.5 leading-snug overflow-hidden relative group">
-      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-black/20"></div>
+    <div className={`h-full w-full flex flex-col px-1.5 py-0.5 leading-snug overflow-hidden relative group ${isCancelled ? 'opacity-60 grayscale' : ''}`}>
       
       {event.type === 'cleanup' ? (
         <div className="flex items-center gap-1 text-[10px] italic opacity-75">
@@ -99,15 +99,19 @@ const CustomEvent = ({ event }: EventProps<CalendarEvent>) => {
         </div>
       ) : (
         <>
-          <div className="font-bold text-[11px] truncate mt-0.5">
+          <div className={`font-bold text-[11px] truncate mt-0.5 ${isCancelled ? 'line-through decoration-red-500' : ''}`}>
+            {/* Nếu hủy thì thêm prefix cho rõ */}
+            {isCancelled && <span className="text-red-200 mr-1">[HỦY]</span>}
             {event.title}
           </div>
+          
           <div className="text-[10px] opacity-90 truncate flex items-center gap-1">
              <span className={`w-1.5 h-1.5 rounded-full ${event.status === 'confirmed' ? 'bg-white' : 'bg-white/50'}`}></span>
              <span className="capitalize">
-              {Number(event.extendedProps?.deposit_amount) > 0 
-                ? 'Đã cọc' 
-                : (event.status === 'confirmed' ? 'Chưa cọc' : event.status)
+              {/* Xử lý hiển thị Text Status */}
+              {isCancelled 
+                ? 'Đã hủy lịch' 
+                : (Number(event.extendedProps?.deposit_amount) > 0 ? 'Đã cọc' : (event.status === 'confirmed' ? 'Chưa cọc' : event.status))
               }
             </span>
           </div>
@@ -135,8 +139,6 @@ export default function BookingCalendar({
   const events: CalendarEvent[] = useMemo(() => {
     const list: CalendarEvent[] = []
     bookings.forEach((b) => {
-      // 2. SỬA LOGIC LẤY BOOKING ID
-      // Lấy trực tiếp b.booking_id (FK) thay vì b.bookings?.booking_id (Nested) để chắc chắn có dữ liệu
       const bookingId = b.booking_id || b.bookings?.booking_id;
 
       list.push({
@@ -234,8 +236,10 @@ export default function BookingCalendar({
   return (
     <div className="h-full w-full text-[var(--admin-fg)] font-sans">
       <DnDCalendar
+        style={{ height: '100%' }}
         localizer={localizer}
         events={events}
+        className={view === Views.WEEK ? 'mode-week' : ''}
         resources={view === Views.DAY ? resources : undefined} 
         resourceIdAccessor={(r: CalendarResource) => r.id}
         resourceTitleAccessor={(r: CalendarResource) => r.title}

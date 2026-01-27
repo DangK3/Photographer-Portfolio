@@ -177,3 +177,40 @@ export async function updateBookingStatus(bookingId: number, status: string, tot
   revalidatePath('/admin');
   return { success: true };
 }
+
+export async function cancelBooking(bookingId: number) {
+  const supabase = await createClient();
+
+  // B1: Lấy trạng thái mới nhất từ DB (đề phòng UI chưa cập nhật)
+  const { data: booking, error: fetchError } = await supabase
+    .from('bookings')
+    .select('status')
+    .eq('booking_id', bookingId)
+    .single();
+
+  if (fetchError || !booking) {
+    return { success: false, error: 'Không tìm thấy thông tin booking.' };
+  }
+
+  // B2: Kiểm tra điều kiện "Chưa qua Check-in"
+  // Các trạng thái không được huỷ: checked_in, checked_out, completed, paid
+  const invalidStatuses = ['checked_in', 'checked_out', 'completed', 'paid'];
+  
+  if (invalidStatuses.includes(booking.status || '')) {
+    return { 
+      success: false, 
+      error: 'Không thể huỷ! Khách đang sử dụng hoặc đơn đã hoàn thành.' 
+    };
+  }
+
+  // B3: Thực hiện huỷ
+  const { error } = await supabase
+    .from('bookings')
+    .update({ status: 'cancelled' })
+    .eq('booking_id', bookingId);
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath('/admin');
+  return { success: true };
+}
