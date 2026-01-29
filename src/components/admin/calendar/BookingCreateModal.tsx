@@ -328,8 +328,8 @@ export default function BookingCreateModal({
     }
 
     const baseDate = format(bookingDate, 'yyyy-MM-dd');
-    const startISO = `${baseDate}T${startTimeStr}:00`;
-    const endISO = `${baseDate}T${endTimeStr}:00`;
+    const startISO = `${baseDate}T${startTimeStr}:00+07:00`;
+    const endISO = `${baseDate}T${endTimeStr}:00+07:00`;
 
     if (new Date(startISO) >= new Date(endISO)) {
         toast.error('Giờ kết thúc phải sau giờ bắt đầu');
