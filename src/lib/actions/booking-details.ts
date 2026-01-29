@@ -3,6 +3,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { Database } from '../../../types/supabase';
+
 
 // 1. Lấy chi tiết Booking
 export async function getBookingDetails(bookingId: number) {
@@ -127,18 +129,24 @@ export async function checkOutCustomer(bookingId: number) {
     return { success: true };
 }
 
+
+type BookingStatusEnum = Database['public']['Enums']['booking_status'];
+
 // 6. CONFIRM PAYMENT (FIX LỖI TYPE Ở ĐÂY)
 export async function confirmPayment(bookingId: number, totalActual: number) {
     const supabase = await createClient();
 
+    const statusPayload: { status: BookingStatusEnum; total_actual: number } = {
+      status: 'paid', // TypeScript sẽ tự hiểu đây là giá trị hợp lệ của Enum
+      total_actual: totalActual
+    };
+
+
     const { error } = await supabase
-        .from('bookings')
-        .update({ 
-            // FIX: Ép kiểu 'as any'
-            status: 'paid', 
-            total_actual: totalActual
-        })
-        .eq('booking_id', bookingId);
+    .from('bookings')
+    .update(statusPayload)
+    .eq('booking_id', bookingId);
+
 
     if (error) return { success: false, error: error.message };
     revalidatePath('/admin');
@@ -164,16 +172,26 @@ export async function finalizeBooking(bookingId: number) {
 // 8. UPDATE STATUS CHUNG (FIX LỖI TYPE Ở ĐÂY)
 export async function updateBookingStatus(bookingId: number, status: string, totalActual?: number) {
   const supabase = await createClient();
-  
-  const payload: { status: BookingStatus; total_actual?: number } = { 
-    status: status as BookingStatus 
+  // Danh sách này phải khớp với DB Enums [3]
+  const validStatuses: BookingStatusEnum[] = [
+    'pending', 'confirmed', 'checked_in', 'checked_out', 
+    'completed', 'cancelled', 'paid'
+  ];
+
+  if (!validStatuses.includes(status as BookingStatusEnum)) {
+    return { success: false, error: 'Trạng thái không hợp lệ' };
+  }
+
+  const payload: { status: BookingStatusEnum; total_actual?: number } = {
+    status: status as BookingStatusEnum // Safe cast vì đã validate ở trên
   };
+
   if (totalActual !== undefined) payload.total_actual = totalActual;
-  
-  // FIX: Ép kiểu payload 'as any' để Supabase client chấp nhận status mới
+
   const { error } = await supabase.from('bookings').update(payload).eq('booking_id', bookingId);
-  
+
   if (error) return { success: false, error: error.message };
+  
   revalidatePath('/admin');
   return { success: true };
 }

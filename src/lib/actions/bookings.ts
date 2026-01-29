@@ -4,7 +4,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { getCleanupMinutes } from './settings' 
-
+import { getErrorMessage } from '@/lib/utils'; 
+import { Database } from '../../../types/supabase';
 // --- 1. ĐỊNH NGHĨA CÁC INTERFACE CẦN THIẾT ---
 
 // Interface cho việc check trùng (đã có)
@@ -26,18 +27,20 @@ interface ActiveBookingResult {
 // Interface CHUẨN cho dữ liệu trả về Calendar (FIX LỖI SelectQueryError)
 export interface CalendarBookingItem {
   booking_item_id: number;
+  booking_id: number; // Đảm bảo trường này có
   start_dt: string;
   end_dt: string;
   room_id: number;
-  cleanup_minutes?: number | null; // Cột mới thêm
+  cleanup_minutes?: number | null;
   rooms: { 
     name: string | null; 
     code: string | null; 
   } | null;
   bookings: {
     booking_id: number;
-    status: string | null;
+    status: Database['public']['Enums']['booking_status'] | null; // Dùng Enum chuẩn
     customer_id: number | null;
+    deposit_amount: number | null; // Thêm trường này nếu dùng trong Calendar
     customers: { 
       full_name: string | null; 
       phone: string | null; 
@@ -132,80 +135,48 @@ export async function checkRoomAvailability(roomId: number, startStr: string, en
 // ==============================================================================
 
 export async function createBooking(payload: CreateBookingDTO) {
-  const supabase = await createClient()
-  const currentCleanupMinutes = await getCleanupMinutes();
+  const supabase = await createClient();
 
-  // --- BƯỚC 1: TẠO HEADER ---
-  const { data: booking, error: bookingError } = await supabase
-    .from('bookings')
-    .insert({
-      customer_id: payload.customerId,
-      created_by: payload.staffId,
-      status: 'confirmed', 
-      deposit_amount: payload.deposit,
-      deposit_paid: 0, 
-      discount_amount: payload.discount,
-      discount_reason: payload.discountReason,
-      notes: payload.notes,
-      vat_percent_snapshot: 8, 
-      total_estimate: 0, 
-      total_actual: 0
-    })
-    .select()
-    .single()
-
-  if (bookingError) return { success: false, error: 'Lỗi tạo đơn: ' + bookingError.message }
-  
-  // FIX: Thay thế 'any' bằng định nghĩa kiểu inline để tránh lỗi Linter
-  const bookingId = (booking as { booking_id: number }).booking_id;
-
-  // --- BƯỚC 2: TẠO ITEMS ---
   try {
-    const itemsToInsert = payload.items.map(item => ({
-      booking_id: bookingId,
-      room_id: item.roomId,
-      start_dt: item.startDt,
-      end_dt: item.endDt,
-      price_snapshot: item.price,
-      cleanup_minutes: currentCleanupMinutes 
-    }))
-
-    const { error: itemsError } = await supabase
-      .from('booking_items')
-      .insert(itemsToInsert)
-
-    if (itemsError) throw itemsError 
-
-    // --- BƯỚC 3: TẠO SERVICES ---
-    if (payload.services && payload.services.length > 0) {
-      const servicesToInsert = payload.services.map(s => ({
-        booking_id: bookingId,
+    // Gọi RPC (Stored Procedure)
+    const { data: bookingId, error } = await supabase.rpc('create_booking_transaction', {
+      p_customer_id: payload.customerId,
+      p_created_by: payload.staffId,
+      p_deposit_amount: payload.deposit,
+      p_discount_amount: payload.discount,
+      p_notes: payload.notes,
+      p_items: payload.items.map(i => ({
+        room_id: i.roomId,
+        start_dt: i.startDt,
+        end_dt: i.endDt,
+        price: i.price
+      })),
+      p_services: payload.services?.map(s => ({
         service_id: s.serviceId,
         quantity: s.quantity,
-        type: s.type,
-        unit_price_snapshot: s.price,
-        computed_amount: s.quantity * s.price
-      }))
+        price: s.price,
+        type: s.type
+      })) || []
+    });
 
-      const { error: serviceError } = await supabase
-        .from('booking_services')
-        .insert(servicesToInsert)
-      
-      if (serviceError) throw serviceError
+    if (error) {
+        // Lỗi từ Trigger DB sẽ được trả về đây
+        // Ví dụ: 'Lỗi đặt phòng: Vi phạm thời gian dọn dẹp hoặc trùng lịch.'
+        throw error;
     }
-    
-    revalidatePath('/admin/bookings')
-    revalidatePath('/admin/calendar')
-    return { success: true, bookingId }
 
-  } catch (error: unknown) {
-    console.error("Booking Transaction Failed. Rolling back...", error)
-    await supabase.from('bookings').delete().eq('booking_id', bookingId)
+    revalidatePath('/admin/bookings');
+    revalidatePath('/admin/calendar');
     
-    const errMsg = error instanceof Error ? error.message : JSON.stringify(error);
-    return { success: false, error: 'Đặt phòng thất bại: ' + errMsg }
+    // Ép kiểu về number vì RPC trả về BIGINT (có thể là string hoặc number tuỳ driver)
+    return { success: true, bookingId: Number(bookingId) };
+
+  } catch (error: unknown) { 
+    console.error("Booking RPC Failed:", error);
+    return { success: false, error: getErrorMessage(error) };
   }
 }
+
 
 // ==============================================================================
 // 3. LẤY DANH SÁCH BOOKING (CHO CALENDAR)
